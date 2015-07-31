@@ -1,4 +1,6 @@
-package GameLogic
+package scala.GameLogic.voxels
+
+import scala.GameLogic.Vec
 
 /**
  * Created by David McGillicuddy on 30/07/2015.
@@ -16,18 +18,18 @@ case class Subdivided (octets: Array[SVO]) extends SVONode
 class SVO (node: SVONode) {
   def this() = this(Subdivided(Array()))
 
-  def inBounds(v: Vector3f) : Boolean = {
+  def inBounds(v: Vec) : Boolean = {
     def inBoundsAxis(f: Float) = 0.0 <= f && f <= 1.0
     return inBoundsAxis(v.x) && inBoundsAxis(v.y) && inBoundsAxis(v.z)
   }
 
-  def insertNodeAt (node: SVONode, position: Vector3f, height: Int): Unit = {
+  def insertNodeAt (node: SVONode, position: Vec, height: Int): Unit = {
     // TODO: copy from f# version
     return
   }
 
-  def insertElementAt (element: Block, position: Vector3f, height: Int): Unit = {
-    insertNodeAt (Full(element), position, height)
+  def insertElementAt (element: Block, position: Vec, height: Int): Unit = {
+    insertNodeAt (Full(Some (element)), position, height)
   }
 
   // TODO: copy from f# version

@@ -1,4 +1,6 @@
-package GameLogic
+package scala.GameLogic
+
+import scala.GameLogic.voxels.SVO
 
 /**
  * Created by David McGillicuddy on 30/07/2015.

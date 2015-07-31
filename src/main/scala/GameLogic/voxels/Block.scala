@@ -1,4 +1,4 @@
-package GameLogic
+package scala.GameLogic.voxels
 
 /**
  * Created by David McGillicuddy on 30/07/2015.
