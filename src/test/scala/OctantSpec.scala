@@ -1,7 +1,5 @@
-package scala
-
 import org.scalatest._
-import scala.GameLogic.voxels.Octant
+import GameLogic.voxels.Octant
 
 class OctantSpec extends FlatSpec with Matchers {
   "The boolean triple" should "correspond to the set bits" in {

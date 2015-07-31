@@ -1,25 +1,25 @@
-package scala.GameLogic
+package GameLogic
 
-
+import com.github.jpbetz.subspace._
 
 /**
  * Created by David McGillicuddy on 30/07/2015.
  * This represents a floating viewpoint in the world.
  */
+
 class ViewCamera (
-    origin: Vec,
-    rho: Float,
-    theta: Float,
-    fov: Float,
-    world: GameState) {
-  // TODO: copy from f# version
+    private var origin: Vector3,
+    private var rho: Float,
+    private var theta: Float,
+    private var fov: Float) {
+
   // constants
-  val RotateSpeed   = 1.0
-  val PitchSpeed    = 2.0
-  val PanSpeed      = 3.0
-  val ScrollSpeed   = 1.0
+  val RotateSpeed   = 1.0f
+  val PitchSpeed    = 2.0f
+  val PanSpeed      = 3.0f
+  val ScrollSpeed   = 1.0f
 
   def scroll (distance: Float): Unit = {
-    return 
+    origin += Vector3 (0.0f, 1.0f, 0.0f) * distance * ScrollSpeed
   } 
 }
