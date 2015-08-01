@@ -1,5 +1,7 @@
 import org.scalatest._
 import GameLogic.voxels.Octant
+import com.github.jpbetz.subspace._
+
 
 class OctantSpec extends FlatSpec with Matchers {
   "The boolean triple" should "correspond to the set bits" in {
