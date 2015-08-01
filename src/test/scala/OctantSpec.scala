@@ -24,7 +24,6 @@ class OctantSpec extends FlatSpec with Matchers {
     new Octant(true , true , true ).ix should be (7)
   }
 
-
   val lowerHalf = new Octant(false, false, false)
   val upperHalf = new Octant(true , false, false)
   def xAxis(x: Float) = new Vector4 (x, 0, 0, 1)
