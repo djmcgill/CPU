@@ -10,11 +10,23 @@ sealed abstract class SVONode
 case class Full (contents: Option[Block]) extends SVONode
 case class Subdivided (octants: Array[SVO]) extends SVONode
 
+object SVO {
+  val initialWorld = {
+    val world = new SVO(Full(None), 5)
+    val cornerPositions = Array((-0.1f, -0.1f), (-0.1f, 0.1f), (0.1f, -0.1f), (0.1f, 0.1f))
+    def justBelowZAxis(dx: Float, dz: Float) = Vector4 (dx + 0.5f, 0.4f, dz + 0.5f, 1.0f)
+    val lowerHalfPositions = cornerPositions map Function.tupled(justBelowZAxis)
+    lowerHalfPositions foreach (pos => world.insertElementAt(Some(new Dirt()), pos, 4))
+    world.insertElementAt(Some(new Dirt()), Vector4 (0.1f, 0.6f, 0.1f, 1.0f), 2)
+    world
+  }
+}
+
 /**
  * Each Sparse Voxel Octree thinks that it is the cube (0,0,0) to (1,1,1)
  */
-
-class SVO (var node: SVONode, height: Int) {
+// TODO: value equality
+case class SVO (var node: SVONode, height: Int) {
   def this() = this(Subdivided(Array()), 0)
 
   def inBounds(v: Vector4): Boolean = {
@@ -26,47 +38,42 @@ class SVO (var node: SVONode, height: Int) {
     new Octant(v.x > 0.5, v.y > 0.5, v.z > 0.5)
   }
 
-  def depth: Int = node match {
-    case Full(_) => 0
-    case Subdivided(octets) => (octets map (_.depth + 1)).max
-  }
-
-  def insertNodeAt (node: SVONode, position: Vector4, insertionHeight: Int): Unit = {
+  def insertNodeAt (newNode: SVONode, position: Vector4, insertionHeight: Int): Unit = {
     if (insertionHeight < 0)
       throw new IllegalArgumentException("Can't add at a negative height.")
-    if (!this.inBounds(position))
+    if (!inBounds(position))
       throw new IndexOutOfBoundsException("The position was not contained inside the cube.")
 
-    if (insertionHeight > this.height)
+    if (insertionHeight > height)
       throw new IllegalArgumentException("Tried to add higher than the height of the octree")
 
-    def alreadyThere: Boolean = (node, this.node) match {
+    val alreadyThere: Boolean = (newNode, node) match {
       case (Full(newElement), Full(oldElement)) => newElement == oldElement
       case _ => false
     }
     if (alreadyThere) return
 
-    if (insertionHeight == this.height) {
+    if (insertionHeight == height) {
       // Insert here, overwriting whatever was in there.
-      this.node = node
+      node = newNode
       return
     }
 
-    // insertionHeight < this.height so recurse
+    // insertionHeight < height so recurse
     node match {
       case Subdivided(_) =>
       case Full(element) =>
         // If the node is full then we need to split it up first.
-        val newOctants = Array.fill(8)(new SVO(Full(element), this.height - 1))
-        this.node = Subdivided(newOctants)
+        val newOctants = Array.fill(8)(new SVO(Full(element), height - 1))
+        node = Subdivided(newOctants)
     }
 
-    val newOctant = this.whichOctant(position)
+    val newOctant = whichOctant(position)
     val newPosition = newOctant.toChildSpace * position
     node match {
       case Full(_) => throw new IllegalStateException("The node should have been subdivided.")
       case Subdivided(octants) =>
-        octants(newOctant.ix).insertNodeAt(node, newPosition, height)
+        octants(newOctant.ix).insertNodeAt(node, newPosition, insertionHeight)
 
         // If we've completely filled all of the subnodes, then replace it with a Full
         octants(0).node match {
@@ -76,7 +83,7 @@ class SVO (var node: SVONode, height: Int) {
               case Full(otherElement) => firstElement == otherElement
               case _ => false
             })
-            if (allFullWithSame) this.node = Full(firstElement)
+            if (allFullWithSame) node = Full(firstElement)
         }
     }
   }
@@ -84,20 +91,7 @@ class SVO (var node: SVONode, height: Int) {
   def insertElementAt (element: Option[Block], position: Vector4, height: Int): Unit = {
     insertNodeAt (Full(element), position, height)
   }
-
-  val initialWorld = {
-    val world = new SVO(Full(None), 5)
-    val cornerPositions = Array((-0.1f, -0.1f), (-0.1f, 0.1f), (0.1f, -0.1f), (0.1f, 0.1f))
-    def justBelowZAxis(dx: Float, dz: Float) = Vector4 (dx + 0.5f, 0.4f, dz + 0.5f, 1.0f)
-    val lowerHalfPositions = cornerPositions map Function.tupled(justBelowZAxis)
-    lowerHalfPositions foreach (pos => world.insertElementAt(Some(new Dirt()), pos, 4))
-    world.insertElementAt(Some(new Dirt()), Vector4 (0.1f, 0.6f, 0.1f, 1.0f), 2)
-    world
-  }
-
 }
-
-
 
 
 
