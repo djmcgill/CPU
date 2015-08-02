@@ -54,47 +54,44 @@ class SVO (var node: SVONode, height: Int) {
 
     // insertionHeight < this.height so recurse
     node match {
-      case Subdivided(_) => {}
-      case Full(element) => {
+      case Subdivided(_) =>
+      case Full(element) =>
         // If the node is full then we need to split it up first.
         val newOctants = Array.fill(8)(new SVO(Full(element), this.height - 1))
         this.node = Subdivided(newOctants)
-      }
     }
 
     val newOctant = this.whichOctant(position)
     val newPosition = newOctant.toChildSpace * position
     node match {
       case Full(_) => throw new IllegalStateException("The node should have been subdivided.")
-      case Subdivided(octants) => {
+      case Subdivided(octants) =>
         octants(newOctant.ix).insertNodeAt(node, newPosition, height)
 
         // If we've completely filled all of the subnodes, then replace it with a Full
-        octants(0) match {
-          case Subdivided(_) => {}
+        octants(0).node match {
+          case Subdivided(_) =>
           case Full(firstElement) =>
-            val allFullWithSame = octants forall (_ match {
+            val allFullWithSame = octants forall (_.node match {
               case Full(otherElement) => firstElement == otherElement
               case _ => false
             })
             if (allFullWithSame) this.node = Full(firstElement)
         }
-      }
     }
   }
 
-  def insertElementAt (element: Block, position: Vector4, height: Int): Unit = {
-    insertNodeAt (Full(Some (element)), position, height)
+  def insertElementAt (element: Option[Block], position: Vector4, height: Int): Unit = {
+    insertNodeAt (Full(element), position, height)
   }
 
-  // TODO: copy from f# version
-  val exampleWorld = {
+  val initialWorld = {
     val world = new SVO(Full(None), 5)
-    val cornerPositions = Array() // [(-0.1f, -0.1f); (-0.1f, 0.1f); (0.1f, -0.1f); (0.1f, 0.1f)]
+    val cornerPositions = Array((-0.1f, -0.1f), (-0.1f, 0.1f), (0.1f, -0.1f), (0.1f, 0.1f))
     def justBelowZAxis(dx: Float, dz: Float) = Vector4 (dx + 0.5f, 0.4f, dz + 0.5f, 1.0f)
-    //let lowerHalfPositions = List.map justBelowZAxis cornerPositions
-    //List.iter (fun pos -> world.InsertElementLevel pos 4 (Some Opaque)) lowerHalfPositions
-    //world.InsertElementLevel (Vector4 (0.1f, 0.6f, 0.1f, 1.f)) 2 (Some Opaque)
+    val lowerHalfPositions = cornerPositions map Function.tupled(justBelowZAxis)
+    lowerHalfPositions foreach (pos => world.insertElementAt(Some(new Dirt()), pos, 4))
+    world.insertElementAt(Some(new Dirt()), Vector4 (0.1f, 0.6f, 0.1f, 1.0f), 2)
     world
   }
 
