@@ -8,8 +8,7 @@ import scala.collection.mutable
  * Given an SVO and a ray, where does that ray intersect with a voxel (if it does).
  */
 object RayTracer {
-  def rayHit (origin: Vector4, directionRaw: Vector4, svo : SVO) : Option[Vector4] = {
-    // Set up all the constants.
+  def rayHit (oldOrigin: Vector4, directionRaw: Vector4, svo : SVO) : Option[Vector4] = {
     val Eps = 0.0001f
 
     def notTooSmall(x: Float) =
@@ -44,6 +43,8 @@ object RayTracer {
       val tBias = tCoeff.scale(origin)
 
       def tSVO(f: Float) = tCoeff * f - tBias
+
+      // What value for t intersects the lower and upper edges on each axis?
       val atZero = tSVO(0)
       val atOne = tSVO(1)
       val collisions = Array(
@@ -56,16 +57,16 @@ object RayTracer {
       val tMin = mins.max
       val tMax = maxes.min
 
-      // Is there a hit?
+      // Does the ray miss?
       if (tMin > tMax) return None
 
-      val hitPosition: Vector4 = ???
+      val hitPosition: Vector4 = oldOrigin + direction * tMin
 
       parent.node match {
-        // If we're full then we can stop
+        // If the node is Full then we're done.
         case Full(_) => Some(hitPosition)
 
-        // If not, then there might be empty voxels to pass through
+        // If not, then there might be empty voxels to pass through.
         case Subdivided(subNodes) =>
           val firstOctant = parent.whichOctant(hitPosition)
           val otherOctants: Stream[Octant] = ???
@@ -73,10 +74,12 @@ object RayTracer {
             val newOrigin = Vector4(o.childOrigin, 1) + origin
             rayHitGo (subNodes(o.ix), newOrigin)
           }
+
+          // We only care about the first hit, I'm pretty sure that this is lazy
+          // TODO: test that it is lazy by printing in recursiveCall
           ((firstOctant #:: otherOctants) flatMap recursiveCall).headOption
       }
     }
-    rayHitGo(svo, origin)
-
+    rayHitGo(svo, oldOrigin)
   }
 }
