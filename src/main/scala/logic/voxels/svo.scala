@@ -20,6 +20,8 @@ object SVO {
     world.insertElementAt(Some(new Dirt()), Vector4 (0.1f, 0.6f, 0.1f, 1.0f), 2)
     world
   }
+
+  val voxel = new SVO(Full(Some(new Dirt())), 0)
 }
 
 /**

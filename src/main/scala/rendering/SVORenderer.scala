@@ -1,17 +1,44 @@
 package rendering
 
-import org.lwjgl._
+import com.jme3.asset.AssetManager
+import com.jme3.material.Material
+import com.jme3.math.{Vector3f, ColorRGBA}
+import com.jme3.scene.{Spatial, Geometry, Node}
+import com.jme3.scene.shape.Box
+import logic.voxels._
 
 
 /**
  * Renders a cube between 0,0,0 and 1,1,1
  */
-class SVORenderer {
-  /*
-    let cube = ObjVBO "Resources/gl_cube.obj"
-    let textureID = GL.Utils.LoadImage "Resources/gl_uvmap.bmp"
-   */
+class SVORenderer(assetManager: AssetManager, rootNode: Node) {
+  def render(svo: SVO): Unit = {
+    rootNode.attachChild(subSVONode(svo))
+  }
 
+  def subSVONode(svo: SVO): Spatial = svo.node match {
+    case Full(_) =>
+      val b = new Box(1, 1, 1)               // create cube shape
+      val blue = new Geometry("Box", b)      // create cube geometry from the shape
+      val mat1 = new Material(assetManager,
+        "Common/MatDefs/Misc/Unshaded.j3md") // create a simple material
+      mat1.setColor("Color", ColorRGBA.Blue)  // set color of material to blue
+      blue.setMaterial(mat1)                 // set the cube's material
+      blue
+
+    case Subdivided(subNodes) =>
+      val subSVOs: Array[Spatial] = subNodes map subSVONode
+      val node = new Node()
+      // for each subSVO, draw it in the correct position
+      for ((subSVO, ix) <- subSVOs.zipWithIndex) {
+        subSVO.scale(0.5f)
+        val newOrigin: Vector3f = ??? // new Octant(ix).childOrigin
+        subSVO.setLocalTranslation(newOrigin)
+        node.attachChild(subSVO)
+      }
+      node
+
+  }
 
 
 
