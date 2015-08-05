@@ -6,7 +6,7 @@ import logic.GameState
 import rendering.SVORenderer
 
 /**
- * Created by David McGillicuddy on 05/08/2015.
+ * Renders a logic.GameState
  */
 class GameStateRenderer(assetManager: AssetManager, rootNode: Node) {
   val svoRenderer = new SVORenderer(assetManager, rootNode)
