@@ -1,6 +1,6 @@
+import com.jme3.math.Vector4f
 import org.scalatest._
 import logic.voxels.Octant
-import com.github.jpbetz.subspace._
 
 
 class OctantSpec extends FlatSpec with Matchers {
@@ -26,24 +26,24 @@ class OctantSpec extends FlatSpec with Matchers {
 
   val lowerHalf = new Octant(false, false, false)
   val upperHalf = new Octant(true , false, false)
-  def xAxis(x: Float) = new Vector4 (x, 0, 0, 1)
+  def xAxis(x: Float) = new Vector4f (x, 0, 0, 1)
   "toChildSpace" should "work correctly on the X axis" in {
-    lowerHalf.toChildSpace * xAxis(0)     should be (xAxis(0))
-    lowerHalf.toChildSpace * xAxis(0.25f) should be (xAxis(0.5f))
-    lowerHalf.toChildSpace * xAxis(0.5f)  should be (xAxis(1))
+    lowerHalf.toChildSpace mult xAxis(0)     should be (xAxis(0))
+    lowerHalf.toChildSpace mult xAxis(0.25f) should be (xAxis(0.5f))
+    lowerHalf.toChildSpace mult xAxis(0.5f)  should be (xAxis(1))
 
-    upperHalf.toChildSpace * xAxis(0.5f)  should be (xAxis(0))
-    upperHalf.toChildSpace * xAxis(0.75f) should be (xAxis(0.5f))
-    upperHalf.toChildSpace * xAxis(1)     should be (xAxis(1))
+    upperHalf.toChildSpace mult xAxis(0.5f)  should be (xAxis(0))
+    upperHalf.toChildSpace mult xAxis(0.75f) should be (xAxis(0.5f))
+    upperHalf.toChildSpace mult xAxis(1)     should be (xAxis(1))
   }
 
   "fromChildSpace" should "work correctly on the X axis" in {
-    lowerHalf.fromChildSpace * xAxis(0)    should be (xAxis(0))
-    lowerHalf.fromChildSpace * xAxis(0.5f) should be (xAxis(0.25f))
-    lowerHalf.fromChildSpace * xAxis(1)    should be (xAxis(0.5f))
+    lowerHalf.fromChildSpace mult xAxis(0)    should be (xAxis(0))
+    lowerHalf.fromChildSpace mult xAxis(0.5f) should be (xAxis(0.25f))
+    lowerHalf.fromChildSpace mult xAxis(1)    should be (xAxis(0.5f))
 
-    upperHalf.fromChildSpace * xAxis(0)    should be (xAxis(0.5f))
-    upperHalf.fromChildSpace * xAxis(0.5f) should be (xAxis(0.75f))
-    upperHalf.fromChildSpace * xAxis(1)    should be (xAxis(1))
+    upperHalf.fromChildSpace mult xAxis(0)    should be (xAxis(0.5f))
+    upperHalf.fromChildSpace mult xAxis(0.5f) should be (xAxis(0.75f))
+    upperHalf.fromChildSpace mult xAxis(1)    should be (xAxis(1))
   }
 }

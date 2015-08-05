@@ -1,6 +1,6 @@
 package logic.voxels
 
-import com.github.jpbetz.subspace._
+import com.jme3.math.Vector4f
 
 /**
  * An octant's node can either be completely filled with voxels of a given element
@@ -11,17 +11,17 @@ case class Full (contents: Option[Block]) extends SVONode
 case class Subdivided (octants: Array[SVO]) extends SVONode
 
 object SVO {
-  val initialWorld = {
+  lazy val initialWorld = {
     val world = new SVO(Full(None), 5)
     val cornerPositions = Array((-0.1f, -0.1f), (-0.1f, 0.1f), (0.1f, -0.1f), (0.1f, 0.1f))
-    def justBelowZAxis(dx: Float, dz: Float) = Vector4 (dx + 0.5f, 0.4f, dz + 0.5f, 1.0f)
+    def justBelowZAxis(dx: Float, dz: Float) = new Vector4f (dx + 0.5f, 0.4f, dz + 0.5f, 1.0f)
     val lowerHalfPositions = cornerPositions map Function.tupled(justBelowZAxis)
     lowerHalfPositions foreach (pos => world.insertElementAt(Some(new Dirt()), pos, 4))
-    world.insertElementAt(Some(new Dirt()), Vector4 (0.1f, 0.6f, 0.1f, 1.0f), 2)
+    world.insertElementAt(Some(new Dirt()), new Vector4f (0.1f, 0.6f, 0.1f, 1.0f), 2)
     world
   }
 
-  val voxel = new SVO(Full(Some(new Dirt())), 0)
+  lazy val voxel = new SVO(Full(Some(new Dirt())), 0)
 }
 
 /**
@@ -31,16 +31,16 @@ object SVO {
 case class SVO (var node: SVONode, height: Int) {
   def this() = this(Subdivided(Array()), 0)
 
-  def inBounds(v: Vector4): Boolean = {
+  def inBounds(v: Vector4f): Boolean = {
     def inBoundsAxis(f: Float) = 0.0 <= f && f <= 1.0
     inBoundsAxis(v.x) && inBoundsAxis(v.y) && inBoundsAxis(v.z)
   }
 
-  def whichOctant(v: Vector4): Octant = {
+  def whichOctant(v: Vector4f): Octant = {
     new Octant(v.x > 0.5, v.y > 0.5, v.z > 0.5)
   }
 
-  def insertNodeAt (newNode: SVONode, position: Vector4, insertionHeight: Int): Unit = {
+  def insertNodeAt (newNode: SVONode, position: Vector4f, insertionHeight: Int): Unit = {
     if (insertionHeight < 0)
       throw new IllegalArgumentException("Can't add at a negative height.")
     if (!inBounds(position))
@@ -71,7 +71,8 @@ case class SVO (var node: SVONode, height: Int) {
     }
 
     val newOctant = whichOctant(position)
-    val newPosition = newOctant.toChildSpace * position
+    val newPosition: Vector4f = newOctant.toChildSpace.mult(position)
+
     node match {
       case Full(_) => throw new IllegalStateException("The node should have been subdivided.")
       case Subdivided(octants) =>
@@ -90,7 +91,7 @@ case class SVO (var node: SVONode, height: Int) {
     }
   }
 
-  def insertElementAt (element: Option[Block], position: Vector4, height: Int): Unit = {
+  def insertElementAt (element: Option[Block], position: Vector4f, height: Int): Unit = {
     insertNodeAt (Full(element), position, height)
   }
 }

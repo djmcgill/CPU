@@ -32,7 +32,7 @@ class SVORenderer(assetManager: AssetManager, rootNode: Node) {
       // for each subSVO, draw it in the correct position
       for ((subSVO, ix) <- subSVOs.zipWithIndex) {
         subSVO.scale(0.5f)
-        val newOrigin: Vector3f = ??? // new Octant(ix).childOrigin
+        val newOrigin: Vector3f = new Octant(ix).childOrigin
         subSVO.setLocalTranslation(newOrigin)
         node.attachChild(subSVO)
       }

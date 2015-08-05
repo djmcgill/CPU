@@ -3,7 +3,6 @@ package rendering
 import com.jme3.asset.AssetManager
 import com.jme3.scene.Node
 import logic.GameState
-import rendering.SVORenderer
 
 /**
  * Renders a logic.GameState
