@@ -1,4 +1,4 @@
-package GameLogic.voxels
+package logic.voxels
 
 import com.github.jpbetz.subspace._
 

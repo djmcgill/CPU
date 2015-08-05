@@ -1,4 +1,4 @@
-package GameLogic.voxels
+package logic.voxels
 
 /**
  * Created by David McGillicuddy on 30/07/2015.

@@ -1,6 +1,6 @@
-package GameLogic
+package logic
 
-import GameLogic.voxels.SVO
+import logic.voxels.SVO
 
 /**
  * At the moment, the gamestate consists only of the voxels and the camera.

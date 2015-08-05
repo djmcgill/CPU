@@ -1,5 +1,5 @@
 import org.scalatest._
-import GameLogic.voxels.Octant
+import logic.voxels.Octant
 import com.github.jpbetz.subspace._
 
 

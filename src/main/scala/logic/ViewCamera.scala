@@ -1,4 +1,4 @@
-package GameLogic
+package logic
 
 import com.github.jpbetz.subspace._
 

@@ -1,6 +1,6 @@
 import org.scalatest._
 
-import GameLogic.voxels.SVO
+import logic.voxels.SVO
 
 class SVOSpec extends FlatSpec with Matchers {
   "Inserting into a SVO" should "not throw an exception" in {
