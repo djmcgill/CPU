@@ -1,6 +1,6 @@
 package logic.voxels
 
-import com.jme3.math.{Matrix4f, Vector3f}
+import com.jme3.math.{Vector4f, Matrix3f, Matrix4f, Vector3f}
 
 /**
  * An Octant's int value is used to index into the array of suboctrees.
@@ -29,7 +29,9 @@ class Octant (val ix : Int) {
    *   else map [0.5, 1] to [0, 1]
    * (same for all the other axes)
    */
-  def toChildSpace: Matrix4f = ???
+  def toChildSpace(oldV: Vector3f): Vector3f = {
+    new Vector3f(oldV).add(childOrigin mult -1).scaleAdd(2, Vector3f.ZERO)
+  }
 
   /**
    * To use when going from the perspective of the child to the adult (i.e. drawing)
@@ -39,5 +41,7 @@ class Octant (val ix : Int) {
    * (same for all the other axes)
    */
 
-  def fromChildSpace: Matrix4f = ???
+  def fromChildSpace(oldV: Vector3f): Vector3f = {
+    new Vector3f(oldV).scaleAdd(0.5f, childOrigin)
+  }
 }

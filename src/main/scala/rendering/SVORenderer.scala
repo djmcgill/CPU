@@ -18,16 +18,18 @@ class SVORenderer(assetManager: AssetManager, rootNode: Node) {
 
   def subSVONode(svo: SVO): Spatial = svo.node match {
     case Full(_) =>
-      val b = new Box(1, 1, 1)               // create cube shape
-      val blue = new Geometry("Box", b)      // create cube geometry from the shape
+      val b = new Box(1, 1, 1) // create cube shape
+      val blue = new Geometry("Box", b) // create cube geometry from the shape
       val mat1 = new Material(assetManager,
-        "Common/MatDefs/Misc/Unshaded.j3md") // create a simple material
-      mat1.setColor("Color", ColorRGBA.Blue)  // set color of material to blue
-      blue.setMaterial(mat1)                 // set the cube's material
+          "Common/MatDefs/Misc/Unshaded.j3md") // create a simple material
+      mat1.setColor("Color", ColorRGBA.Blue) // set color of material to blue
+      blue.setMaterial(mat1) // set the cube's material
       blue
 
     case Subdivided(subNodes) =>
+      printf("Subdivided subSVONode, size = %d\n", svo.height)
       val subSVOs: Array[Spatial] = subNodes map subSVONode
+      println("after recursive call")
       val node = new Node()
       // for each subSVO, draw it in the correct position
       for ((subSVO, ix) <- subSVOs.zipWithIndex) {
@@ -35,9 +37,9 @@ class SVORenderer(assetManager: AssetManager, rootNode: Node) {
         val newOrigin: Vector3f = new Octant(ix).childOrigin
         subSVO.setLocalTranslation(newOrigin)
         node.attachChild(subSVO)
+
       }
       node
-
   }
 
 

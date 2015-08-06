@@ -7,9 +7,8 @@ import logic.GameState
 
 /**
  * Manages the controls.
- * TODO: make cameraTranslations a Map so that you can change keybindings,
- * and change _3 to a params Array
  */
+// TODO: make cameraTranslations a Map so that you can change keybindings, and change _3 to a params Array
 class Controls(inputManager: InputManager, gs: GameState) {
   def initKeys() = {
     val moveX = new Vector3f(10,  0,  0)

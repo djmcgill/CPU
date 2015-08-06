@@ -1,6 +1,6 @@
 package logic.voxels
 
-import com.jme3.math.Vector4f
+import com.jme3.math.Vector3f
 
 /**
  * An octant's node can either be completely filled with voxels of a given element
@@ -11,36 +11,53 @@ case class Full (contents: Option[Block]) extends SVONode
 case class Subdivided (octants: Array[SVO]) extends SVONode
 
 object SVO {
-  lazy val initialWorld = {
+  val minimalSubdivided = {
+    def empty: SVO = new SVO(new Full(None), 0)
+    def full: SVO = new SVO(new Full(Some(new Dirt())), 0)
+    val arr: Array[SVO] = Array(full, empty, empty, empty, empty, empty, empty, full)
+    new SVO(Subdivided(arr), 1)
+  }
+  val initialWorld = {
+    println("Creating initial world")
     val world = new SVO(Full(None), 5)
     val cornerPositions = Array((-0.1f, -0.1f), (-0.1f, 0.1f), (0.1f, -0.1f), (0.1f, 0.1f))
-    def justBelowZAxis(dx: Float, dz: Float) = new Vector4f (dx + 0.5f, 0.4f, dz + 0.5f, 1.0f)
+    def justBelowZAxis(dx: Float, dz: Float) = new Vector3f(dx + 0.5f, 0.4f, dz + 0.5f)
     val lowerHalfPositions = cornerPositions map Function.tupled(justBelowZAxis)
     lowerHalfPositions foreach (pos => world.insertElementAt(Some(new Dirt()), pos, 4))
-    world.insertElementAt(Some(new Dirt()), new Vector4f (0.1f, 0.6f, 0.1f, 1.0f), 2)
+    world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.6f, 0.1f), 2)
     world
   }
 
-  lazy val voxel = new SVO(Full(Some(new Dirt())), 0)
+  val voxel = new SVO(Full(Some(new Dirt())), 0)
 }
 
 /**
  * Each Sparse Voxel Octree thinks that it is the cube (0,0,0) to (1,1,1)
  */
-// TODO: value equality
 case class SVO (var node: SVONode, height: Int) {
   def this() = this(Subdivided(Array()), 0)
 
-  def inBounds(v: Vector4f): Boolean = {
+  def inBounds(v: Vector3f): Boolean = {
     def inBoundsAxis(f: Float) = 0.0 <= f && f <= 1.0
     inBoundsAxis(v.x) && inBoundsAxis(v.y) && inBoundsAxis(v.z)
   }
 
-  def whichOctant(v: Vector4f): Octant = {
+  def whichOctant(v: Vector3f): Octant = {
     new Octant(v.x > 0.5, v.y > 0.5, v.z > 0.5)
   }
 
-  def insertNodeAt (newNode: SVONode, position: Vector4f, insertionHeight: Int): Unit = {
+  def printSVO(): Unit = printSubSVO(0)
+
+  private def printSubSVO(tabs: Int): Unit = node match {
+    case Full(Some(_)) => println(("\t" * tabs) ++ "Full")
+    case Full(None) => println(("\t" * tabs) ++ "_")
+    case Subdivided(subNodes) =>
+      subNodes foreach (subNode => subNode.printSubSVO(tabs+1))
+  }
+
+  // FIXME: causes stack overflow with boundless recursion
+  def insertNodeAt(newNode: SVONode, position: Vector3f, insertionHeight: Int): Unit = {
+    //printf("inserting at (%f, %f, %f) at height %d\n", position.x, position.y, position.z, insertionHeight)
     if (insertionHeight < 0)
       throw new IllegalArgumentException("Can't add at a negative height.")
     if (!inBounds(position))
@@ -71,7 +88,7 @@ case class SVO (var node: SVONode, height: Int) {
     }
 
     val newOctant = whichOctant(position)
-    val newPosition: Vector4f = newOctant.toChildSpace.mult(position)
+    val newPosition: Vector3f = newOctant.toChildSpace(position)
 
     node match {
       case Full(_) => throw new IllegalStateException("The node should have been subdivided.")
@@ -91,7 +108,7 @@ case class SVO (var node: SVONode, height: Int) {
     }
   }
 
-  def insertElementAt (element: Option[Block], position: Vector4f, height: Int): Unit = {
+  def insertElementAt (element: Option[Block], position: Vector3f, height: Int): Unit = {
     insertNodeAt (Full(element), position, height)
   }
 }
