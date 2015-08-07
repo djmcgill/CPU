@@ -21,7 +21,7 @@ You are a paralysed robot (just a head?) that can have a large throne built arou
 
 ## TODO:
   * Fix inserting into SVO
-  * Mouse picking
+  * Mouse picking (custom)
   * Click to insert
   
   * Switch to use advanced JME3 features to allow switching of camera, mouse picking modes, etc.
