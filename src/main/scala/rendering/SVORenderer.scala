@@ -2,7 +2,7 @@ package rendering
 
 import com.jme3.asset.AssetManager
 import com.jme3.material.Material
-import com.jme3.math.{Vector3f, ColorRGBA}
+import com.jme3.math.{Transform, Vector3f, ColorRGBA}
 import com.jme3.scene.{Spatial, Geometry, Node}
 import com.jme3.scene.shape.Box
 import logic.voxels._
@@ -13,53 +13,40 @@ import logic.voxels._
  */
 class SVORenderer(assetManager: AssetManager, rootNode: Node) {
   def render(svo: SVO): Unit = {
-    rootNode.attachChild(subSVONode(svo))
+    subSVONode(svo) foreach rootNode.attachChild
   }
 
-  def subSVONode(svo: SVO): Spatial = svo.node match {
-    case Full(_) =>
+  def subSVONode(svo: SVO): Option[Spatial] = svo.node match {
+    case Full(Some(_)) =>
       val b = new Box(1, 1, 1) // create cube shape
       val blue = new Geometry("Box", b) // create cube geometry from the shape
       val mat1 = new Material(assetManager,
           "Common/MatDefs/Misc/Unshaded.j3md") // create a simple material
       mat1.setColor("Color", ColorRGBA.Blue) // set color of material to blue
       blue.setMaterial(mat1) // set the cube's material
-      blue
+      Some(blue)
+    case Full(None) => None
 
     case Subdivided(subNodes) =>
       printf("Subdivided subSVONode, size = %d\n", svo.height)
-      val subSVOs: Array[Spatial] = subNodes map subSVONode
+      val subSVOs: Array[Option[Spatial]] = subNodes map subSVONode
       println("after recursive call")
-      val node = new Node()
-      // for each subSVO, draw it in the correct position
-      for ((subSVO, ix) <- subSVOs.zipWithIndex) {
-        subSVO.scale(0.5f)
-        val newOrigin: Vector3f = new Octant(ix).childOrigin
-        subSVO.setLocalTranslation(newOrigin)
-        node.attachChild(subSVO)
+      val subNode = new Node()
+      // for each subSVO, draw it in the correct position (if it is not empty)
+      for ((optionSubSVO, ix) <- subSVOs.zipWithIndex) {
+        for (subSVO <- optionSubSVO) {
+          subNode.attachChild(subSVO)
 
+
+          val newOrigin: Vector3f = new Octant(ix).childOrigin
+
+          // This is a bit hacky, but it seems that the scale applies after the
+          // translation no matter which order the two are set.
+          subSVO.setLocalTranslation(newOrigin mult 2)
+          subSVO.scale(0.5f)
+
+        }
       }
-      node
+      Some(subNode)
   }
-
-
-
-  /*
-  member this.DrawFrom (svo : SparseVoxelOctree<Option<Block>>) (m : Matrix) (vp : Matrix) =
-    let mutable mvp = m * vp
-  GL.UniformMatrix4(matrixID, false, &mvp)
-  GL.ActiveTexture TextureUnit.Texture0
-  GL.BindTexture(TextureTarget.Texture2D, textureID)
-  GL.Uniform1(textureID, 0)
-
-  let drawSubSVO octant subSVO = this.DrawFrom subSVO (fromChildSpace octant * m) vp
-  match svo.Nodes with
-  | Full None -> ()
-  | Full _ -> cube.Draw ()
-  | Subdivided arr -> Array.iteri drawSubSVO arr
-
-  // Given a SVO, draw it between the bounds of (0,0,0) and (1,1,1)
-  member this.Draw (svo : SparseVoxelOctree<Option<Block>>) (vp : Matrix) =
-    this.DrawFrom svo Matrix.Identity vp
-   */
 }
