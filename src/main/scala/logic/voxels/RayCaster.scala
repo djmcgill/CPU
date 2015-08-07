@@ -25,7 +25,29 @@ object RayCaster {
       svo: SVO,
       pathSoFar: List[Octant]): Option[(Vector3f, List[Octant])] = {
 
-    val hitPosition: Option[Vector3f] = ???
+    val hitPosition: Option[Vector3f] = {
+      def tMinMaxAxis(eAxis: Float, fAxis: Float) = {
+        // TODO: don't do the division if fAxis is near 0
+        val t1: Float = eAxis/fAxis
+        val t2: Float = (eAxis+1)/fAxis
+        if (t1 < t2) (t1, t2) else (t2, t1)
+      }
+      val (tMinX, tMaxX) = tMinMaxAxis(-rayOrigin.x, rayDirection.x)
+      val (tMinY, tMaxY) = tMinMaxAxis(-rayOrigin.y, rayDirection.y)
+      val (tMinZ, tMaxZ) = tMinMaxAxis(-rayOrigin.z, rayDirection.z)
+
+      val tMin = List(tMinX, tMinY, tMinZ).max
+      val tMax = List(tMaxX, tMaxY, tMaxZ).min
+
+      // Where the hit would be (if there would be one)
+      // TODO: check that this is okay
+      val hitPosition = (rayDirection mult tMin) add rayOrigin
+
+      // Was there a hit?
+      // TODO: check that this is okay
+      if (tMin < tMax) Some(hitPosition) else None
+    }
+
     hitPosition flatMap (hitPosition => svo.node match {
       // The node is full so that's the final hit or miss.
       case Full(Some(_)) => Some(hitPosition, pathSoFar)

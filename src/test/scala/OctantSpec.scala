@@ -32,7 +32,7 @@ class OctantSpec extends FlatSpec with Matchers {
     lowerHalf.toChildSpace(xAxis(0.25f)) should be (xAxis(0.5f))
     lowerHalf.toChildSpace(xAxis(0.5f))  should be (xAxis(1))
 
-    upperHalf.toChildSpace(xAxis(0.5f))  should be (xAxis(0)) // gives 1,0,0
+    upperHalf.toChildSpace(xAxis(0.5f))  should be (xAxis(0))
     upperHalf.toChildSpace(xAxis(0.75f)) should be (xAxis(0.5f))
     upperHalf.toChildSpace(xAxis(1))     should be (xAxis(1))
   }
