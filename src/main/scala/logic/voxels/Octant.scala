@@ -17,6 +17,10 @@ class Octant (val ix : Int) {
   def z = isSet(2)
   def xyz = (this.x, this.y, this.z)
 
+  def flipX = new Octant(!x, y, z)
+  def flipY = new Octant(x, !y, z)
+  def flipZ = new Octant(x, y, !z)
+
   def childOrigin = {
     def originAxis(b: Boolean): Float = if (b) 0.5f else 0
     new Vector3f(originAxis(this.x), originAxis(this.y), originAxis(this.z))
