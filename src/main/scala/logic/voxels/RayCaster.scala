@@ -26,28 +26,42 @@ object RayCaster {
       pathSoFar: List[Octant]): Option[(Vector3f, List[Octant])] = {
 
     val hitPosition: Option[Vector3f] = ???
-    hitPosition flatMap (hitPosition => {
-      svo.node match {
+    hitPosition flatMap (hitPosition => svo.node match {
+      // The node is full so that's the final hit or miss.
+      case Full(Some(_)) => Some(hitPosition, pathSoFar)
+      case Full(None)    => None
 
-        // The node is full so that's the final hit.
-        case Full(_) => Some(hitPosition, pathSoFar)
+      // The node has been subdivided, check each of the subtrees.
+      case Subdivided(subSVOs) =>
+        val firstOctant = svo.whichOctant(hitPosition)
 
-        // The node has been subdivided, check each of the subTrees.
-        case Subdivided(subSVOs) =>
-          val firstOctant = svo.whichOctant(hitPosition)
-
-          val flipOnce: Stream[Octant] = ??? // choose 1 from x,y,z. If can flip, then do so.
-          val flipTwice: Stream[Octant] = ??? // choose 2 from x,y,z. If both can flip, then do so.
-          val flipThrice: Stream[Octant] = ??? // if can flip all three, then do so.
-
-          val potentiallyHit: Stream[Octant] = firstOctant #:: (flipOnce #::: flipTwice #::: flipThrice)
-
-          def recursiveCall(o: Octant): Option[(Vector3f, List[Octant])] = {
-            val newRayOrigin = o.toChildSpace(rayOrigin)
-            castGo(newRayOrigin, rayDirection, subSVOs(o.ix), o :: pathSoFar)
-          }
-          (potentiallyHit flatMap recursiveCall).headOption
+        def flipIfPossible(xyz: (Boolean, Boolean, Boolean)) = xyz match {case (x, y, z) =>
+          val flipX = (o: Octant) => if (firstOctant.x != (rayDirection.x > 0)) o.flipX else o
+          val flipY = (o: Octant) => if (firstOctant.y != (rayDirection.y > 0)) o.flipY else o
+          val flipZ = (o: Octant) => if (firstOctant.z != (rayDirection.z > 0)) o.flipZ else o
+          val newOctant = (flipX compose flipY compose flipZ)(firstOctant)
+          if (newOctant != firstOctant) Stream(newOctant) else Stream()
         }
-      })
-    }
+        val onlyX    = ( true, false, false)
+        val onlyY    = (false,  true, false)
+        val onlyZ    = (false, false,  true)
+        val exceptX  = (false,  true,  true)
+        val exceptY  = ( true, false,  true)
+        val exceptZ  = ( true,  true, false)
+        val allThree = ( true,  true,  true)
+
+        val potentiallyHit =
+          firstOctant #:: Stream(
+            onlyX, onlyY, onlyZ,
+            exceptX, exceptY, exceptZ,
+            allThree
+          ).flatMap(flipIfPossible)
+
+        def recursiveCall(o: Octant): Option[(Vector3f, List[Octant])] = {
+          val newRayOrigin = o.toChildSpace(rayOrigin)
+          castGo(newRayOrigin, rayDirection, subSVOs(o.ix), o :: pathSoFar)
+        }
+        (potentiallyHit flatMap recursiveCall).headOption
+    })
+  }
 }
