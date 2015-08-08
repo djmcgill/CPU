@@ -15,7 +15,7 @@ object RayCaster {
       nonZero(rayDirection.y),
       nonZero(rayDirection.z))
 
-    castGo(rayOrigin, sanitisedDirection, svo, List())
+    castGo(rayOrigin, sanitisedDirection.normalize(), svo, List())
       .map({case (pos, path) => (pos, path.reverse)})
   }
 
@@ -25,44 +25,51 @@ object RayCaster {
       svo: SVO,
       pathSoFar: List[Octant]): Option[(Vector3f, List[Octant])] = {
 
-    val hitPosition: Option[Vector3f] = {
-      def tMinMaxAxis(eAxis: Float, fAxis: Float) = {
-        // TODO: don't do the division if fAxis is near 0
-        val t1: Float = eAxis/fAxis
-        val t2: Float = (eAxis+1)/fAxis
-        if (t1 < t2) (t1, t2) else (t2, t1)
-      }
-      val (tMinX, tMaxX) = tMinMaxAxis(-rayOrigin.x, rayDirection.x)
-      val (tMinY, tMaxY) = tMinMaxAxis(-rayOrigin.y, rayDirection.y)
-      val (tMinZ, tMaxZ) = tMinMaxAxis(-rayOrigin.z, rayDirection.z)
-
-      val tMin = List(tMinX, tMinY, tMinZ).max
-      val tMax = List(tMaxX, tMaxY, tMaxZ).min
-
-      // Where the hit would be (if there would be one)
-      // TODO: check that this is okay
-      val hitPosition = (rayDirection mult tMin) add rayOrigin
-
-      // Was there a hit?
-      // TODO: check that this is okay
-      if (tMin < tMax) Some(hitPosition) else None
+    def tMinMaxAxis(o: Float, d: Float) = {
+      val t1: Float = -o/d
+      val t2: Float = (1-o)/d
+      if (t1 < t2) (t1, t2) else (t2, t1)
     }
+    val (tMinX, tMaxX) = tMinMaxAxis(rayOrigin.x, rayDirection.x)
+    val (tMinY, tMaxY) = tMinMaxAxis(rayOrigin.y, rayDirection.y)
+    val (tMinZ, tMaxZ) = tMinMaxAxis(rayOrigin.z, rayDirection.z)
 
-    hitPosition flatMap (hitPosition => svo.node match {
+    val tMin: Float = List(tMinX, tMinY, tMinZ, 0.0f).max
+    val tMax: Float = List(tMaxX, tMaxY, tMaxZ, 100000.0f).min
+
+    // Was there a hit?
+    if (tMin > tMax) return None
+
+    // Where the hit is
+    lazy val hitPosition = (rayDirection mult tMin) add rayOrigin
+
+    // Now process what the hit means.
+    svo.node match {
+
       // The node is full so that's the final hit or miss.
       case Full(Some(_)) => Some(hitPosition, pathSoFar)
       case Full(None)    => None
 
       // The node has been subdivided, check each of the subtrees.
+      // This is a bit of a brute force way, evaluating all possibilities.
+      // Another way to do this would be to follow the line, and see which of x, y, or z equal 0.5 first.
       case Subdivided(subSVOs) =>
         val firstOctant = svo.whichOctant(hitPosition)
 
-        def flipIfPossible(xyz: (Boolean, Boolean, Boolean)) = xyz match {case (x, y, z) =>
-          val flipX = (o: Octant) => if (firstOctant.x != (rayDirection.x > 0)) o.flipX else o
-          val flipY = (o: Octant) => if (firstOctant.y != (rayDirection.y > 0)) o.flipY else o
-          val flipZ = (o: Octant) => if (firstOctant.z != (rayDirection.z > 0)) o.flipZ else o
-          val newOctant = (flipX compose flipY compose flipZ)(firstOctant)
-          if (newOctant != firstOctant) Stream(newOctant) else Stream()
+        def flipIfPossible(xyz: (Boolean, Boolean, Boolean)) = xyz match {
+          case (shouldFlipX, shouldFlipY, shouldFlipZ) =>
+            val canFlipX = firstOctant.x != (rayDirection.x > 0)
+            val canFlipY = firstOctant.y != (rayDirection.y > 0)
+            val canFlipZ = firstOctant.z != (rayDirection.z > 0)
+
+            val allThatShouldFlipCan =
+              (!shouldFlipX || canFlipX) && (!shouldFlipY || canFlipY) && (!shouldFlipZ || canFlipZ)
+
+            lazy val flipX = (o: Octant) => if (shouldFlipX) o.flipX else o
+            lazy val flipY = (o: Octant) => if (shouldFlipY) o.flipY else o
+            lazy val flipZ = (o: Octant) => if (shouldFlipZ) o.flipZ else o
+            lazy val newOctant = (flipX compose flipY compose flipZ)(firstOctant)
+            if (allThatShouldFlipCan) Stream(newOctant) else Stream()
         }
         val onlyX    = ( true, false, false)
         val onlyY    = (false,  true, false)
@@ -72,7 +79,7 @@ object RayCaster {
         val exceptZ  = ( true,  true, false)
         val allThree = ( true,  true,  true)
 
-        val potentiallyHit =
+        val potentiallyHit: Stream[Octant] =
           firstOctant #:: Stream(
             onlyX, onlyY, onlyZ,
             exceptX, exceptY, exceptZ,
@@ -81,9 +88,11 @@ object RayCaster {
 
         def recursiveCall(o: Octant): Option[(Vector3f, List[Octant])] = {
           val newRayOrigin = o.toChildSpace(rayOrigin)
-          castGo(newRayOrigin, rayDirection, subSVOs(o.ix), o :: pathSoFar)
+          val childResult = castGo(newRayOrigin, rayDirection, subSVOs(o.ix), o :: pathSoFar)
+          childResult map {case (childHitPosition: Vector3f, path: List[Octant]) =>
+            (o.fromChildSpace(childHitPosition), path)}
         }
         (potentiallyHit flatMap recursiveCall).headOption
-    })
+    }
   }
 }

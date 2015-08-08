@@ -5,7 +5,7 @@ import com.jme3.math.{Vector4f, Matrix3f, Matrix4f, Vector3f}
 /**
  * An Octant's int value is used to index into the array of suboctrees.
  */
-class Octant (val ix : Int) {
+case class Octant (ix : Int) {
   private def isSet (i : Int) = (this.ix & (1 << i)) != 0
 
   def this (x : Boolean, y : Boolean, z : Boolean) = {

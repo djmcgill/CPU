@@ -23,5 +23,33 @@
     <orderEntry type="library" scope="TEST" name="SBT: org.scala-lang:scala-reflect:2.11.2:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scala-lang.modules:scala-xml_2.11:1.0.2:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scalatest:scalatest_2.11:2.2.4:jar" level="project" />
+    <orderEntry type="module-library">
+      <library name="JME3">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/../../lib/jm3/lib" />
+          <root url="file://$MODULE_DIR$/../../lib/jm3" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="file://$MODULE_DIR$/../../lib/jm3/javadoc" />
+        </JAVADOC>
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../../lib/jm3/source" />
+        </SOURCES>
+        <jarDirectory url="file://$MODULE_DIR$/../../lib/jm3" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/../../lib/jm3/lib" recursive="false" />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="LWJGL">
+        <CLASSES>
+          <root url="file://$MODULE_DIR$/../../lib/lwjgl/jar" />
+        </CLASSES>
+        <JAVADOC>
+          <root url="file://$MODULE_DIR$/../../lib/lwjgl/doc" />
+        </JAVADOC>
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/../../lib/lwjgl/jar" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>

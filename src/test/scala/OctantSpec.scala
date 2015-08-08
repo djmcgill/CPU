@@ -27,6 +27,7 @@ class OctantSpec extends FlatSpec with Matchers {
   val lowerHalf = new Octant(false, false, false)
   val upperHalf = new Octant(true , false, false)
   def xAxis(x: Float) = new Vector3f (x, 0, 0)
+
   "toChildSpace" should "work correctly on the X axis" in {
     lowerHalf.toChildSpace(xAxis(0))     should be (xAxis(0))
     lowerHalf.toChildSpace(xAxis(0.25f)) should be (xAxis(0.5f))
@@ -45,5 +46,16 @@ class OctantSpec extends FlatSpec with Matchers {
     upperHalf.fromChildSpace(xAxis(0))    should be (xAxis(0.5f))
     upperHalf.fromChildSpace(xAxis(0.5f)) should be (xAxis(0.75f))
     upperHalf.fromChildSpace(xAxis(1))    should be (xAxis(1))
+  }
+
+  "flipX, flipY, and flipZ" should "correctly flip a bit" in {
+    new Octant(false, false, false).flipX.xyz should be ((true, false, false))
+    new Octant(true , false, false).flipX.xyz should be ((false, false, false))
+    new Octant(false, false, false).flipX.flipZ.xyz should be ((true, false, true))
+
+    new Octant(true, true, true).flipX.xyz should be ((false, true, true))
+    new Octant(true, true, false).flipX.flipY.xyz should be ((false, false, false))
+
+    new Octant(false, false, false).flipX.flipY.flipZ.xyz should be ((true, true, true))
   }
 }

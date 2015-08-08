@@ -17,7 +17,7 @@ object CPU extends SimpleApplication {
     gsRenderer.render(gs)
 
     flyCam.setEnabled(false)
-    val chaseCam = new ChaseCamera(cam, gs.cameraTarget, inputManager)
+    new ChaseCamera(cam, gs.cameraTarget, inputManager)
     rootNode.attachChild(gs.cameraTarget)
     new Controls(inputManager, gs).initKeys()
   }
