@@ -2,7 +2,6 @@ import com.jme3.app.SimpleApplication
 import com.jme3.input.{MouseInput, ChaseCamera}
 import com.jme3.input.controls.{ActionListener, MouseButtonTrigger}
 import com.jme3.math.{Vector2f, Vector3f}
-import controller.Controls
 import logic.GameState
 import logic.voxels.RayCaster
 
@@ -14,37 +13,25 @@ object CPU extends SimpleApplication {
     CPU.start()
   }
 
-  @Override
-  def simpleInitApp() {
+  override def simpleInitApp() {
+    // TODO: this needs to refresh itself when the SVO changes, do it in simpleUpdate()
     val gsRenderer = new GameStateRenderer(assetManager, rootNode)
     gsRenderer.render(gs)
 
+    // TODO: move this to OverviewCameraControls
     flyCam.setEnabled(false)
     new ChaseCamera(cam, gs.cameraTarget, inputManager)
     rootNode.attachChild(gs.cameraTarget)
-    new Controls(inputManager, gs).initKeys()
 
-    val cubeClicker = new ActionListener() {
-      def onAction(name: String, keyPressed: Boolean, tpf: Float): Unit = {
-        val rayOrigin = cam.getLocation
 
-        val click2d = inputManager.getCursorPosition
-        def worldCoordsAtZ(z: Float) = cam.getWorldCoordinates(click2d, z)
-        val rayDirection = (worldCoordsAtZ(1) subtractLocal worldCoordsAtZ(0)).normalizeLocal
+    // TODO: register the AppStates OverviewCameraControls and SelectionCameraControls
 
-        val result = RayCaster.cast(rayOrigin, rayDirection, gs.svo)
-        result match {
-          case None => println("none")
-          case Some((hitResult, path)) =>
-            printf("path = ")
-            for (o <- path) {printf("%d", o.ix)}
-            println()
-        }
-      }
-    }
 
-    inputManager.addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT))
-    inputManager.addListener(cubeClicker, "Click")
+  }
+
+  override def simpleUpdate(tpf: Float): Unit = {
+    // TODO: refresh the svo
+    // TODO: only refresh the changes to the svo
   }
 }
 
