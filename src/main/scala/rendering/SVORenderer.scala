@@ -18,7 +18,7 @@ class SVORenderer(assetManager: AssetManager, rootNode: Node) {
 
   def subSVONode(svo: SVO): Option[Spatial] = svo.node match {
     case Full(Some(_)) =>
-      val b = new Box(1, 1, 1) // create cube shape
+      val b = new Box(Vector3f.ZERO, Vector3f.UNIT_XYZ) // create cube shape
       val blue = new Geometry("Box", b) // create cube geometry from the shape
       val mat1 = new Material(assetManager,
           "Common/MatDefs/Misc/Unshaded.j3md") // create a simple material
@@ -39,10 +39,7 @@ class SVORenderer(assetManager: AssetManager, rootNode: Node) {
 
 
           val newOrigin: Vector3f = new Octant(ix).childOrigin
-
-          // This is a bit hacky, but it seems that the scale applies after the
-          // translation no matter which order the two are set.
-          subSVO.setLocalTranslation(newOrigin mult 2)
+          subSVO.setLocalTranslation(newOrigin)
           subSVO.scale(0.5f)
 
         }
