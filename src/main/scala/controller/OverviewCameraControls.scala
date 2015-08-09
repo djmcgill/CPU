@@ -5,8 +5,7 @@ import com.jme3.app.state._
 import com.jme3.input._
 import com.jme3.input.controls._
 import com.jme3.math.Vector3f
-import com.jme3.scene.control.CameraControl.ControlDirection
-import com.jme3.scene.{CameraNode, Node}
+import com.jme3.scene.Node
 
 /**
  * Manages the controls.
@@ -19,6 +18,7 @@ class OverviewCameraControls extends AbstractAppState {
   val moveX = Vector3f.UNIT_X mult 10
   val moveY = Vector3f.UNIT_Y mult 10
   val moveZ = Vector3f.UNIT_Z mult 10
+
   val cameraTranslations = Seq(
     ("CAMERA TARGET LEFT"    , KeyInput.KEY_LEFT , moveX mult -1),
     ("CAMERA TARGET RIGHT"   , KeyInput.KEY_RIGHT, moveX),
@@ -26,6 +26,7 @@ class OverviewCameraControls extends AbstractAppState {
     ("CAMERA TARGET BACKWARD", KeyInput.KEY_DOWN , moveZ),
     ("CAMERA TARGET UP"      , KeyInput.KEY_PGUP , moveY),
     ("CAMERA TARGET DOWN"    , KeyInput.KEY_PGDN , moveY mult -1))
+  val keys = cameraTranslations map (_._1)
 
   val analogListener = new AnalogListener() {
     override def onAnalog(name: String, value: Float, tpf: Float) =
@@ -49,8 +50,7 @@ class OverviewCameraControls extends AbstractAppState {
     // Set up the key mappings and corresponding actions.
     cameraTranslations foreach {case (name, key, _) =>
       app.getInputManager.addMapping(name, new KeyTrigger(key))}
-
-    app.getInputManager.addListener(analogListener, cameraTranslations map (_._1): _*)
+    app.getInputManager.addListener(analogListener, keys: _*)
   }
 
   override def cleanup(): Unit = {
