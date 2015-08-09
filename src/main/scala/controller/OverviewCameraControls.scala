@@ -28,6 +28,7 @@ class OverviewCameraControls extends AbstractAppState {
     ("CAMERA TARGET DOWN"    , KeyInput.KEY_PGDN , moveY mult -1))
   val keys = cameraTranslations map (_._1)
 
+  // When a key is pressed, move the camera according to the offset specified in cameraTranslations
   val analogListener = new AnalogListener() {
     override def onAnalog(name: String, value: Float, tpf: Float) =
       cameraTranslations find (_._1 == name) foreach {case (_, _, offset) =>
