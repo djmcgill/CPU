@@ -49,13 +49,22 @@ class OctantSpec extends FlatSpec with Matchers {
   }
 
   "flipX, flipY, and flipZ" should "correctly flip a bit" in {
-    new Octant(false, false, false).flipX.xyz should be ((true, false, false))
-    new Octant(true , false, false).flipX.xyz should be ((false, false, false))
-    new Octant(false, false, false).flipX.flipZ.xyz should be ((true, false, true))
+    new Octant(false, false, false)
+      .flipX.xyz             should be (( true, false, false))
 
-    new Octant(true, true, true).flipX.xyz should be ((false, true, true))
-    new Octant(true, true, false).flipX.flipY.xyz should be ((false, false, false))
+    new Octant(true , false, false)
+      .flipX.xyz             should be ((false, false, false))
 
-    new Octant(false, false, false).flipX.flipY.flipZ.xyz should be ((true, true, true))
+    new Octant(false, false, false)
+      .flipX.flipZ.xyz       should be (( true, false,  true))
+
+    new Octant(true, true, true)
+      .flipX.xyz             should be ((false,  true,  true))
+
+    new Octant(true, true, false)
+      .flipX.flipY.xyz       should be ((false, false, false))
+
+    new Octant(false, false, false)
+      .flipX.flipY.flipZ.xyz should be (( true,  true,  true))
   }
 }

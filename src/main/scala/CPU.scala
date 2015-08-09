@@ -28,18 +28,10 @@ object CPU extends SimpleApplication {
       def onAction(name: String, keyPressed: Boolean, tpf: Float): Unit = {
         val rayOrigin = cam.getLocation
 
-
-        //val rayDirection = (cam.getWorldCoordinates(click2d, 1) subtractLocal
-        //                        cam.getWorldCoordinates(click2d, 0)).normalizeLocal()
-        //
         val click2d = inputManager.getCursorPosition
-        val click3d = cam.getWorldCoordinates(
-          new Vector2f(click2d.x, click2d.y), 0).clone()
-        val rayDirection = cam.getWorldCoordinates(
-          new Vector2f(click2d.x, click2d.y), 1).subtractLocal(click3d).normalizeLocal()
+        def worldCoordsAtZ(z: Float) = cam.getWorldCoordinates(click2d, z)
+        val rayDirection = (worldCoordsAtZ(1) subtractLocal worldCoordsAtZ(0)).normalizeLocal
 
-        printf("origin: (%f, %f, %f)\n", rayOrigin.x, rayOrigin.y, rayOrigin.z)
-        printf("direction: (%f, %f, %f)\n", rayDirection.x, rayDirection.y, rayDirection.z)
         val result = RayCaster.cast(rayOrigin, rayDirection, gs.svo)
         result match {
           case None => println("none")
