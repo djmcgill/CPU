@@ -55,6 +55,29 @@ case class SVO (var node: SVONode, height: Int) {
       subNodes foreach (subNode => subNode.printSubSVO(tabs+1))
   }
 
+  val modifyNodePath = (f: (SVONode => Option[SVONode])) => (path: List[Octant]) => {
+    (path, this.node) match {
+      case (List(), _) =>
+        val result = f(this.node)
+        this.node = result.getOrElse(Full(None))
+        result
+      case (o :: os, Full(element)) => ??? // split, then recurse
+      case (o :: os, Subdivided(subNodes)) => ??? // recurse
+    }
+  }
+
+  /**
+   * Go over the whole tree, combining nodes where possible.
+   */
+  def cleanTree() = ??? : ()
+
+
+  val getNodePath = modifyNodePath(Some(_))
+  val setNodePath = (node: SVONode) => (path: List[Octant]) => {modifyNodePath(Function.const(Some(node)))(path); ()}
+  val deleteNodePath = (path: List[Octant]) => {modifyNodePath(Function.const(None))(path); ()}
+
+
+
   // FIXME: causes stack overflow with boundless recursion
   def insertNodeAt(newNode: SVONode, position: Vector3f, insertionHeight: Int): Unit = {
     //printf("inserting at (%f, %f, %f) at height %d\n", position.x, position.y, position.z, insertionHeight)
