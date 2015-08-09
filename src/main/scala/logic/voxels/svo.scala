@@ -69,7 +69,7 @@ case class SVO (var node: SVONode, height: Int) {
   /**
    * Go over the whole tree, combining nodes where possible.
    */
-  def cleanTree() = ??? : ()
+  def cleanTree(): Unit = ???
 
 
   val getNodePath = modifyNodePath(Some(_))

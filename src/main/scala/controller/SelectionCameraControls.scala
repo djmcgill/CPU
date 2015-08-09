@@ -1,12 +1,7 @@
 package controller
 
-import _root_.CPU._
 import com.jme3.app.Application
 import com.jme3.app.state.{AppStateManager, AbstractAppState}
-import com.jme3.input.MouseInput
-import com.jme3.input.controls.{MouseButtonTrigger, ActionListener}
-import com.jme3.math.Vector3f
-import logic.voxels.RayCaster
 
 class SelectionCameraControls extends AbstractAppState {
 
