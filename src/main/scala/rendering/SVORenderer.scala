@@ -28,9 +28,7 @@ class SVORenderer(assetManager: AssetManager, rootNode: Node) {
     case Full(None) => None
 
     case Subdivided(subNodes) =>
-      printf("Subdivided subSVONode, size = %d\n", svo.height)
       val subSVOs: Array[Option[Spatial]] = subNodes map subSVONode
-      println("after recursive call")
       val subNode = new Node()
       // for each subSVO, draw it in the correct position (if it is not empty)
       for ((optionSubSVO, ix) <- subSVOs.zipWithIndex) {
