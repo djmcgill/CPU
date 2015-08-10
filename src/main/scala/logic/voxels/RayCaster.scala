@@ -54,7 +54,7 @@ object RayCaster {
       // This is a bit of a brute force way, evaluating all possibilities.
       // Another way to do this would be to follow the line, and see which of x, y, or z equal 0.5 first.
       case Subdivided(subSVOs) =>
-        val firstOctant = svo.whichOctant(hitPosition)
+        val firstOctant = Octant.whichOctant(hitPosition)
 
         def flipIfPossible(xyz: (Boolean, Boolean, Boolean)) = xyz match {
           case (shouldFlipX, shouldFlipY, shouldFlipZ) =>

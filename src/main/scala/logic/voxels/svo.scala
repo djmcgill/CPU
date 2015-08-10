@@ -51,10 +51,6 @@ case class SVO (var node: SVONode, height: Int) {
     inBoundsAxis(v.x) && inBoundsAxis(v.y) && inBoundsAxis(v.z)
   }
 
-  def whichOctant(v: Vector3f): Octant = {
-    new Octant(v.x > 0.5, v.y > 0.5, v.z > 0.5)
-  }
-
   def printSVO(): Unit = printSubSVO(0)
 
   private def printSubSVO(tabs: Int): Unit = node match {
@@ -117,7 +113,7 @@ case class SVO (var node: SVONode, height: Int) {
         node = Subdivided(newOctants)
     }
 
-    val newOctant = whichOctant(position)
+    val newOctant = Octant.whichOctant(position)
     val newPosition: Vector3f = newOctant.toChildSpace(position)
 
     node match {

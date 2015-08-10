@@ -1,6 +1,13 @@
 package logic.voxels
 
-import com.jme3.math.{Vector4f, Matrix3f, Matrix4f, Vector3f}
+import com.jme3.math.Vector3f
+
+object Octant {
+  def whichOctant(v: Vector3f): Octant = {
+    new Octant(v.x > 0.5, v.y > 0.5, v.z > 0.5)
+  }
+}
+
 
 /**
  * An Octant's int value is used to index into the array of suboctrees.
