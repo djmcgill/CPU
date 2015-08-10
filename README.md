@@ -20,9 +20,4 @@ What would multiplayer be like? Raids on each other's maps?
 You are a paralysed robot (just a head?) that can have a large throne built around it in order to control more minions.
 
 ## TODO:
-  * Fix inserting into SVO
-  * Mouse picking (custom)
   * Click to insert
-  
-  * Switch to use advanced JME3 features to allow switching of camera, mouse picking modes, etc.
-
