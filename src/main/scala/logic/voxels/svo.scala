@@ -11,14 +11,23 @@ case class Full (contents: Option[Block]) extends SVONode
 case class Subdivided (octants: Array[SVO]) extends SVONode
 
 object SVO {
-  val minimalSubdivided = {
+  lazy val minimalSubdivided = {
     def empty: SVO = new SVO(new Full(None), 0)
     def full: SVO = new SVO(new Full(Some(new Dirt())), 0)
     val arr: Array[SVO] = Array(full, empty, empty, empty, empty, empty, empty, full)
     new SVO(Subdivided(arr), 1)
   }
-  val initialWorld = {
-    println("Creating initial world")
+
+  lazy val minimalInserted = {
+    def empty: SVO = new SVO(new Full(None), 0)
+    val arr: Array[SVO] = Array(empty, empty, empty, empty, empty, empty, empty, empty)
+    val world: SVO = new SVO(new Subdivided(arr), 1)
+    world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.1f, 0.1f), 0)
+    world.insertElementAt(Some(new Dirt()), new Vector3f(0.9f, 0.9f, 0.9f), 0)
+    world
+  }
+
+  lazy val initialWorld = {
     val world = new SVO(Full(None), 5)
     val cornerPositions = Array((-0.1f, -0.1f), (-0.1f, 0.1f), (0.1f, -0.1f), (0.1f, 0.1f))
     def justBelowZAxis(dx: Float, dz: Float) = new Vector3f(dx + 0.5f, 0.4f, dz + 0.5f)
@@ -49,10 +58,10 @@ case class SVO (var node: SVONode, height: Int) {
   def printSVO(): Unit = printSubSVO(0)
 
   private def printSubSVO(tabs: Int): Unit = node match {
-    case Full(Some(_)) => println(("\t" * tabs) ++ "Full")
-    case Full(None) => println(("\t" * tabs) ++ "_")
-    case Subdivided(subNodes) =>
-      subNodes foreach (subNode => subNode.printSubSVO(tabs+1))
+      case Full(Some(_)) => println(("\t" * tabs) ++ "Full")
+      case Full(None) => println(("\t" * tabs) ++ "_")
+      case Subdivided(subNodes) =>
+        subNodes foreach (subNode => subNode.printSubSVO(tabs+1))
   }
 
   val modifyNodePath = (f: (SVONode => Option[SVONode])) => (path: List[Octant]) => {
@@ -78,9 +87,7 @@ case class SVO (var node: SVONode, height: Int) {
 
 
 
-  // FIXME: causes stack overflow with boundless recursion
   def insertNodeAt(newNode: SVONode, position: Vector3f, insertionHeight: Int): Unit = {
-    //printf("inserting at (%f, %f, %f) at height %d\n", position.x, position.y, position.z, insertionHeight)
     if (insertionHeight < 0)
       throw new IllegalArgumentException("Can't add at a negative height.")
     if (!inBounds(position))
@@ -94,7 +101,6 @@ case class SVO (var node: SVONode, height: Int) {
       case _ => false
     }
     if (alreadyThere) return
-
     if (insertionHeight == height) {
       // Insert here, overwriting whatever was in there.
       node = newNode
@@ -102,10 +108,11 @@ case class SVO (var node: SVONode, height: Int) {
     }
 
     // insertionHeight < height so recurse
+
+    // If the node is full then we need to split it up first.
     node match {
       case Subdivided(_) =>
       case Full(element) =>
-        // If the node is full then we need to split it up first.
         val newOctants = Array.fill(8)(new SVO(Full(element), height - 1))
         node = Subdivided(newOctants)
     }
@@ -116,7 +123,7 @@ case class SVO (var node: SVONode, height: Int) {
     node match {
       case Full(_) => throw new IllegalStateException("The node should have been subdivided.")
       case Subdivided(octants) =>
-        octants(newOctant.ix).insertNodeAt(node, newPosition, insertionHeight)
+        octants(newOctant.ix).insertNodeAt(newNode, newPosition, insertionHeight)
 
         // If we've completely filled all of the subnodes, then replace it with a Full
         octants(0).node match {
