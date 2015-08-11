@@ -11,20 +11,27 @@ import logic.voxels._
 /**
  * Renders a cube between 0,0,0 and 1,1,1
  */
-class SVORenderer(assetManager: AssetManager, rootNode: Node) {
-  def render(svo: SVO): Unit = {
-    subSVONode(svo) foreach rootNode.attachChild
+// TODO: according to the wiki, passing around AssetManagers is a bad idea.
+class SVORenderer(assetManager: AssetManager) {
+  val blueBox = {
+    val b = new Box(Vector3f.ZERO, Vector3f.UNIT_XYZ) // create cube shape
+    val blue = new Geometry("Box", b) // create cube geometry from the shape
+    val mat1 = new Material(assetManager,
+        "Common/MatDefs/Misc/Unshaded.j3md") // create a simple material
+    mat1.setColor("Color", ColorRGBA.Blue) // set color of material to blue
+    blue.setMaterial(mat1) // set the cube's material
+    blue
+  }
+
+  def node(svo: SVO): Node = {
+    val node = new Node("SVO")
+    subSVONode(svo) foreach node.attachChild
+    node
   }
 
   def subSVONode(svo: SVO): Option[Spatial] = svo.node match {
-    case Full(Some(_)) =>
-      val b = new Box(Vector3f.ZERO, Vector3f.UNIT_XYZ) // create cube shape
-      val blue = new Geometry("Box", b) // create cube geometry from the shape
-      val mat1 = new Material(assetManager,
-          "Common/MatDefs/Misc/Unshaded.j3md") // create a simple material
-      mat1.setColor("Color", ColorRGBA.Blue) // set color of material to blue
-      blue.setMaterial(mat1) // set the cube's material
-      Some(blue)
+    case Full(Some(_)) => Some(blueBox.clone)
+
     case Full(None) => None
 
     case Subdivided(subNodes) =>

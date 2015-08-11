@@ -1,25 +1,18 @@
 package controller
 
-import javax.swing.event.MouseInputAdapter
-
-import com.jme3.app.{SimpleApplication, Application}
-import com.jme3.app.state.{AppStateManager, AbstractAppState}
-import com.jme3.input.{MouseInput, KeyInput}
-import com.jme3.input.controls.{ActionListener, MouseButtonTrigger, KeyTrigger}
+import com.jme3.app.Application
+import com.jme3.app.state.AppStateManager
+import com.jme3.input.MouseInput
+import com.jme3.input.controls.{ActionListener, MouseButtonTrigger}
 import com.jme3.math.Vector3f
-import com.jme3.renderer.{ViewPort, RenderManager}
-import com.jme3.scene.{Node, Spatial}
-import com.jme3.scene.control._
 import logic.voxels._
 
 /**
  * This control implements new blocks appearing in the SVO when they're clicked on.
  * It needs to update both the SVO itself and also the renderer.
  */
-object SVOInsertionControl extends AbstractAppStateWithApp {
+class SVOInsertionControl(svo: SVO) extends AbstractAppStateWithApp {
   val insertionKey = "INSERT ONTO FACE"
-  val svo: SVO = ??? // pull from the stateManager?
-  val svoNode: Node = ??? // pull from the rootNode?
 
   def actionListener = new ActionListener {
     override def onAction(name: String, isPressed: Boolean, tpf: Float): Unit = {
@@ -57,20 +50,10 @@ object SVOInsertionControl extends AbstractAppStateWithApp {
         // to the scale of the smallest voxel
         val elementToInsert: Block = new Dirt()
         svo.insertElementAt(Some(elementToInsert), absoluteHitPosition add adjustment, 0)
-
-        // TODO: also update svo rendering, in whole or in part
-
         svo.printSVO()
       }
-
-
     }
   }
-
-
-
-
-
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)

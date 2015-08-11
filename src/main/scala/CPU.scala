@@ -1,24 +1,29 @@
 import com.jme3.app.SimpleApplication
 import controller.OverviewCameraControls
-import logic.GameState
-
-import rendering.GameStateRenderer
+import logic.voxels.SVO
+import rendering.SVORenderer
 
 object CPU extends SimpleApplication {
-  var gs: GameState = GameState.initialGameState
+  var svo = SVO.initialWorld
+  var svoRenderer: SVORenderer = _
   def main(args: Array[String]): Unit = {
     CPU.start()
   }
 
   override def simpleInitApp() {
-    val gsRenderer = new GameStateRenderer(assetManager, rootNode)
-    gsRenderer.render(gs)
     stateManager.attach(new OverviewCameraControls)
+    svoRenderer = new SVORenderer(assetManager)
+
+    val svoNode = svoRenderer.node(svo)
+    rootNode.attachChild(svoNode)
   }
 
   override def simpleUpdate(tpf: Float): Unit = {
     super.simpleUpdate(tpf)
-    // TODO: refresh the svo
+
+    rootNode.detachChildNamed("SVO")
+    val svoNode = svoRenderer.node(svo)
+    rootNode.attachChild(svoNode)
     // TODO: now refresh only the changes to the svo
   }
 }
