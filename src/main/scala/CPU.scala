@@ -1,5 +1,5 @@
 import com.jme3.app.SimpleApplication
-import controller.{SVOInsertionControl, OverviewCameraControls}
+import controller.{SVOInsertElementControl, OverviewCameraControls}
 import logic.voxels.SVO
 import rendering.SVORenderer
 
@@ -12,7 +12,7 @@ object CPU extends SimpleApplication {
 
   override def simpleInitApp() {
     stateManager.attach(new OverviewCameraControls)
-    stateManager.attach(new SVOInsertionControl(svo))
+    stateManager.attach(new SVOInsertElementControl(svo))
     svoRenderer = new SVORenderer(assetManager)
 
     val svoNode = svoRenderer.node(svo)
