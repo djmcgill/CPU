@@ -10,4 +10,8 @@ class SVOSpec extends FlatSpec with Matchers {
   "Inserting into a subdivided and then printing" should "not throw an exception" in {
     SVO.minimalInserted.printSVO()
   }
+
+  "Inserting to create a SVO" should "produce the same results as hard coding it" in {
+    SVO.minimalSubdivided == SVO.minimalInserted
+  }
 }

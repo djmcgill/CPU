@@ -87,7 +87,8 @@ case class SVO (var node: SVONode, height: Int) {
     if (insertionHeight < 0)
       throw new IllegalArgumentException("Can't add at a negative height.")
     if (!inBounds(position))
-      throw new IndexOutOfBoundsException("The position was not contained inside the cube.")
+      //throw new IndexOutOfBoundsException("The position was not contained inside the cube.")
+      return
 
     if (insertionHeight > height)
       throw new IllegalArgumentException("Tried to add higher than the height of the octree")

@@ -16,6 +16,7 @@ class SVOInsertionControl(svo: SVO) extends AbstractAppStateWithApp {
 
   def actionListener = new ActionListener {
     override def onAction(name: String, isPressed: Boolean, tpf: Float): Unit = {
+      if (!isPressed) return
       val rayOrigin = app.getCamera.getLocation
       val click2d = app.getInputManager.getCursorPosition
       def worldCoordsAtZ(z: Float) = app.getCamera.getWorldCoordinates(click2d, z)

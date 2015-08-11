@@ -4,7 +4,7 @@ import logic.voxels.SVO
 import rendering.SVORenderer
 
 object CPU extends SimpleApplication {
-  var svo = SVO.initialWorld
+  var svo = SVO.minimalInserted
   var svoRenderer: SVORenderer = _
   def main(args: Array[String]): Unit = {
     CPU.start()
