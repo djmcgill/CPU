@@ -1,5 +1,7 @@
 package controller
 
+import com.jme3.input.MouseInput
+import com.jme3.input.controls.MouseButtonTrigger
 import logic.voxels.{RayCaster, SVO}
 
 /**
@@ -8,7 +10,7 @@ import logic.voxels.{RayCaster, SVO}
  */
 class SVODeleteElementControl(svo: SVO) extends AbstractActionListenerState {
   override val name = "DELETE CUBE"
-  override val triggers = Seq()
+  override val triggers = Seq(new MouseButtonTrigger(MouseInput.BUTTON_RIGHT))
   override def action(name: String, isPressed: Boolean, tpf: Float): Unit = {
     if (!isPressed) return
     val rayOrigin = app.getCamera.getLocation
