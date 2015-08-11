@@ -14,7 +14,6 @@ object CPU extends SimpleApplication {
     val gsRenderer = new GameStateRenderer(assetManager, rootNode)
     gsRenderer.render(gs)
     stateManager.attach(new OverviewCameraControls)
-    // TODO: register the AppState SelectionCameraControls
   }
 
   override def simpleUpdate(tpf: Float): Unit = {

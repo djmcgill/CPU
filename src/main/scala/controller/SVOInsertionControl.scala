@@ -16,51 +16,51 @@ import logic.voxels._
  * This control implements new blocks appearing in the SVO when they're clicked on.
  * It needs to update both the SVO itself and also the renderer.
  */
-object SVOInsertionControl extends AbstractAppState {
+object SVOInsertionControl extends AbstractAppStateWithApp {
   val insertionKey = "INSERT ONTO FACE"
-  var app: SimpleApplication = _
-  val svo: SVO = ???
-  val svoNode: Node = ???
+  val svo: SVO = ??? // pull from the stateManager?
+  val svoNode: Node = ??? // pull from the rootNode?
 
   def actionListener = new ActionListener {
     override def onAction(name: String, isPressed: Boolean, tpf: Float): Unit = {
-      val rayOrigin: Vector3f = ???
-      val rayDirection: Vector3f = ???
-      val result: Option[(Vector3f, List[Octant])] = RayCaster.cast(rayOrigin, rayDirection, svo)
+      val rayOrigin = app.getCamera.getLocation
+      val click2d = app.getInputManager.getCursorPosition
+      def worldCoordsAtZ(z: Float) = app.getCamera.getWorldCoordinates(click2d, z)
+      val rayDirection = (worldCoordsAtZ(1) subtractLocal worldCoordsAtZ(0)).normalizeLocal
 
-      result match {
-        case None =>
-        case Some ((absoluteHitPosition, path)) =>
-          // go down the path to the node we care about,
-          // adjusting the hit position each time
-          val relativeHitPosition: Vector3f = ???
+      val result = RayCaster.cast(rayOrigin, rayDirection, svo)
 
-          val edges = List(
-            (1, relativeHitPosition.x), (0, relativeHitPosition.x),
-            (1, relativeHitPosition.y), (0, relativeHitPosition.y),
-            (1, relativeHitPosition.z), (0, relativeHitPosition.z))
+      result foreach {case (absoluteHitPosition, path) =>
+        // What's the hit position relative to the clicked on cube?
+        // Note that this should be on its face.
+        val relativeHitPosition = path.foldLeft(absoluteHitPosition){case (v, o) => o.toChildSpace(v)}
 
-          val diffs = edges map {case (x: Float, y: Float) => math.abs(x - y)}
-          val indexOfSmallestDiff = ???
+        // We have a point on the face of a cube, and we want to nudge it over
+        // the boundary so that the insert position corresponds to the cube touching that face.
+        val edges = List(
+          (1.0f, relativeHitPosition.x), (0.0f, relativeHitPosition.x),
+          (1.0f, relativeHitPosition.y), (0.0f, relativeHitPosition.y),
+          (1.0f, relativeHitPosition.z), (0.0f, relativeHitPosition.z))
+        val diffs = edges map {case (x: Float, y: Float) => math.abs(x - y)}
+        val indexOfSmallestDiff: Int = diffs.zipWithIndex.minBy(_._1)._2
+        val adjustment: Vector3f = indexOfSmallestDiff match {
+          case 0 => Vector3f.UNIT_X mult 0.0001f
+          case 1 => Vector3f.UNIT_X mult -0.0001f
+          case 2 => Vector3f.UNIT_Y mult 0.0001f
+          case 3 => Vector3f.UNIT_Y mult -0.0001f
+          case 4 => Vector3f.UNIT_Z mult 0.0001f
+          case 5 => Vector3f.UNIT_Z mult -0.0001f
+          case _ => throw new IllegalStateException
+        }
 
-          val adjustment: Vector3f = indexOfSmallestDiff match {
-            case 0 => Vector3f.UNIT_X mult 0.0001f
-            case 1 => Vector3f.UNIT_X mult -0.0001f
-            case 2 => Vector3f.UNIT_Y mult 0.0001f
-            case 3 => Vector3f.UNIT_Y mult -0.0001f
-            case 4 => Vector3f.UNIT_Z mult 0.0001f
-            case 5 => Vector3f.UNIT_Z mult -0.0001f
-            case _ => ??? // throw an exception? invalid state?
-          }
+        // May possibly need to convert adjustment from parentSpace
+        // to the scale of the smallest voxel
+        val elementToInsert: Block = new Dirt()
+        svo.insertElementAt(Some(elementToInsert), absoluteHitPosition add adjustment, 0)
 
-          // May possibly need to convert adjustment from parentSpace
-          // to the scale of the smallest voxel
-          val elementToInsert: Block = new Dirt()
-          svo.insertElementAt(Some(elementToInsert), absoluteHitPosition add adjustment, 0)
+        // TODO: also update svo rendering, in whole or in part
 
-          // TODO: also update svo rendering, in whole or in part
-
-          svo.printSVO()
+        svo.printSVO()
       }
 
 
