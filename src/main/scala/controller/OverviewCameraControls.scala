@@ -10,10 +10,9 @@ import com.jme3.scene.Node
 /**
  * Manages the controls.
  */
-class OverviewCameraControls extends AbstractAppState {
+class OverviewCameraControls extends AbstractAppStateWithApp {
   // TODO: changeable keybindings here
   var cameraTarget: Node = new Node("Overview Camera Target")
-  var app: SimpleApplication = _
 
   val moveX = Vector3f.UNIT_X mult 10
   val moveY = Vector3f.UNIT_Y mult 10
@@ -37,10 +36,6 @@ class OverviewCameraControls extends AbstractAppState {
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
-    app = superApp match {
-      case simple: SimpleApplication => simple
-      case _ => throw new ClassCastException
-    }
 
     // Create and register the camera
     app.getFlyByCamera.setEnabled(false)
