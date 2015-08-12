@@ -6,6 +6,11 @@ object Octant {
   def whichOctant(v: Vector3f): Octant = {
     new Octant(v.x > 0.5, v.y > 0.5, v.z > 0.5)
   }
+
+  def getPathTo(v: Vector3f): List[Octant] = ???
+  def toChildSpace(path: List[Octant], v: Vector3f): Vector3f = ???
+  def fromChildSpace(path: List[Octant], v: Vector3f): Vector3f = ???
+
 }
 
 
