@@ -1,14 +1,43 @@
 package logic.voxels
 
+import com.jme3.export.{JmeExporter, JmeImporter, Savable}
 import com.jme3.math.Vector3f
 
 /**
  * An octant's node can either be completely filled with voxels of a given element
  * (which can be None i.e. empty space) or subdivided into eight suboctants.
  */
-sealed abstract class SVONode
-case class Full (contents: Option[Block]) extends SVONode
-case class Subdivided (octants: Array[SVO]) extends SVONode
+sealed abstract class SVONode extends Savable
+case class Full (var contents: Option[Block]) extends SVONode {
+  def this() = this(None)
+  val contentsName = "contents"
+  override def write(ex: JmeExporter): Unit = {
+    val capsule = ex.getCapsule(this)
+    capsule.write(contents.orNull, contentsName, null)
+  }
+
+  override def read(im: JmeImporter): Unit = {
+    val capsule = im.getCapsule(this)
+    capsule.readSavable(contentsName, null) match {
+      case block: Block => contents = Option(block)
+    }
+  }
+}
+case class Subdivided (var octants: Array[SVO]) extends SVONode {
+  def this() = this(Array()) // TODO: attach warning to this, you should never call it from user code.
+  val octantsName = "octants"
+  override def write(ex: JmeExporter): Unit = {
+    val capsule = ex.getCapsule(this)
+    val savableOctants: Array[Savable] = octants map {case so: Savable => so}
+    capsule.write(savableOctants, octantsName, Array[Savable]())
+  }
+
+  override def read(im: JmeImporter): Unit = {
+    val capsule = im.getCapsule(this)
+    val savableOctants = capsule.readSavableArray(octantsName, Array())
+    octants = savableOctants map {case o: SVO => o}
+  }
+}
 
 object SVO {
   lazy val minimalSubdivided = {
@@ -43,8 +72,24 @@ object SVO {
 /**
  * Each Sparse Voxel Octree thinks that it is the cube (0,0,0) to (1,1,1)
  */
-case class SVO (var node: SVONode, height: Int) {
-  def this() = this(Subdivided(Array()), 0)
+case class SVO (var node: SVONode, var height: Int) extends Savable {
+  def this() = this(new Full(None), 0)
+
+  val nodeName = "node"
+  val heightName = "height"
+  override def write(ex: JmeExporter): Unit = {
+    val capsule = ex.getCapsule(this)
+    capsule.write(node, nodeName, new Full(None))
+    capsule.write(height, heightName, 0)
+  }
+
+  override def read(im: JmeImporter): Unit = {
+    val capsule = im.getCapsule(this)
+    capsule.readSavable(nodeName, new Full(None)) match {
+      case node: SVONode => this.node = node
+    }
+    height = capsule.readInt(heightName, 0)
+  }
 
   def inBounds(v: Vector3f): Boolean = {
     def inBoundsAxis(f: Float) = 0.0 <= f && f <= 1.0

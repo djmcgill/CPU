@@ -9,17 +9,19 @@ import logic.voxels._
  * This control implements new blocks appearing in the SVO when they're clicked on.
  * It needs to update both the SVO itself and also the renderer.
  */
-class SVOInsertElementControl(svo: SVO) extends AbstractActionListenerState {
+class SVOInsertElementControl extends AbstractActionListenerState {
   override val name = "INSERT ONTO FACE"
   override val triggers = Seq(new MouseButtonTrigger(MouseInput.BUTTON_LEFT))
 
   override def action(name: String, isPressed: Boolean, tpf: Float): Unit = {
     if (!isPressed) return
+    val svo: SVO = app.getRootNode.getUserData[SVO]("svo")
+
+
     val rayOrigin = app.getCamera.getLocation
     val click2d = app.getInputManager.getCursorPosition
     def worldCoordsAtZ(z: Float) = app.getCamera.getWorldCoordinates(click2d, z)
     val rayDirection = (worldCoordsAtZ(1) subtractLocal worldCoordsAtZ(0)).normalizeLocal
-
     val result = RayCaster.cast(rayOrigin, rayDirection, svo)
 
     result foreach {case (absoluteHitPosition, path) =>

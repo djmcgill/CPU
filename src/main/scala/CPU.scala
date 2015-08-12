@@ -11,9 +11,10 @@ object CPU extends SimpleApplication {
   }
 
   override def simpleInitApp() {
+    rootNode.setUserData("svo", svo)
     stateManager.attach(new OverviewCameraControls)
-    stateManager.attach(new SVOInsertElementControl(svo))
-    stateManager.attach(new SVODeleteElementControl(svo))
+    stateManager.attach(new SVOInsertElementControl)
+    stateManager.attach(new SVODeleteElementControl)
     svoRenderer = new SVORenderer(assetManager)
 
     val svoNode = svoRenderer.node(svo)
