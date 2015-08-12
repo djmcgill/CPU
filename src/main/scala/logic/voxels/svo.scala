@@ -61,18 +61,22 @@ case class SVO (var node: SVONode, height: Int) {
   }
 
   // Could add some sort of "minimum height that we care about"?
-  // TODO: if we delete the last node in a Subdivided then we replace with a Full(None)
   def deleteNodePath(path: List[Octant]): Unit = path match {
     case Nil => this.node = Full(None)
     case o :: os => this.node match {
       case Full(None) => // Nothing to do
       case Subdivided(subNodes) => subNodes(o.ix).deleteNodePath(os)
       case Full(element) =>
+        // the path was too long for some reason
+        if (height == 0) return
+
         // split and then recurse
         val newSubNodes = Array.fill(8)(new SVO(Full(element), height - 1))
         node = Subdivided(newSubNodes)
         newSubNodes(o.ix).deleteNodePath(os)
     }
+
+    // TODO: delete nodes that we've just deleted the last element from. Or maybe only clean up trees on a save?
   }
 
   def insertNodeAt(newNode: SVONode, position: Vector3f, targetHeight: Int): Unit = {

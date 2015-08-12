@@ -45,10 +45,30 @@ object RayCaster {
 
     // Now process what the hit means.
     svo.node match {
+      // We're done, found the right voxel.
+      case Full(Some(_)) if svo.height <= 0 => Some(hitPosition, pathSoFar)
 
-      // The node is full so that's the final hit or miss.
-      case Full(Some(_)) => Some(hitPosition, pathSoFar)
-      case Full(None)    => None
+      // We've found the parent of a voxel, but it's too big.
+      case Full(Some(_)) =>
+        def virtuallySubdivide(
+            currentHitPosition: Vector3f,
+            virtualPathSoFar: List[Octant],
+            height: Int)
+          : List[Octant] = {
+          if (height <= 0) virtualPathSoFar
+          else {
+            val o = Octant.whichOctant(currentHitPosition)
+            val childHitPosition = o.toChildSpace(currentHitPosition)
+            virtuallySubdivide(childHitPosition, o :: virtualPathSoFar, height - 1)
+          }
+        }
+
+        val virtualPath = virtuallySubdivide(hitPosition, List(), svo.height)
+        Some(hitPosition, pathSoFar ++ virtualPath)
+
+
+      // There's nothing here.
+      case Full(None) => None
 
       // The node has been subdivided, check each of the subtrees.
       // This is a bit of a brute force way, evaluating all possibilities.
@@ -69,7 +89,7 @@ object RayCaster {
             lazy val flipY = (o: Octant) => if (shouldFlipY) o.flipY else o
             lazy val flipZ = (o: Octant) => if (shouldFlipZ) o.flipZ else o
             lazy val newOctant = (flipX compose flipY compose flipZ)(firstOctant)
-            if (allThatShouldFlipCan) Stream(newOctant) else Stream()
+            if (allThatShouldFlipCan) Some(newOctant) else None
         }
         val onlyX    = ( true, false, false)
         val onlyY    = (false,  true, false)
@@ -79,12 +99,14 @@ object RayCaster {
         val exceptZ  = ( true,  true, false)
         val allThree = ( true,  true,  true)
 
+        // It's quite important for this to be lazy as otherwise we'd end up
+        // retrieving all hits when we only want the first.
         val potentiallyHit: Stream[Octant] =
           firstOctant #:: Stream(
             onlyX, onlyY, onlyZ,
             exceptX, exceptY, exceptZ,
             allThree
-          ).flatMap(flipIfPossible)
+          ).flatMap(flipIfPossible(_).toStream)
 
         def recursiveCall(o: Octant): Option[(Vector3f, List[Octant])] = {
           val newRayOrigin = o.toChildSpace(rayOrigin)
