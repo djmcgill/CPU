@@ -116,6 +116,8 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
   def deleteNodePath(path: List[Octant]): Unit = insertElementPath(None, path)
 
   def deleteNodeAt(position: Vector3f, targetHeight: Int) = insertNodeAt(new Full(None), position, targetHeight)
+
+  // TODO: Inserting onto the side of a (non-size-0) Full SVO, even if it has a valid parent, doesn't work.
   def insertNodeAt(newNode: SVONode, position: Vector3f, targetHeight: Int): Unit = {
     if (targetHeight < 0)
       throw new IllegalArgumentException("Can't add at a negative height.")

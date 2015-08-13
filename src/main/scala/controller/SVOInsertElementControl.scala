@@ -10,7 +10,6 @@ import logic.voxels._
  * It needs to update both the SVO itself and also the renderer.
  */
 
-// TODO: Inserting onto the side of a Full SVO, even if it has a valid parent, doesn't work.
 class SVOInsertElementControl extends AbstractActionListenerState {
   override val name = "INSERT ONTO FACE"
   override val triggers = Seq(new MouseButtonTrigger(MouseInput.BUTTON_LEFT))
