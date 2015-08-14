@@ -22,7 +22,7 @@ class Peons(assetManger: AssetManager, bulletAppState: BulletAppState, rootNode:
 
   peonControl.setJumpForce(new Vector3f(0,5f,0))
   peonControl.setGravity(new Vector3f(0,1f,0))
-  peonControl.warp(new Vector3f(0,1.5f,0)); // warp character into landscape at particular location
+  peonControl.warp(new Vector3f(0.5f,1.5f,0.5f)); // warp character into landscape at particular location
 
   // add to physics state
   bulletAppState.getPhysicsSpace.add(peonControl)

@@ -1,15 +1,18 @@
 import com.jme3.app.SimpleApplication
 import com.jme3.bullet.BulletAppState
+import com.jme3.bullet.collision.shapes.CollisionShape
+import com.jme3.bullet.control.{PhysicsControl, RigidBodyControl}
 import com.jme3.light.{AmbientLight, DirectionalLight}
 import com.jme3.math.{ColorRGBA, Vector3f}
+import com.jme3.scene.Node
 import controller.{SVODeleteElementControl, SVOInsertElementControl, OverviewCameraControls}
 import jme3test.bullet.PhysicsTestHelper
 import logic.voxels.SVO
-import rendering.SVORenderer
+import rendering.SVOGeometry
 
 object CPU extends SimpleApplication {
   var svo = SVO.initialWorld
-  var svoRenderer: SVORenderer = _
+  var svoGeometry: SVOGeometry = _
   var bulletAppState: BulletAppState = _
   def main(args: Array[String]): Unit = {
     CPU.start()
@@ -22,10 +25,12 @@ object CPU extends SimpleApplication {
     stateManager.attach(new OverviewCameraControls)
     stateManager.attach(new SVOInsertElementControl)
     stateManager.attach(new SVODeleteElementControl)
-    svoRenderer = new SVORenderer(assetManager)
+    svoGeometry = new SVOGeometry(assetManager)
 
-    val svoNode = svoRenderer.node(svo)
+    val svoNode = svoGeometry.node(svo)
     rootNode.attachChild(svoNode)
+    bulletAppState = new BulletAppState()
+    stateManager.attach(bulletAppState)
 
     val sun = new DirectionalLight()
     sun.setDirection(new Vector3f(0,-1,-1).normalizeLocal())
@@ -37,21 +42,26 @@ object CPU extends SimpleApplication {
     rootNode.addLight(ambient)
 
     // TODO: turn the SVO into a collisionMesh. Again, ideally should only modify it as things change.
-    bulletAppState = new BulletAppState()
-    stateManager.attach(bulletAppState)
-    //bulletAppState.getPhysicsSpace.addAll(svoNode)
-    // CollisionShapeFactory
+
+    //bulletAppState.getPhysicsSpace.enableDebug(assetManager)
 
     val peons = new Peons(assetManager, bulletAppState, rootNode)
+    //val svoPhysicsControl: Option[PhysicsControl] = SVOPhysics.mesh(svo) map (new RigidBodyControl(_, 0))
+    //svoPhysicsControl foreach (bulletAppState.getPhysicsSpace.add(_))
   }
 
   override def simpleUpdate(tpf: Float): Unit = {
     super.simpleUpdate(tpf)
 
-    bulletAppState.getPhysicsSpace
-    rootNode.detachChildNamed("SVO")
-    val svoNode = svoRenderer.node(svo)
+
+
+    val oldSVO: Node = rootNode.getChild("SVO") match {case n: Node => n}
+    rootNode.detachChild(oldSVO)
+    bulletAppState.getPhysicsSpace.remove(oldSVO)
+    val svoNode = svoGeometry.node(svo)
     rootNode.attachChild(svoNode)
+    bulletAppState.getPhysicsSpace.add(svoNode)
+    // TODO: add the physics control to each spatial in the SVO. That way it can be more incremental
     // TODO: now refresh only the changes to the svo
     // TODO: update the physics space
   }
