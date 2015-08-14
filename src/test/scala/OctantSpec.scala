@@ -29,42 +29,50 @@ class OctantSpec extends FlatSpec with Matchers {
   def xAxis(x: Float) = new Vector3f (x, 0, 0)
 
   "toChildSpace" should "work correctly on the X axis" in {
-    lowerHalf.toChildSpace(xAxis(0))     should be (xAxis(0))
-    lowerHalf.toChildSpace(xAxis(0.25f)) should be (xAxis(0.5f))
-    lowerHalf.toChildSpace(xAxis(0.5f))  should be (xAxis(1))
+    lowerHalf.toChildSpace(xAxis(0))     shouldBe xAxis(0)
+    lowerHalf.toChildSpace(xAxis(0.25f)) shouldBe xAxis(0.5f)
+    lowerHalf.toChildSpace(xAxis(0.5f))  shouldBe xAxis(1)
 
-    upperHalf.toChildSpace(xAxis(0.5f))  should be (xAxis(0))
-    upperHalf.toChildSpace(xAxis(0.75f)) should be (xAxis(0.5f))
-    upperHalf.toChildSpace(xAxis(1))     should be (xAxis(1))
+    upperHalf.toChildSpace(xAxis(0.5f))  shouldBe xAxis(0)
+    upperHalf.toChildSpace(xAxis(0.75f)) shouldBe xAxis(0.5f)
+    upperHalf.toChildSpace(xAxis(1))     shouldBe xAxis(1)
   }
 
   "fromChildSpace" should "work correctly on the X axis" in {
-    lowerHalf.fromChildSpace(xAxis(0))    should be (xAxis(0))
-    lowerHalf.fromChildSpace(xAxis(0.5f)) should be (xAxis(0.25f))
-    lowerHalf.fromChildSpace(xAxis(1))    should be (xAxis(0.5f))
+    lowerHalf.fromChildSpace(xAxis(0))    shouldBe xAxis(0)
+    lowerHalf.fromChildSpace(xAxis(0.5f)) shouldBe xAxis(0.25f)
+    lowerHalf.fromChildSpace(xAxis(1))    shouldBe xAxis(0.5f)
 
-    upperHalf.fromChildSpace(xAxis(0))    should be (xAxis(0.5f))
-    upperHalf.fromChildSpace(xAxis(0.5f)) should be (xAxis(0.75f))
-    upperHalf.fromChildSpace(xAxis(1))    should be (xAxis(1))
+    upperHalf.fromChildSpace(xAxis(0))    shouldBe xAxis(0.5f)
+    upperHalf.fromChildSpace(xAxis(0.5f)) shouldBe xAxis(0.75f)
+    upperHalf.fromChildSpace(xAxis(1))    shouldBe xAxis(1)
   }
 
   "flipX, flipY, and flipZ" should "correctly flip a bit" in {
     new Octant(false, false, false)
-      .flipX.xyz             should be (( true, false, false))
+      .flipX.xyz             shouldBe ( true, false, false)
 
     new Octant(true , false, false)
-      .flipX.xyz             should be ((false, false, false))
+      .flipX.xyz             shouldBe (false, false, false)
 
     new Octant(false, false, false)
-      .flipX.flipZ.xyz       should be (( true, false,  true))
+      .flipX.flipZ.xyz       shouldBe ( true, false,  true)
 
     new Octant(true, true, true)
-      .flipX.xyz             should be ((false,  true,  true))
+      .flipX.xyz             shouldBe (false,  true,  true)
 
     new Octant(true, true, false)
-      .flipX.flipY.xyz       should be ((false, false, false))
+      .flipX.flipY.xyz       shouldBe (false, false, false)
 
     new Octant(false, false, false)
-      .flipX.flipY.flipZ.xyz should be (( true,  true,  true))
+      .flipX.flipY.flipZ.xyz shouldBe ( true,  true,  true)
+  }
+
+  "getPathTo" should "behave as expected" in {
+    Octant.getPathTo(Vector3f.ZERO, 3) shouldBe Some(List(0, 0, 0) map (ix => new Octant(ix)))
+    Octant.getPathTo(Vector3f.UNIT_XYZ, 4) shouldBe Some(List(7, 7, 7, 7) map (ix => new Octant(ix)))
+
+    // TODO: THIS IS FAILING
+    Octant.getPathTo(new Vector3f(0.3f, 0.3f, 0.3f), 3) shouldBe Some(List(0, 7, 0) map (ix => new Octant(ix)))
   }
 }

@@ -7,7 +7,17 @@ object Octant {
     new Octant(v.x > 0.5, v.y > 0.5, v.z > 0.5)
   }
 
-  def getPathTo(v: Vector3f): List[Octant] = ???
+  def getPathTo(v: Vector3f, n: Int): Option[List[Octant]] = {
+    def axisOOB(f: Float) = f < 0.0f || 1.0f < f
+    if (axisOOB(v.x) || axisOOB(v.y) || axisOOB(v.z)) {return None}
+    var currentV = v
+    Some((0 until n).map {case _ =>
+      val o = Octant.whichOctant(v)
+      currentV = o.toChildSpace(currentV)
+      o
+    }.toList)
+  }
+
   def toChildSpace(path: List[Octant], v: Vector3f): Vector3f = ???
   def fromChildSpace(path: List[Octant], v: Vector3f): Vector3f = ???
 

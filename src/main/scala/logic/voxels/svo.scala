@@ -117,6 +117,7 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
 
   def deleteNodeAt(position: Vector3f, targetHeight: Int) = insertNodeAt(new Full(None), position, targetHeight)
 
+  // TODO: call Octant.getPathTo
   def insertNodeAt(newNode: SVONode, position: Vector3f, targetHeight: Int): Unit = {
     if (targetHeight < 0)
       throw new IllegalArgumentException("Can't add at a negative height.")
