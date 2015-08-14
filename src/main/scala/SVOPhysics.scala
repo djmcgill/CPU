@@ -5,7 +5,11 @@ import logic.voxels._
 object SVOPhysics {
   mesh(svo: SVO): Option[CollisionShape] = {
     // convert a cube centered on the origin to one centered on 0.5,0.5,0.5
-    def fromOriginToCorner(shape: CollisionShape): CollisionShape = ???
+    def fromOriginToCorner(shape: CollisionShape): CollisionShape = {
+      val parent = new CompountCollisionShape
+      parent.addChildShape(shape, new Vector3f(0.5f, 0.5f, 0.5f))
+      parent
+    }
     meshGo(svo) map fromOriginToCorner
   }
   
@@ -17,9 +21,10 @@ object SVOPhysics {
       Full(Some(_)) => Some(new BoxCollisionShape(0.5f, 0.5f, 0.5f))
       Subdivided(subNodes) =>
         val shape: CollisionShape = new CompoundCollisionShape
-        val subShapes: List[Option[CollisionShape]] = ???
+        val subShapes: List[Option[CollisionShape]] = subNodes map meshGo
         val subTranslations: List[Vector3f] = ???
-        (subShapes zip subOrigins) map shape.addChildShape(_, _)
+        subShapes mapWithIndex {case (subShape, index) =>
+          shape.addChildNode(subShape, new Octant(index).childOrigin)}
     }
   }
 }
