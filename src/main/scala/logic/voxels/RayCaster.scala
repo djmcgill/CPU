@@ -64,7 +64,8 @@ object RayCaster {
         }
 
         val virtualPath = virtuallySubdivide(hitPosition, List(), svo.height)
-        Some(hitPosition, pathSoFar ++ virtualPath)
+        // Remember that the path is REVERSED here
+        Some(hitPosition, virtualPath ++ pathSoFar)
 
 
       // There's nothing here.

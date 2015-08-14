@@ -117,22 +117,21 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
 
   def deleteNodeAt(position: Vector3f, targetHeight: Int) = insertNodeAt(new Full(None), position, targetHeight)
 
-  // TODO: Inserting onto the side of a (non-size-0) Full SVO, even if it has a valid parent, doesn't work.
   def insertNodeAt(newNode: SVONode, position: Vector3f, targetHeight: Int): Unit = {
     if (targetHeight < 0)
       throw new IllegalArgumentException("Can't add at a negative height.")
-    if (!inBounds(position))
+    if (!inBounds(position)) {
       //throw new IndexOutOfBoundsException("The position was not contained inside the cube.")
       return
-
+    }
     if (targetHeight > height)
-      throw new IllegalArgumentException("Tried to add higher than the height of the octree")
+      {throw new IllegalArgumentException("Tried to add higher than the height of the octree")}
 
     val alreadyThere: Boolean = (newNode, node) match {
       case (Full(newElement), Full(oldElement)) => newElement == oldElement
       case _ => false
     }
-    if (alreadyThere) return
+    if (alreadyThere) {return}
     if (targetHeight == height) {
       // Insert here, overwriting whatever was in there.
       node = newNode
@@ -153,6 +152,7 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
     val newPosition: Vector3f = newOctant.toChildSpace(position)
 
     node match {
+      // TODO: abstract into own function to get rid of the weird two matches
       case Full(_) => throw new IllegalStateException("The node should have been subdivided.")
       case Subdivided(octants) =>
         octants(newOctant.ix).insertNodeAt(newNode, newPosition, targetHeight)
@@ -167,7 +167,7 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
               case Full(otherElement) => firstElement == otherElement
               case _ => false
             })
-            if (allFullWithSame) node = Full(firstElement)
+            if (allFullWithSame) {node = Full(firstElement)}
         }
     }
   }
