@@ -11,7 +11,7 @@ import scala.collection.mutable
 
 object CPU extends SimpleApplication {
   // TODO: these should be in SVOManager class
-  var svo = SVO.minimalSubdivided
+  var svo = SVO.initialWorld
   var svoNode: Node = _
   var svoGeometry: SVOGeometry = _
 
@@ -74,8 +74,17 @@ object CPU extends SimpleApplication {
     }
 
     // TODO: move this code into a SVOManager control
-    insertionQueue foreach {case (svoNode: SVONode, position: Vector3f) =>
-      println(s"TODO: please insert $svoNode into the svo at $position now")}
+    insertionQueue foreach {case (nodeToInsert: SVONode, position: Vector3f) =>
+      println(s"about to insert $svoNode into the svo at $position now")
+      val maybeToRefresh = svo.insertNodeAt(nodeToInsert, position, 0)
+      maybeToRefresh foreach (toRefresh => if (true || toRefresh.isEmpty) {
+        rootNode.detachChild(svoNode)
+        svoNode = svoGeometry.generateNode(svo)
+        rootNode.attachChild(svoNode)
+      } else {
+        svoGeometry.regenerateGeometry(svoNode, toRefresh)
+      })
+    }
     insertionQueue.clear()
 
   }

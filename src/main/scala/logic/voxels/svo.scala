@@ -2,6 +2,8 @@ package logic.voxels
 
 import com.jme3.export.{JmeExporter, JmeImporter, Savable}
 import com.jme3.math.Vector3f
+import com.typesafe.scalalogging.LazyLogging
+
 
 /**
  * An octant's node can either be completely filled with voxels of a given newNode
@@ -83,7 +85,7 @@ object SVO {
 /**
  * Each Sparse Voxel Octree thinks that it is the cube (0,0,0) to (1,1,1)
  */
-case class SVO (var node: SVONode, var height: Int) extends Savable {
+case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLogging {
   def this() = this(new Full(None), 0)
 
   val nodeName = "node"
@@ -124,8 +126,12 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
 
   // Insert the given node at the end of the path. Return a path to the highest node that has changed.
   def insertNodePath(newNode: SVONode, path: List[Octant]): Option[List[Octant]] = path match {
+
     // Insert here
-    case Nil => this.node = newNode; Some(List())
+    case Nil =>
+      logger.debug(s"inserting $newNode here")
+      this.node = newNode
+      Some(List())
 
     // If it's not already there, recurse. Then try to consolidate if needed.
     case o :: os =>
@@ -133,16 +139,31 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
         case (Full(newElement), Full(oldElement)) => newElement == oldElement
         case _ => false
       }
-      if (alreadyThere) {return None}
+      if (alreadyThere) {
+        logger.debug(s"The node $node was already there.")
+        return None
+      }
 
-      insertNodePath(newNode, os) flatMap {insertPath =>
+      logger.debug(s"recursing into node ${o.ix}")
+      val childSVO: SVO = this.node match {
+        case Subdivided(subNodes) => subNodes(o.ix)
+        case Full(element) =>
+          logger.debug("Splitting up a full node in order to recurse into it.")
+          val subNodes: Array[SVO] = Array.fill(8)(new SVO(Full(element), this.height - 1))
+          this.node = Subdivided(subNodes)
+          subNodes(o.ix)
+      }
+      childSVO.insertNodePath(newNode, os) flatMap {insertPath =>
         // Check to see if we've make all the subNodes the same
         val maybeOnlyNode: Option[SVONode] = this.node match {
           case Full(_) => None
           case Subdivided(subSVOs) =>
             val subNodes = subSVOs map (_.node)
             val allAreFull = subNodes forall {case Full(_) => true; case _ => false}
-            if (allAreFull && subNodes.distinct.length == 1) {Some(subNodes(0))} else None
+            if (allAreFull && subNodes.distinct.length == 1) {
+              logger.debug("All of the subnodes were the same, now combining them.")
+              Some(subNodes(0))
+            } else None
         }
 
         // If we have, then change this node to reflect that (and report that we've done that).

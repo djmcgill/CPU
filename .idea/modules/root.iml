@@ -23,11 +23,15 @@
     <orderEntry type="library" scope="TEST" name="SBT: org.scala-lang:scala-reflect:2.11.2:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scala-lang.modules:scala-xml_2.11:1.0.2:jar" level="project" />
     <orderEntry type="library" scope="TEST" name="SBT: org.scalatest:scalatest_2.11:2.2.4:jar" level="project" />
+    <orderEntry type="library" name="SBT: com.typesafe.scala-logging:scala-logging_2.11:3.1.0:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scala-reflect:2.11.1:jar" level="project" />
+    <orderEntry type="library" name="SBT: org.slf4j:slf4j-api:1.7.7:jar" level="project" />
     <orderEntry type="module-library">
       <library name="JME3">
         <CLASSES>
-          <root url="file://$MODULE_DIR$/../../lib/jm3/lib" />
           <root url="file://$MODULE_DIR$/../../lib/jm3" />
+          <root url="file://$MODULE_DIR$/../../lib/jm3/lib" />
+          <root url="file://$MODULE_DIR$/../../lib/jm3/opt/native-bullet" />
         </CLASSES>
         <JAVADOC>
           <root url="file://$MODULE_DIR$/../../lib/jm3/javadoc" />
@@ -37,6 +41,7 @@
         </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/../../lib/jm3" recursive="false" />
         <jarDirectory url="file://$MODULE_DIR$/../../lib/jm3/lib" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/../../lib/jm3/opt/native-bullet" recursive="false" />
       </library>
     </orderEntry>
     <orderEntry type="module-library">
@@ -47,6 +52,9 @@
         <JAVADOC>
           <root url="file://$MODULE_DIR$/../../lib/lwjgl/doc" />
         </JAVADOC>
+        <NATIVE>
+          <root url="file://$MODULE_DIR$/../../lib/lwjgl/native" />
+        </NATIVE>
         <SOURCES />
         <jarDirectory url="file://$MODULE_DIR$/../../lib/lwjgl/jar" recursive="false" />
       </library>
