@@ -1,37 +1,46 @@
 import com.jme3.app.SimpleApplication
 import com.jme3.bullet.BulletAppState
-import com.jme3.bullet.collision.shapes.CollisionShape
-import com.jme3.bullet.control.{PhysicsControl, RigidBodyControl}
 import com.jme3.light.{AmbientLight, DirectionalLight}
 import com.jme3.math.{ColorRGBA, Vector3f}
 import com.jme3.scene.Node
-import controller.{SVODeleteElementControl, SVOInsertElementControl, OverviewCameraControls}
-import jme3test.bullet.PhysicsTestHelper
-import logic.voxels.SVO
+import controller._
+import logic.voxels._
 import rendering.SVOGeometry
 
+import scala.collection.mutable
+
 object CPU extends SimpleApplication {
-  var svo = SVO.initialWorld
+  // TODO: these should be in SVOManager class
+  var svo = SVO.minimalSubdivided
+  var svoNode: Node = _
   var svoGeometry: SVOGeometry = _
+
+
   var bulletAppState: BulletAppState = _
+
+  // You can't make changes directly to the SVO or it's geometry, you have to register your intention here.
+  val insertionQueue = new mutable.Queue[(SVONode, List[Octant])]()
   def main(args: Array[String]): Unit = {
     CPU.start()
   }
 
   override def simpleInitApp() {
-    rootNode.setUserData("svo", svo)
 
-    stateManager.attach(new BulletAppState)
-    stateManager.attach(new OverviewCameraControls)
-    stateManager.attach(new SVOInsertElementControl)
-    stateManager.attach(new SVODeleteElementControl)
-    svoGeometry = new SVOGeometry(assetManager)
 
-    val svoNode = svoGeometry.node(svo)
-    rootNode.attachChild(svoNode)
-    bulletAppState = new BulletAppState()
+    bulletAppState = new BulletAppState() // save in the stateManager instead?
     stateManager.attach(bulletAppState)
+    stateManager.attach(new OverviewCameraControls)
+    stateManager.attach(new SVOInsertElementControl(insertionQueue))
+    stateManager.attach(new SVODeleteElementControl(insertionQueue))
 
+    // TODO: have some SVOManager class
+    rootNode.setUserData("svo", svo)
+    svoGeometry = new SVOGeometry(this)
+
+    svoNode = svoGeometry.generateNode(svo)
+    rootNode.attachChild(svoNode)
+
+    // Lighting
     val sun = new DirectionalLight()
     sun.setDirection(new Vector3f(0,-1,-1).normalizeLocal())
     sun.setColor(ColorRGBA.White mult 1.5f)
@@ -41,28 +50,33 @@ object CPU extends SimpleApplication {
     ambient.setColor(ColorRGBA.White)
     rootNode.addLight(ambient)
 
-    // TODO: turn the SVO into a collisionMesh. Again, ideally should only modify it as things change.
-
-    //bulletAppState.getPhysicsSpace.enableDebug(assetManager)
-
     val peons = new Peons(assetManager, bulletAppState, rootNode)
-    //val svoPhysicsControl: Option[PhysicsControl] = SVOPhysics.mesh(svo) map (new RigidBodyControl(_, 0))
-    //svoPhysicsControl foreach (bulletAppState.getPhysicsSpace.add(_))
   }
 
   override def simpleUpdate(tpf: Float): Unit = {
     super.simpleUpdate(tpf)
 
+    val size = insertionQueue.size
+    if (size != 0) println(size)
+    val f: ((SVONode, List[Octant]) => Unit) = {case (node, path) =>
+      println(s"about to regenerate $path")
+      // modify svo and svoNode
+      val maybeToRefresh = svo.insertNodePath(node, path)
 
+      maybeToRefresh foreach { refreshPath =>
+        if (refreshPath.isEmpty) {
+          // We need to generate the whole thing again.
+          svoNode = svoGeometry.generateNode(svo)
+        } else {
+          svoGeometry.regenerateGeometry(svoNode, refreshPath)
+        }
+      }
+    }
 
-    val oldSVO: Node = rootNode.getChild("SVO") match {case n: Node => n}
-    rootNode.detachChild(oldSVO)
-    bulletAppState.getPhysicsSpace.remove(oldSVO)
-    val svoNode = svoGeometry.node(svo)
-    rootNode.attachChild(svoNode)
-    bulletAppState.getPhysicsSpace.add(svoNode)
-    // TODO: add the physics control to each spatial in the SVO. That way it can be more incremental
-    // TODO: now refresh only the changes to the svo
-    // TODO: update the physics space
+    // TODO: move this code into a SVOManager control
+    insertionQueue foreach {case (svoNode: SVONode, path: List[Octant]) =>
+      println(s"TODO: actually insert $svoNode into the svo at $path now")}
+    insertionQueue.clear()
+
   }
 }

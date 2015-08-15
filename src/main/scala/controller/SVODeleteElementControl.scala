@@ -4,16 +4,12 @@ import com.jme3.input.MouseInput
 import com.jme3.input.controls.MouseButtonTrigger
 import logic.voxels._
 
-/**
- * This control implements new blocks appearing in the SVO when they're clicked on.
- * It needs to update both the SVO itself and also the renderer.
- */
+import scala.collection.mutable
 
-object SVODeleteElementControl {
-  def deleteNode(n: Option[SVONode]) = Full(None)
-}
-
-class SVODeleteElementControl extends AbstractSVOModificationControl(SVODeleteElementControl.deleteNode, false) {
-  override val name = "INSERT ONTO FACE"
-  override val triggers = Seq(new MouseButtonTrigger(MouseInput.BUTTON_LEFT))
+class SVODeleteElementControl(queue: mutable.Queue[(SVONode, List[Octant])])
+    extends AbstractSVOInsertionControl(queue) {
+  override val name = "DELETE FROM FACE"
+  override val triggers = Seq(new MouseButtonTrigger(MouseInput.BUTTON_RIGHT))
+  override val node: SVONode = Full(None)
+  override val insertion: Boolean = false
 }

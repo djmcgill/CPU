@@ -108,7 +108,18 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
       case Full(Some(_)) => println(("\t" * tabs) ++ "Full")
       case Full(None) => println(("\t" * tabs) ++ "_")
       case Subdivided(subNodes) =>
+        if (subNodes.length != 8) {throw new Exception("ahh there's a subdivided here without 8 nodes")}
         subNodes foreach (subNode => subNode.printSubSVO(tabs+1))
+  }
+
+  // Get the node at a given path.
+  // Returns None if the path isn't valid (because the SVO is not subdivided as expected)
+  def getNodePath(path: List[Octant]): Option[SVO] = path match {
+    case Nil     => Some(this)
+    case o :: os => this.node match {
+      case Full(_) => None
+      case Subdivided(subSVOs) => subSVOs(o.ix).getNodePath(os)
+    }
   }
 
   // Insert the given node at the end of the path. Return a path to the highest node that has changed.
