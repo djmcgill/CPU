@@ -12,7 +12,7 @@ import logic.voxels._
  * It returns the path to the node that needs to be recreated (if any).
  */
 
-abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, List[Octant])])
+abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, Vector3f)])
     extends AbstractActionListenerState {
   val node: SVONode
   val insertion: Boolean
@@ -52,16 +52,7 @@ abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, List[O
         case _ => throw new IllegalStateException
       }
       val onBlockOrNewBlock = if (insertion) {adjustment} else {adjustment mult -1}
-
-      val maybePathToRegenerate = {
-        // TODO
-        //val path = svo.insertNodeAt(node, absoluteHitPosition add onBlockOrNewBlock, 0)
-        val path = Octant.getPathTo(absoluteHitPosition add onBlockOrNewBlock, svo.height - 0)
-        path
-      }
-
-      maybePathToRegenerate foreach (pathToRegen => queue.enqueue((node, pathToRegen)))
-
+      queue.enqueue((node, absoluteHitPosition add onBlockOrNewBlock))
     }
   }
 }

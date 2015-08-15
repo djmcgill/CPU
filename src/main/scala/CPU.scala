@@ -19,7 +19,7 @@ object CPU extends SimpleApplication {
   var bulletAppState: BulletAppState = _
 
   // You can't make changes directly to the SVO or it's geometry, you have to register your intention here.
-  val insertionQueue = new mutable.Queue[(SVONode, List[Octant])]()
+  val insertionQueue = new mutable.Queue[(SVONode, Vector3f)]()
   def main(args: Array[String]): Unit = {
     CPU.start()
   }
@@ -74,8 +74,8 @@ object CPU extends SimpleApplication {
     }
 
     // TODO: move this code into a SVOManager control
-    insertionQueue foreach {case (svoNode: SVONode, path: List[Octant]) =>
-      println(s"TODO: actually insert $svoNode into the svo at $path now")}
+    insertionQueue foreach {case (svoNode: SVONode, position: Vector3f) =>
+      println(s"TODO: please insert $svoNode into the svo at $position now")}
     insertionQueue.clear()
 
   }
