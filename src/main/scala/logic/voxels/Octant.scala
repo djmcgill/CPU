@@ -4,23 +4,18 @@ import com.jme3.math.Vector3f
 
 object Octant {
   def whichOctant(v: Vector3f): Octant = {
-    new Octant(v.x > 0.5, v.y > 0.5, v.z > 0.5)
+    new Octant(v.x > 0.5f, v.y > 0.5f, v.z > 0.5f)
   }
 
   def getPathTo(v: Vector3f, n: Int): Option[List[Octant]] = {
-    def axisOOB(f: Float) = f < 0.0f || 1.0f < f
-    if (axisOOB(v.x) || axisOOB(v.y) || axisOOB(v.z)) {return None}
+    if (!SVO.inBounds(v)) {return None}
     var currentV = v
     Some((0 until n).map {case _ =>
-      val o = Octant.whichOctant(v)
+      val o = Octant.whichOctant(currentV)
       currentV = o.toChildSpace(currentV)
       o
     }.toList)
   }
-
-  def toChildSpace(path: List[Octant], v: Vector3f): Vector3f = ???
-  def fromChildSpace(path: List[Octant], v: Vector3f): Vector3f = ???
-
 }
 
 

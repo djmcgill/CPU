@@ -4,7 +4,7 @@ import com.jme3.export.{JmeExporter, JmeImporter, Savable}
 import com.jme3.math.Vector3f
 
 /**
- * An octant's node can either be completely filled with voxels of a given element
+ * An octant's node can either be completely filled with voxels of a given newNode
  * (which can be None i.e. empty space) or subdivided into eight suboctants.
  */
 sealed abstract class SVONode extends Savable
@@ -73,6 +73,11 @@ object SVO {
   }
 
   val voxel = new SVO(Full(Some(new Dirt())), 0)
+
+  def inBounds(v: Vector3f): Boolean = {
+    def inBoundsAxis(f: Float) = 0.0 <= f && f <= 1.0
+    inBoundsAxis(v.x) && inBoundsAxis(v.y) && inBoundsAxis(v.z)
+  }
 }
 
 /**
@@ -97,11 +102,6 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
     height = capsule.readInt(heightName, 0)
   }
 
-  def inBounds(v: Vector3f): Boolean = {
-    def inBoundsAxis(f: Float) = 0.0 <= f && f <= 1.0
-    inBoundsAxis(v.x) && inBoundsAxis(v.y) && inBoundsAxis(v.z)
-  }
-
   def printSVO(): Unit = printSubSVO(0)
 
   private def printSubSVO(tabs: Int): Unit = node match {
@@ -111,69 +111,48 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
         subNodes foreach (subNode => subNode.printSubSVO(tabs+1))
   }
 
-  // Could add some sort of "minimum height that we care about"?
-  def insertElementPath(element: Option[Block], path: List[Octant]): Unit = ???
-  def deleteNodePath(path: List[Octant]): Unit = insertElementPath(None, path)
+  // Insert the given node at the end of the path. Return a path to the highest node that has changed.
+  def insertNodePath(newNode: SVONode, path: List[Octant]): Option[List[Octant]] = path match {
+    // Insert here
+    case Nil => this.node = newNode; Some(List())
 
-  def deleteNodeAt(position: Vector3f, targetHeight: Int) = insertNodeAt(new Full(None), position, targetHeight)
+    // If it's not already there, recurse. Then try to consolidate if needed.
+    case o :: os =>
+      val alreadyThere: Boolean = (newNode, node) match {
+        case (Full(newElement), Full(oldElement)) => newElement == oldElement
+        case _ => false
+      }
+      if (alreadyThere) {return None}
 
-  // TODO: call Octant.getPathTo
-  def insertNodeAt(newNode: SVONode, position: Vector3f, targetHeight: Int): Unit = {
-    if (targetHeight < 0)
-      throw new IllegalArgumentException("Can't add at a negative height.")
-    if (!inBounds(position)) {
-      //throw new IndexOutOfBoundsException("The position was not contained inside the cube.")
-      return
-    }
-    if (targetHeight > height)
-      {throw new IllegalArgumentException("Tried to add higher than the height of the octree")}
-
-    val alreadyThere: Boolean = (newNode, node) match {
-      case (Full(newElement), Full(oldElement)) => newElement == oldElement
-      case _ => false
-    }
-    if (alreadyThere) {return}
-    if (targetHeight == height) {
-      // Insert here, overwriting whatever was in there.
-      node = newNode
-      return
-    }
-
-    // insertionHeight < height so recurse
-
-    // If the node is full then we need to split it up first.
-    node match {
-      case Subdivided(_) =>
-      case Full(element) =>
-        val newOctants = Array.fill(8)(new SVO(Full(element), height - 1))
-        node = Subdivided(newOctants)
-    }
-
-    val newOctant = Octant.whichOctant(position)
-    val newPosition: Vector3f = newOctant.toChildSpace(position)
-
-    node match {
-      // TODO: abstract into own function to get rid of the weird two matches
-      case Full(_) => throw new IllegalStateException("The node should have been subdivided.")
-      case Subdivided(octants) =>
-        octants(newOctant.ix).insertNodeAt(newNode, newPosition, targetHeight)
-
-
-        // If we've completely filled all of the subnodes, then replace it with a Full
-        // Without this last section, the function is tail recursive.
-        octants(0).node match {
-          case Subdivided(_) =>
-          case Full(firstElement) =>
-            val allFullWithSame = octants forall (_.node match {
-              case Full(otherElement) => firstElement == otherElement
-              case _ => false
-            })
-            if (allFullWithSame) {node = Full(firstElement)}
+      insertNodePath(newNode, os) flatMap {insertPath =>
+        // Check to see if we've make all the subNodes the same
+        val maybeOnlyNode: Option[SVONode] = this.node match {
+          case Full(_) => None
+          case Subdivided(subSVOs) =>
+            val subNodes = subSVOs map (_.node)
+            val allAreFull = subNodes forall {case Full(_) => true; case _ => false}
+            if (allAreFull && subNodes.distinct.length == 1) {Some(subNodes(0))} else None
         }
-    }
+
+        // If we have, then change this node to reflect that (and report that we've done that).
+        (maybeOnlyNode map {
+          onlyNode => this.node = onlyNode; Some(List())
+        }).getOrElse(Some(insertPath))
+      }
   }
 
-  def insertElementAt (element: Option[Block], position: Vector3f, height: Int): Unit = {
+  def deleteNodePath(path: List[Octant]): Unit = insertNodePath(Full(None), path)
+
+  def deleteNodeAt(position: Vector3f, targetHeight: Int) = {
+    insertNodeAt(new Full(None), position, targetHeight)
+  }
+
+  def insertNodeAt(newNode: SVONode, position: Vector3f, targetHeight: Int) = {
+    val maybePath = Octant.getPathTo(position, this.height - targetHeight)
+    maybePath flatMap (insertNodePath(newNode, _))
+  }
+
+  def insertElementAt (element: Option[Block], position: Vector3f, height: Int) = {
     insertNodeAt (Full(element), position, height)
   }
 }

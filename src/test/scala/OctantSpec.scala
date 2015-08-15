@@ -5,28 +5,28 @@ import logic.voxels.Octant
 
 class OctantSpec extends FlatSpec with Matchers {
   "The boolean triple" should "correspond to the set bits" in {
-    new Octant(0).xyz should be ((false, false, false))
-    new Octant(1).xyz should be ((true , false, false))
-    new Octant(2).xyz should be ((false, true , false))
-    new Octant(3).xyz should be ((true , true , false))
-    new Octant(4).xyz should be ((false, false, true ))
-    new Octant(5).xyz should be ((true , false, true ))
-    new Octant(6).xyz should be ((false, true , true ))
-    new Octant(7).xyz should be ((true , true , true ))
+    new Octant(0).xyz shouldBe (false, false, false)
+    new Octant(1).xyz shouldBe (true , false, false)
+    new Octant(2).xyz shouldBe (false, true , false)
+    new Octant(3).xyz shouldBe (true , true , false)
+    new Octant(4).xyz shouldBe (false, false, true )
+    new Octant(5).xyz shouldBe (true , false, true )
+    new Octant(6).xyz shouldBe (false, true , true )
+    new Octant(7).xyz shouldBe (true , true , true )
 
-    new Octant(false, false, false).ix should be (0)
-    new Octant(true , false, false).ix should be (1)
-    new Octant(false, true , false).ix should be (2)
-    new Octant(true , true , false).ix should be (3)
-    new Octant(false, false, true ).ix should be (4)
-    new Octant(true , false, true ).ix should be (5)
-    new Octant(false, true , true ).ix should be (6)
-    new Octant(true , true , true ).ix should be (7)
+    new Octant(false, false, false).ix shouldBe 0
+    new Octant(true , false, false).ix shouldBe 1
+    new Octant(false, true , false).ix shouldBe 2
+    new Octant(true , true , false).ix shouldBe 3
+    new Octant(false, false, true ).ix shouldBe 4
+    new Octant(true , false, true ).ix shouldBe 5
+    new Octant(false, true , true ).ix shouldBe 6
+    new Octant(true , true , true ).ix shouldBe 7
   }
 
-  val lowerHalf = new Octant(false, false, false)
-  val upperHalf = new Octant(true , false, false)
-  def xAxis(x: Float) = new Vector3f (x, 0, 0)
+  private val lowerHalf = new Octant(false, false, false)
+  private val upperHalf = new Octant(true , false, false)
+  private def xAxis(x: Float) = new Vector3f (x, 0, 0)
 
   "toChildSpace" should "work correctly on the X axis" in {
     lowerHalf.toChildSpace(xAxis(0))     shouldBe xAxis(0)
