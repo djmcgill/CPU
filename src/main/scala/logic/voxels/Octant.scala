@@ -7,10 +7,10 @@ object Octant {
     new Octant(v.x > 0.5f, v.y > 0.5f, v.z > 0.5f)
   }
 
-  def getPathTo(v: Vector3f, n: Int): Option[List[Octant]] = {
+  def getPathTo(v: Vector3f, maxLength: Int): Option[List[Octant]] = {
     if (!SVO.inBounds(v)) {return None}
     var currentV = v
-    Some((0 until n).map {case _ =>
+    Some((0 until maxLength).map {case _ =>
       val o = Octant.whichOctant(currentV)
       currentV = o.toChildSpace(currentV)
       o

@@ -4,41 +4,24 @@ import com.jme3.light.{AmbientLight, DirectionalLight}
 import com.jme3.math.{ColorRGBA, Vector3f}
 import com.jme3.scene.Node
 import controller._
+import controller.svoControl.{SVOInsertElementControl, SVODeleteElementControl}
 import logic.voxels._
-import rendering.SVOGeometry
 
 import scala.collection.mutable
 
 object CPU extends SimpleApplication {
-  // TODO: these should be in SVOManager class
-  var svo = SVO.initialWorld
-  var svoNode: Node = _
-  var svoGeometry: SVOGeometry = _
-
-
   var bulletAppState: BulletAppState = _
 
-  // You can't make changes directly to the SVO or it's geometry, you have to register your intention here.
-  val insertionQueue = new mutable.Queue[(SVONode, Vector3f)]()
   def main(args: Array[String]): Unit = {
     CPU.start()
   }
 
   override def simpleInitApp() {
-
-
-    bulletAppState = new BulletAppState() // save in the stateManager instead?
-    stateManager.attach(bulletAppState)
-    stateManager.attach(new OverviewCameraControls)
-    stateManager.attach(new SVOInsertElementControl(insertionQueue))
-    stateManager.attach(new SVODeleteElementControl(insertionQueue))
-
-    // TODO: have some SVOManager class
-    rootNode.setUserData("svo", svo)
-    svoGeometry = new SVOGeometry(this)
-
-    svoNode = svoGeometry.generateNode(svo)
-    rootNode.attachChild(svoNode)
+    stateManager.attachAll(
+      new BulletAppState,
+      new OverviewCameraControls,
+      new SVOControl
+    )
 
     // Lighting
     val sun = new DirectionalLight()
@@ -50,42 +33,11 @@ object CPU extends SimpleApplication {
     ambient.setColor(ColorRGBA.White)
     rootNode.addLight(ambient)
 
-    val peons = new Peons(assetManager, bulletAppState, rootNode)
+    // Entities
+    //val peons = new Peons(assetManager, bulletAppState, rootNode)
   }
 
   override def simpleUpdate(tpf: Float): Unit = {
     super.simpleUpdate(tpf)
-
-    val size = insertionQueue.size
-    if (size != 0) println(size)
-    val f: ((SVONode, List[Octant]) => Unit) = {case (node, path) =>
-      println(s"about to regenerate $path")
-      // modify svo and svoNode
-      val maybeToRefresh = svo.insertNodePath(node, path)
-
-      maybeToRefresh foreach { refreshPath =>
-        if (refreshPath.isEmpty) {
-          // We need to generate the whole thing again.
-          svoNode = svoGeometry.generateNode(svo)
-        } else {
-          svoGeometry.regenerateGeometry(svoNode, refreshPath)
-        }
-      }
-    }
-
-    // TODO: move this code into a SVOManager control
-    insertionQueue foreach {case (nodeToInsert: SVONode, position: Vector3f) =>
-      println(s"about to insert $svoNode into the svo at $position now")
-      val maybeToRefresh = svo.insertNodeAt(nodeToInsert, position, 0)
-      maybeToRefresh foreach (toRefresh => if (true || toRefresh.isEmpty) {
-        rootNode.detachChild(svoNode)
-        svoNode = svoGeometry.generateNode(svo)
-        rootNode.attachChild(svoNode)
-      } else {
-        svoGeometry.regenerateGeometry(svoNode, toRefresh)
-      })
-    }
-    insertionQueue.clear()
-
   }
 }

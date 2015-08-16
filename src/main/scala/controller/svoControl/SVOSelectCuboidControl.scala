@@ -1,10 +1,8 @@
-package controller
+package controller.svoControl
 
-import com.jme3.math.{Rectangle, Vector3f}
-import com.jme3.renderer.{ViewPort, RenderManager}
-import com.jme3.scene.{Node, Spatial}
+import com.jme3.math.Vector3f
+import com.jme3.renderer.{RenderManager, ViewPort}
 import com.jme3.scene.control.AbstractControl
-import logic.voxels.Octant
 
 /**
  * For selecting a whole cuboids at a time.

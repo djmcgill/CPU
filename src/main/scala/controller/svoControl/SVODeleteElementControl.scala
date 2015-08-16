@@ -1,8 +1,9 @@
-package controller
+package controller.svoControl
 
 import com.jme3.input.MouseInput
 import com.jme3.input.controls.MouseButtonTrigger
 import com.jme3.math.Vector3f
+import controller.svoControl.AbstractSVOInsertionControl
 import logic.voxels._
 
 import scala.collection.mutable

@@ -1,8 +1,10 @@
-package controller
+package controller.svoControl
 
-import collection.mutable
 import com.jme3.math.Vector3f
+import controller.AbstractActionListenerState
 import logic.voxels._
+
+import scala.collection.mutable
 
 /**
  * This class will modify the SVO with a given function.

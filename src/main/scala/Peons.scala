@@ -5,10 +5,8 @@ import com.jme3.bullet.control.BetterCharacterControl
 import com.jme3.math.Vector3f
 import com.jme3.scene.{Spatial, Node}
 
-/**
- * Created by David McGillicuddy on 12/08/2015.
- */
 class Peons(assetManger: AssetManager, bulletAppState: BulletAppState, rootNode: Node) {
+  // TODO: make this a CustomControl or AppState or something.
 
   val peonSpatial: Spatial = assetManger.loadModel("Models/Oto/Oto.mesh.xml")
   val peonNode = new Node()
