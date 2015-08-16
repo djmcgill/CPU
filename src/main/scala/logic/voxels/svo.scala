@@ -1,6 +1,6 @@
 package logic.voxels
 
-import com.jme3.export.{JmeExporter, JmeImporter, Savable}
+import com.jme3.export._
 import com.jme3.math.Vector3f
 import com.typesafe.scalalogging.LazyLogging
 

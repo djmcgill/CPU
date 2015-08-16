@@ -2,12 +2,7 @@ import com.jme3.app.SimpleApplication
 import com.jme3.bullet.BulletAppState
 import com.jme3.light.{AmbientLight, DirectionalLight}
 import com.jme3.math.{ColorRGBA, Vector3f}
-import com.jme3.scene.Node
 import controller._
-import controller.svoControl.{SVOInsertElementControl, SVODeleteElementControl}
-import logic.voxels._
-
-import scala.collection.mutable
 
 object CPU extends SimpleApplication {
   var bulletAppState: BulletAppState = _
@@ -33,8 +28,7 @@ object CPU extends SimpleApplication {
     ambient.setColor(ColorRGBA.White)
     rootNode.addLight(ambient)
 
-    // Entities
-    //val peons = new Peons(assetManager, bulletAppState, rootNode)
+    // TODO: Entities
   }
 
   override def simpleUpdate(tpf: Float): Unit = {

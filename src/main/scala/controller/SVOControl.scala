@@ -1,12 +1,11 @@
 package controller
 
-import _root_.CPU._
 import com.jme3.app.Application
 import com.jme3.app.state.AppStateManager
 import com.jme3.material.Material
 import com.jme3.math.{ColorRGBA, Vector2f, Vector3f}
-import com.jme3.scene.{Node, Spatial, Geometry}
 import com.jme3.scene.shape.Box
+import com.jme3.scene.{Geometry, Node, Spatial}
 import com.jme3.util.TangentBinormalGenerator
 import com.typesafe.scalalogging.LazyLogging
 import controller.svoControl.{SVODeleteElementControl, SVOInsertElementControl}
