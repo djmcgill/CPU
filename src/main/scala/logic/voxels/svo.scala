@@ -26,7 +26,8 @@ case class Full (var contents: Option[Block]) extends SVONode {
   }
 }
 case class Subdivided (var octants: Array[SVO]) extends SVONode {
-  def this() = this(Array()) // TODO: attach warning to this, you should never call it from user code.
+  /** For serialisation purposes only, you should never call this constructor otherwise. */
+  def this() = this(Array())
   val octantsName = "octants"
   override def write(ex: JmeExporter): Unit = {
     val capsule = ex.getCapsule(this)

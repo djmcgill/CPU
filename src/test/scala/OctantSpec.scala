@@ -1,6 +1,6 @@
 import com.jme3.math.Vector3f
-import org.scalatest._
 import logic.voxels.Octant
+import org.scalatest._
 
 
 class OctantSpec extends FlatSpec with Matchers {
@@ -71,8 +71,6 @@ class OctantSpec extends FlatSpec with Matchers {
   "getPathTo" should "behave as expected" in {
     Octant.getPathTo(Vector3f.ZERO, 3) shouldBe Some(List(0, 0, 0) map (ix => new Octant(ix)))
     Octant.getPathTo(Vector3f.UNIT_XYZ, 4) shouldBe Some(List(7, 7, 7, 7) map (ix => new Octant(ix)))
-
-    // TODO: THIS IS FAILING
     Octant.getPathTo(new Vector3f(0.3f, 0.3f, 0.3f), 3) shouldBe Some(List(0, 7, 0) map (ix => new Octant(ix)))
   }
 }
