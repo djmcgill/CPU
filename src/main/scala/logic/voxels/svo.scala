@@ -26,6 +26,15 @@ case class Full (var contents: Option[Block]) extends SVONode {
   }
 }
 case class Subdivided (var octants: Array[SVO]) extends SVONode {
+  override def equals(that: Any): Boolean = that match {
+    case Subdivided(thatOctants) => octants sameElements thatOctants // the warning on sameElements is unneeded here.
+    case _ => false
+  }
+  override def hashCode: Int = {
+    val prime = 71
+    octants.foldLeft(1)(prime * _ + _.hashCode)
+  }
+
   /** For serialisation purposes only, you should never call this constructor otherwise. */
   def this() = this(Array())
   val octantsName = "octants"
@@ -43,14 +52,14 @@ case class Subdivided (var octants: Array[SVO]) extends SVONode {
 }
 
 object SVO {
-  lazy val minimalSubdivided = {
+  def minimalSubdivided = {
     def empty: SVO = new SVO(new Full(None), 0)
     def full: SVO = new SVO(new Full(Some(new Dirt())), 0)
     val arr: Array[SVO] = Array(full, empty, empty, empty, empty, empty, empty, full)
     new SVO(Subdivided(arr), 1)
   }
 
-  lazy val minimalInserted = {
+  def minimalInserted = {
     def empty: SVO = new SVO(new Full(None), 0)
     val arr: Array[SVO] = Array(empty, empty, empty, empty, empty, empty, empty, empty)
     val world: SVO = new SVO(new Subdivided(arr), 1)
@@ -59,13 +68,13 @@ object SVO {
     world
   }
 
-  lazy val size2 = {
+  def size2 = {
     val world = new SVO(new Full(None), 2)
     world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.1f, 0.1f), 0)
     world
   }
 
-  lazy val initialWorld = {
+  def initialWorld = {
     val world = new SVO(Full(None), 5)
     val cornerPositions = Array((-0.1f, -0.1f), (-0.1f, 0.1f), (0.1f, -0.1f), (0.1f, 0.1f))
     def justBelowZAxis(dx: Float, dz: Float) = new Vector3f(dx + 0.5f, 0.4f, dz + 0.5f)
@@ -75,7 +84,9 @@ object SVO {
     world
   }
 
-  val voxel = new SVO(Full(Some(new Dirt())), 0)
+  def voxel = new SVO(Full(Some(new Dirt())), 0)
+
+  def empty = new SVO(Full(None), 0)
 
   def inBounds(v: Vector3f): Boolean = {
     def inBoundsAxis(f: Float) = 0.0 <= f && f <= 1.0
@@ -86,6 +97,7 @@ object SVO {
 /**
  * Each Sparse Voxel Octree thinks that it is the cube (0,0,0) to (1,1,1)
  */
+// TODO: structural equality
 case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLogging {
   def this() = this(new Full(None), 0)
 
@@ -183,6 +195,7 @@ case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLog
 
   def insertNodeAt(newNode: SVONode, position: Vector3f, targetHeight: Int) = {
     val maybePath = Octant.getPathTo(position, this.height - targetHeight)
+//    println(s"inserting node $newNode at $position at height $targetHeight")
     maybePath flatMap (insertNodePath(newNode, _))
   }
 

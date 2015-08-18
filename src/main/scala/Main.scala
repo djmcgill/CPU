@@ -4,11 +4,11 @@ import com.jme3.light.{AmbientLight, DirectionalLight}
 import com.jme3.math.{ColorRGBA, Vector3f}
 import controller._
 
-object CPU extends SimpleApplication {
+object Main extends SimpleApplication {
   var bulletAppState: BulletAppState = _
 
   def main(args: Array[String]): Unit = {
-    CPU.start()
+    Main.start()
   }
 
   override def simpleInitApp() {

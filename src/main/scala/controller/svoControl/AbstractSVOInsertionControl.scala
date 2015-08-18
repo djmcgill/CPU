@@ -14,6 +14,7 @@ import scala.collection.mutable
  * It returns the path to the node that needs to be recreated (if any).
  */
 
+// TODO: is passing around the queue the best way? Could we instead just let the Control call a function in enqueue?
 abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, Vector3f)])
     extends AbstractActionListenerState {
   val node: SVONode
@@ -55,6 +56,7 @@ abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, Vector
         case _ => throw new IllegalStateException
       }
       val onBlockOrNewBlock = if (insertion) {adjustment} else {adjustment mult -1}
+//      println("adding to queue")
       queue.enqueue((node, absoluteHitPosition add onBlockOrNewBlock))
     }
   }
