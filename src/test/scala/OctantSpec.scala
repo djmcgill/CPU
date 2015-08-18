@@ -49,28 +49,31 @@ class OctantSpec extends FlatSpec with Matchers {
   }
 
   "flipX, flipY, and flipZ" should "correctly flip a bit" in {
-    new Octant(false, false, false)
-      .flipX.xyz             shouldBe ( true, false, false)
+    new Octant(false, false, false).flipX.xyz shouldBe
+      (true, false, false)
 
-    new Octant(true , false, false)
-      .flipX.xyz             shouldBe (false, false, false)
+    new Octant(true , false, false).flipX.xyz shouldBe
+      (false, false, false)
 
-    new Octant(false, false, false)
-      .flipX.flipZ.xyz       shouldBe ( true, false,  true)
+    new Octant(false, false, false).flipX.flipZ.xyz shouldBe
+      (true, false, true)
 
-    new Octant(true, true, true)
-      .flipX.xyz             shouldBe (false,  true,  true)
+    new Octant(true, true, true).flipX.xyz shouldBe
+      (false, true, true)
 
-    new Octant(true, true, false)
-      .flipX.flipY.xyz       shouldBe (false, false, false)
+    new Octant(true, true, false).flipX.flipY.xyz shouldBe
+      (false, false, false)
 
-    new Octant(false, false, false)
-      .flipX.flipY.flipZ.xyz shouldBe ( true,  true,  true)
+    new Octant(false, false, false).flipX.flipY.flipZ.xyz shouldBe
+      (true, true, true)
   }
 
   "getPathTo" should "behave as expected" in {
-    Octant.getPathTo(Vector3f.ZERO, 3) shouldBe Some(List(0, 0, 0) map (ix => new Octant(ix)))
-    Octant.getPathTo(Vector3f.UNIT_XYZ, 4) shouldBe Some(List(7, 7, 7, 7) map (ix => new Octant(ix)))
-    Octant.getPathTo(new Vector3f(0.3f, 0.3f, 0.3f), 3) shouldBe Some(List(0, 7, 0) map (ix => new Octant(ix)))
+    Octant.getPathTo(Vector3f.ZERO, 3) shouldBe
+      Some(List(0, 0, 0) map (new Octant(_)))
+    Octant.getPathTo(Vector3f.UNIT_XYZ, 4) shouldBe
+      Some(List(7, 7, 7, 7) map (new Octant(_)))
+    Octant.getPathTo(new Vector3f(0.3f, 0.3f, 0.3f), 3) shouldBe
+      Some(List(0, 7, 0) map (new Octant(_)))
   }
 }
