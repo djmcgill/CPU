@@ -27,7 +27,7 @@ case class Full (var contents: Option[Block]) extends SVONode {
 }
 case class Subdivided (var octants: Array[SVO]) extends SVONode {
   override def equals(that: Any): Boolean = that match {
-    case Subdivided(thatOctants) => octants sameElements thatOctants // the warning on sameElements is unneeded here.
+    case Subdivided(thatOctants) => octants sameElements thatOctants
     case _ => false
   }
   override def hashCode: Int = {
@@ -168,20 +168,22 @@ case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLog
       }
       val maybeInsertPath = childSVO.insertNodePath(newNode, os) flatMap {insertPath =>
         // Check to see if we've make all the subNodes the same
-        val maybeOnlyNode: Option[SVONode] = this.node match {
+        val maybeOnlyNode: Option[Option[Block]] = this.node match {
           case Full(_) => None
           case Subdivided(subSVOs) =>
             val subNodes = subSVOs map (_.node)
+            // TODO: this could be better
             val allAreFull = subNodes forall {case Full(_) => true; case _ => false}
             if (allAreFull && subNodes.distinct.length == 1) {
               logger.debug("All of the subnodes were the same, now combining them.")
-              Some(subNodes(0))
+              Some(subNodes(0) match {case Full(b) => b})
             } else None
         }
 
         // If we have, then change this node to reflect that (and report that we've done that).
         (maybeOnlyNode map {
-          onlyNode => this.node = onlyNode; Some(List())
+          onlyNode => this.node = Full(onlyNode)
+            return Some(List())
         }).getOrElse(Some(insertPath))
       }
       maybeInsertPath map (o :: _)
