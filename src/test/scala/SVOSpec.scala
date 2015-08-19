@@ -72,7 +72,9 @@ class SVOSpec extends FlatSpec with Matchers {
 
   it should "return the correct update path for inserting into size2" in {
     val svo = SVO.size2
-  //  val maybeInsertPath
+    val path = List(Octant(2), Octant(5))
+    val maybeInsertPath = svo.insertNodePath(Full(Some(new Dirt())), path)
+    maybeInsertPath shouldBe Some(path)
   }
 
   it should "return the correct update path for inserting a whole node into size2" in {
@@ -85,6 +87,14 @@ class SVOSpec extends FlatSpec with Matchers {
 
   it should "return the correct update path for deleting from a Full in size2" in {
 
+  }
+
+  it should "return no update path when nothing was inserted" in {
+    val svo = SVO.minimalInserted
+    val path = List(Octant(0))
+    svo.insertNodePath(Full(Some(new Dirt())), path)
+    val maybeInsertPath = svo.insertNodePath(Full(Some(new Dirt())), path)
+    maybeInsertPath shouldBe None
   }
 
   private def empty(n: Int) = new SVO(Full(None), n)

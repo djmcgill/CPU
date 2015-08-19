@@ -142,26 +142,23 @@ case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLog
 
     // Insert here
     case Nil =>
-      logger.debug(s"Inserting $newNode here.")
-      this.node = newNode
-      Some(List())
+      if (this.node != newNode) {
+        this.node = newNode
+        Some(List())
+      } else None
 
     // If it's not already there, recurse. Then try to consolidate if needed.
     case o :: os =>
-      val alreadyThere: Boolean = (newNode, node) match {
-        case (Full(newElement), Full(oldElement)) => newElement == oldElement
+      val alreadyThere: Boolean = (newNode, this.node) match {
+        case (Full(newElement), Full(oldElement)) =>
+          newElement == oldElement
         case _ => false
       }
-      if (alreadyThere) {
-        logger.debug(s"The node $node was already there.")
-        return None
-      }
+      if (alreadyThere) {return None}
 
-      logger.debug(s"recursing into node ${o.ix}")
       val childSVO: SVO = this.node match {
         case Subdivided(subNodes) => subNodes(o.ix)
         case Full(element) =>
-          logger.debug("Splitting up a full node in order to recurse into it.")
           val subNodes: Array[SVO] = Array.fill(8)(new SVO(Full(element), this.height - 1))
           this.node = Subdivided(subNodes)
           subNodes(o.ix)
@@ -197,7 +194,6 @@ case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLog
 
   def insertNodeAt(newNode: SVONode, position: Vector3f, targetHeight: Int) = {
     val maybePath = Octant.getPathTo(position, this.height - targetHeight)
-//    println(s"inserting node $newNode at $position at height $targetHeight")
     maybePath flatMap (insertNodePath(newNode, _))
   }
 
