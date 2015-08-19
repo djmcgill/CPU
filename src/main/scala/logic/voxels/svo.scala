@@ -156,12 +156,12 @@ case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLog
       }
       if (alreadyThere) {return None}
 
-      val childSVO: SVO = this.node match {
-        case Subdivided(subNodes) => subNodes(o.ix)
+      val (childSVO, subdivided): (SVO, Boolean) = this.node match {
+        case Subdivided(subNodes) => (subNodes(o.ix), false)
         case Full(element) =>
           val subNodes: Array[SVO] = Array.fill(8)(new SVO(Full(element), this.height - 1))
           this.node = Subdivided(subNodes)
-          subNodes(o.ix)
+          (subNodes(o.ix), true)
       }
       val maybeInsertPath = childSVO.insertNodePath(newNode, os) flatMap {insertPath =>
         // Check to see if we've make all the subNodes the same
@@ -183,7 +183,8 @@ case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLog
             return Some(List())
         }).getOrElse(Some(insertPath))
       }
-      maybeInsertPath map (o :: _)
+      // If we subdivided, then it needs to be refreshed from this node.
+      if (subdivided) {Some(List())} else {maybeInsertPath map (o :: _)}
   }
 
   def deleteNodePath(path: List[Octant]): Unit = insertNodePath(Full(None), path)

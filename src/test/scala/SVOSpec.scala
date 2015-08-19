@@ -31,7 +31,8 @@ class SVOSpec extends FlatSpec with Matchers {
     val svo = octants(2, List())
     svo.node match {
       case Subdivided(arr) => arr(0) = octants(1, List(0))
-      case _ => fail()}
+      case _ => fail()
+    }
     svo shouldBe SVO.size2
   }
 
@@ -67,26 +68,57 @@ class SVOSpec extends FlatSpec with Matchers {
     // The final insert should combine into a node.
     expectedPaths(5) = Some(List())
 
-    (maybeInsertPaths zip expectedPaths) foreach {case (p, e) => p shouldBe e}
+    (maybeInsertPaths zip expectedPaths) foreach { case (p, e) => p shouldBe e }
   }
 
   it should "return the correct update path for inserting into size2" in {
     val svo = SVO.size2
-    val path = List(Octant(2), Octant(5))
+    val path = List(Octant(0), Octant(5))
     val maybeInsertPath = svo.insertNodePath(Full(Some(new Dirt())), path)
     maybeInsertPath shouldBe Some(path)
   }
 
   it should "return the correct update path for inserting a whole node into size2" in {
+    val svo = SVO.size2
+    val paths = Array.range(0, 8) map (ix => List(Octant(2), Octant(ix)))
+
+    val maybeInsertPaths: Array[Option[List[Octant]]] = paths map ((os: List[Octant]) =>
+      svo.insertNodePath(Full(Some(new Dirt())), os))
+
+    val expectedPaths = paths map ((os: List[Octant]) => Some(os))
+
+    // The first insert splits a node of empty
+    expectedPaths(0) = Some(List(Octant(2)))
+
+    // The final insert should combine into a node of dirt.
+    expectedPaths(7) = Some(List(Octant(2)))
+
+
+
+    (maybeInsertPaths zip expectedPaths) foreach { case (p, e) => p shouldBe e }
 
   }
 
   it should "return the correct update path for deleting from size2" in {
+    val svo = SVO.size2
+    val path = List(Octant(2), Octant(4))
 
+    svo.insertNodePath(Full(Some(new Dirt())), path)
+    val actualDeletionPath = svo.insertNodePath(Full(None), path)
+    val expectedDeletionPath = Some(path)
+    // The final insert should combine into a node.
   }
 
   it should "return the correct update path for deleting from a Full in size2" in {
+    val svo = SVO.size2
+    val paths = Array.range(0, 8) map (ix => List(Octant(2), Octant(ix)))
 
+    paths foreach ((os: List[Octant]) => svo.insertNodePath(Full(Some(new Dirt())), os))
+
+    val actualPath = svo.insertNodePath(Full(None), List(Octant(2), Octant(6)))
+    val expectedPath = Some(List(Octant(2)))
+
+    actualPath shouldBe expectedPath
   }
 
   it should "return no update path when nothing was inserted" in {
@@ -97,13 +129,16 @@ class SVOSpec extends FlatSpec with Matchers {
   }
 
   private def empty(n: Int) = new SVO(Full(None), n)
+
   private def full(n: Int) = new SVO(Full(Some(new Dirt())), n)
+
   private def octants(n: Int, indices: List[Int]) = {
     val arr = Array.tabulate[SVO](8)((index: Int) =>
-      if (indices.contains(index)) {full(n-1)} else {empty(n-1)})
+      if (indices.contains(index)) {
+        full(n - 1)
+      } else {
+        empty(n - 1)
+      })
     new SVO(Subdivided(arr), n)
   }
-  private def extractArray(svo: SVO) = svo.node match {
-    case Subdivided(arr) => arr
-    case Full(_) => fail()}
 }
