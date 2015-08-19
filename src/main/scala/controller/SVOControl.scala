@@ -47,7 +47,7 @@ class SVOControl extends AbstractAppStateWithApp with LazyLogging {
     val scale = math.pow(2, height).toFloat
     boxGeometry.getMesh.scaleTextureCoordinates(new Vector2f(scale, scale))
 
-    // TODO: add physics
+    // TODO: add physics with a MeshCollisionShape
     //boxGeometry.addControl(new RigidBodyControl(0))
     boxGeometry
   }
