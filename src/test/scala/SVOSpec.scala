@@ -92,7 +92,6 @@ class SVOSpec extends FlatSpec with Matchers {
   it should "return no update path when nothing was inserted" in {
     val svo = SVO.minimalInserted
     val path = List(Octant(0))
-    svo.insertNodePath(Full(Some(new Dirt())), path)
     val maybeInsertPath = svo.insertNodePath(Full(Some(new Dirt())), path)
     maybeInsertPath shouldBe None
   }
