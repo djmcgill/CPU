@@ -50,11 +50,40 @@ class SVOSpec extends FlatSpec with Matchers {
     svo shouldBe expectedSVO
   }
 
-  it should "return the correct update path for minimalInserted" in {
+  it should "return the correct update path for inserting into minimalInserted" in {
+    val svo = SVO.minimalInserted
+    val maybeInsertPath = svo.insertNodePath(Full(Some(new Dirt())), List(Octant(1)))
+    maybeInsertPath shouldBe Some(List(Octant(1)))
+  }
+
+  it should "return the correct update path for filling minimalInserted" in {
+    val svo = SVO.minimalInserted
+    val paths = Array.range(1, 7) map (ix => List(Octant(ix)))
+
+    val maybeInsertPaths: Array[Option[List[Octant]]] = paths map ((os: List[Octant]) =>
+      svo.insertNodePath(Full(Some(new Dirt())), os))
+
+    val expectedPaths = paths map ((os: List[Octant]) => Some(os))
+    // The final insert should combine into a node.
+    expectedPaths(5) = Some(List())
+
+    (maybeInsertPaths zip expectedPaths) foreach {case (p, e) => p shouldBe e}
+  }
+
+  it should "return the correct update path for inserting into size2" in {
+    val svo = SVO.size2
+  //  val maybeInsertPath
+  }
+
+  it should "return the correct update path for inserting a whole node into size2" in {
 
   }
 
-  it should "return the correct update path for size2" in {
+  it should "return the correct update path for deleting from size2" in {
+
+  }
+
+  it should "return the correct update path for deleting from a Full in size2" in {
 
   }
 
