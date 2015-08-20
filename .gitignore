@@ -10,23 +10,23 @@
 # if you remove the above rule, at least ignore the following:
 
 # User-specific stuff:
-# .idea/workspace.xml
-# .idea/tasks.xml
-# .idea/dictionaries
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
 
 # Sensitive or high-churn files:
-# .idea/dataSources.ids
-# .idea/dataSources.xml
-# .idea/sqlDataSources.xml
-# .idea/dynamic.xml
-# .idea/uiDesigner.xml
+.idea/dataSources.ids
+.idea/dataSources.xml
+.idea/sqlDataSources.xml
+.idea/dynamic.xml
+.idea/uiDesigner.xml
 
 # Gradle:
-# .idea/gradle.xml
-# .idea/libraries
+.idea/gradle.xml
+.idea/libraries
 
-# Mongo Explorer plugin:
-# .idea/mongoSettings.xml
+Mongo Explorer plugin:
+.idea/mongoSettings.xml
 
 ## File-based project format:
 *.ipr
@@ -69,18 +69,6 @@ project/plugins/project/
 .worksheet
 
 
-### SBT ###
-# Simple Build Tool
-# http://www.scala-sbt.org/release/docs/Getting-Started/Directories.html#configuring-version-control
-
-target/
-lib_managed/
-src_managed/
-project/boot/
-.history
-.cache
-
-
 ### Windows ###
 # Windows image file caches
 Thumbs.db
@@ -100,10 +88,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-
-
-### Java ###
-*.class
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
