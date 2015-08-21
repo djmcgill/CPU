@@ -55,9 +55,10 @@
           <root url="file://$MODULE_DIR$/../../lib/lwjgl/native" />
         </NATIVE>
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../lib/lwjgl/src.zip!/" />
+          <root url="file://$MODULE_DIR$/../../lib/lwjgl" />
         </SOURCES>
         <jarDirectory url="file://$MODULE_DIR$/../../lib/lwjgl/jar" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/../../lib/lwjgl" recursive="false" type="SOURCES" />
       </library>
     </orderEntry>
   </component>

@@ -73,59 +73,65 @@ class SVOControl extends AbstractAppStateWithApp with LazyLogging {
     lazy val box2 = shinyBox(0).clone
     box2.scale(0.5f)
 
+    def svoInsertionToSpatialInsertion(svoNode: SVONode, position: Vector3f): Option[(Option[Spatial], List[Octant])] =
+    for (refreshPath  <- svo.insertNodeAt(svoNode, position, 0);
+         svoToRefresh <- svo.getNodePath(refreshPath))
+      yield (createGeometryFromSVO(svoToRefresh), refreshPath)
 
-
-
-    for (
-        (svoNode, position) <- insertionQueue;
-        refreshPath         <- svo.insertNodeAt(svoNode, position, 0);
-        svoToRefresh        <- svo.getNodePath(refreshPath);
-        newGeometry         <- createGeometryFromSVO(svoToRefresh)) {
-      val scale: Float = math.pow(2, -refreshPath.length).toFloat
-      newGeometry.scale(scale)
-//      replaceGeometryPath(createGeometryFromSVO(svo), List())
-//      replaceGeometryPath(Some(newGeometry), refreshPath)
-        replaceGeometryPath(Some(box2), refreshPath)
-      }
+    // TODO: this isn't thread safe
+    val insertionList = insertionQueue.toList
     insertionQueue.clear()
-//    svoRootNode.forceRefresh(true, true, true)
+
+
+    // doing all the svo inserts then all the geometry inserts might maybe lead to weird results?
+    val geometryUpdateRequests: List[(Option[Spatial], List[Octant])] =
+      (insertionList map Function.tupled(svoInsertionToSpatialInsertion)).flatten
+
+
+    geometryUpdateRequests foreach {case (maybeNewGeometry, refreshPath) =>
+      replaceGeometryPath(createGeometryFromSVO(svo), List())
+      // TODO: move the newGeometry to the childSpace
+      //replaceGeometryPath(newGeometry, refreshPath)
+   }
   }
 
-
-  // TODO: still not working
+  // TODO: test just this bit without the recursive call
   def replaceGeometryPath(maybeSpatialToInsert: Option[Spatial], path: List[Octant]): Unit = {
-    println(s"inserting $maybeSpatialToInsert at $path into $svo")
-    def attachChild() = maybeSpatialToInsert foreach {spatial =>
+    def detachFirstchild() = svoRootNode.detachChildNamed(FirstChildName)
+    def attachFirstChild() = maybeSpatialToInsert foreach {spatial =>
       spatial.setName(FirstChildName)
       svoRootNode.attachChild(spatial)
     }
 
     if (path.isEmpty) {
       // An empty list: this is now the first child.
-      svoRootNode.detachChildNamed(FirstChildName)
-      attachChild()
+      detachFirstchild()
+      attachFirstChild()
+
+    // Path is non-empty
     } else Option(svoRootNode.getChild(FirstChildName)) match {
       // In these two cases we replace at the top level
-      case None => println("top none"); attachChild()
+      case None =>
+        // There's nothing here so we don't need to detach
+        attachFirstChild()
       case Some(geo: Geometry) =>
-        println("top geo")
-        svoRootNode.detachChildNamed(FirstChildName)
-        attachChild()
+        detachFirstchild()
+        attachFirstChild()
 
       // Unlike the previous two cases, we keep the top node the same and
       // only edit part of it.
       case Some(node: Node) =>
-        println("top node")
         replaceGeometryPathGo(node, path)
     }
-    println()
 
     def replaceGeometryPathGo(parentNode: Node, path: List[Octant]): Unit = path match {
           // This list is guaranteed to be non-empty.
           case o :: os =>
-            def attachChild() = maybeSpatialToInsert foreach { spatial =>
+            def detachIxChild() = parentNode.detachChildNamed(o.ix.toString)
+            def attachIxChild() = maybeSpatialToInsert foreach { spatial =>
               spatial.setName(o.ix.toString)
-              spatial.setLocalTranslation(o.childOrigin)
+              // TODO: what do to here?
+              //spatial.setLocalTranslation(o.childOrigin)
               //spatial.scale(0.5f)
               parentNode.attachChild(spatial)
             }
@@ -133,22 +139,21 @@ class SVOControl extends AbstractAppStateWithApp with LazyLogging {
             Option(parentNode.getChild(o.ix.toString)) match {
               // for these two cases we'll insert here
               case Some(geo: Geometry) =>
-                println(s"found geo at $path")
-                parentNode.detachChildNamed(o.ix.toString)
-                attachChild()
+                detachIxChild()
+                attachIxChild()
               case None =>
-                println(s"found none at $path")
-                attachChild()
-
+                attachIxChild()
 
               // If the parent is subdivided, then if we're supposed to insert
               // here we do so, else recurse.
               case Some(subdivided: Node) =>
-                println(s"found subdivided at $path")
                 if (os.isEmpty) {
-                  parentNode.detachChildNamed(o.ix.toString)
-                  attachChild()
-                } else { replaceGeometryPathGo(subdivided, os) }
+                  detachIxChild()
+                  attachIxChild()
+                } else {
+                  // TODO: as we recurse, scale and translate the spatial
+                  replaceGeometryPathGo(subdivided, os)
+                }
             }
     }
   }
