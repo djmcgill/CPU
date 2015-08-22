@@ -97,7 +97,6 @@ object SVO {
 /**
  * Each Sparse Voxel Octree thinks that it is the cube (0,0,0) to (1,1,1)
  */
-// TODO: structural equality
 case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLogging {
   def this() = this(new Full(None), 0)
 
@@ -129,10 +128,10 @@ case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLog
 
   // Get the node at a given path.
   // Returns None if the path isn't valid (because the SVO is not subdivided as expected)
-  def getNodePath(path: List[Octant]): Option[SVO] = path match {
-    case Nil     => Some(this)
+  def getNodePath(path: List[Octant]): SVONode = path match {
+    case Nil     => this.node
     case o :: os => this.node match {
-      case Full(_) => None
+      case Full(element) => Full(element)
       case Subdivided(subSVOs) => subSVOs(o.ix).getNodePath(os)
     }
   }
@@ -169,7 +168,7 @@ case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLog
           case Full(_) => None
           case Subdivided(subSVOs) =>
             val subNodes = subSVOs map (_.node)
-            // TODO: this could be better
+            // this could be better
             val allAreFull = subNodes forall {case Full(_) => true; case _ => false}
             if (allAreFull && subNodes.distinct.length == 1) {
               logger.debug("All of the subnodes were the same, now combining them.")
