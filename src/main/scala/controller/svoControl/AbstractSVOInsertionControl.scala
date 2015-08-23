@@ -38,12 +38,11 @@ abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, Vector
 
       // We have a point on the face of a cube, and we want to nudge it over
       // the boundary so that the insert position corresponds to the cube touching that face.
-      // TODO: this is pretty bad code
-      val edges = List(
-        (1.0f, relativeHitPosition.x), (0.0f, relativeHitPosition.x),
-        (1.0f, relativeHitPosition.y), (0.0f, relativeHitPosition.y),
-        (1.0f, relativeHitPosition.z), (0.0f, relativeHitPosition.z))
-      val diffs = edges map {case (x: Float, y: Float) => math.abs(x - y)}
+      val diffs = for (
+        position <- Array(relativeHitPosition.x, relativeHitPosition.y, relativeHitPosition.z);
+        edge <- Array(1.0f, 0.0f)
+      ) yield math.abs (edge - position)
+
       val indexOfSmallestDiff: Int = diffs.zipWithIndex.minBy(_._1)._2
       val EPS = 0.0001f
       val adjustment: Vector3f = indexOfSmallestDiff match {
@@ -56,7 +55,6 @@ abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, Vector
         case _ => throw new IllegalStateException
       }
       val onBlockOrNewBlock = if (insertion) {adjustment} else {adjustment mult -1}
-//      println("adding to queue")
       queue.enqueue((node, absoluteHitPosition add onBlockOrNewBlock))
     }
   }

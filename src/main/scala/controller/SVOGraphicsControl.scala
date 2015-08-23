@@ -6,6 +6,7 @@ import com.jme3.material.Material
 import com.jme3.math._
 import com.jme3.scene._
 import com.jme3.scene.shape.Box
+import com.jme3.texture.Texture
 import com.jme3.util.TangentBinormalGenerator
 import controller.svoControl.{SVODeleteElementControl, SVOInsertElementControl}
 import logic.voxels._
@@ -18,13 +19,20 @@ import scala.collection.mutable
  */
 class SVOGraphicsControl extends AbstractAppStateWithApp {
   private val FirstChildName = "First child"
-  private val svo: SVO = SVO.initialWorld
+  private val svo: SVO = SVO.size2
   private var svoRootNode: Node = _
   private lazy val boxMaterial = {
     val assetManager = app.getAssetManager
     val boxMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md")
-    boxMaterial.setTexture("DiffuseMap", assetManager.loadTexture("Textures/newspaper_diffuse.tga"))
-    boxMaterial.setTexture("NormalMap", assetManager.loadTexture("Textures/newspaper_normal.tga"))
+
+    val diffuseTexture = assetManager.loadTexture("Textures/newspaper_diffuse.tga")
+    diffuseTexture.setWrap(Texture.WrapMode.Repeat)
+    boxMaterial.setTexture("DiffuseMap", diffuseTexture)
+
+    val normalTexture = assetManager.loadTexture("Textures/newspaper_normal.tga")
+    normalTexture.setWrap(Texture.WrapMode.Repeat)
+    boxMaterial.setTexture("NormalMap", normalTexture)
+
     boxMaterial.setBoolean("UseMaterialColors",true)
     boxMaterial.setColor("Diffuse",ColorRGBA.White)  // minimum material color
     boxMaterial.setColor("Specular",ColorRGBA.White) // for shininess
@@ -36,15 +44,17 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
   // You can't make changes directly to the SVO or its geometry, you have to register your intention here.
   val insertionQueue = new mutable.Queue[(SVONode, Vector3f)]()
 
-  // Depth 0 = full size, depth 1 = 1/2 size, depth 2 = 1/4 size etc.
   private def shinyBox(height: Int) = {
     val boxMesh = new Box(Vector3f.ZERO, Vector3f.UNIT_XYZ)
     val boxGeometry = new Geometry("Shiny box", boxMesh)
     TangentBinormalGenerator.generate(boxMesh)
     boxGeometry.setMaterial(boxMaterial)
-    //println("scaling texture")
-    //val scale = math.pow(2, height).toFloat
-    //boxGeometry.getMesh.scaleTextureCoordinates(new Vector2f(scale, scale))
+
+    //val scale = math.pow(2, -height).toFloat
+    val scale = if (height == 0) 1 else if (height == 1) 2f else 4f
+    println(s"shinyBox at size $height gave a scale of $scale")
+    boxGeometry.getMesh.scaleTextureCoordinates(new Vector2f(scale, scale))
+
     boxGeometry
   }
 
