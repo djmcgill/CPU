@@ -23,8 +23,8 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
   private lazy val boxMaterial = {
     val assetManager = app.getAssetManager
     val boxMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md")
-    boxMaterial.setTexture("DiffuseMap", assetManager.loadTexture("Textures/Terrain/Pond/Pond.jpg"))
-    boxMaterial.setTexture("NormalMap", assetManager.loadTexture("Textures/Terrain/Pond/Pond_normal.png"))
+    boxMaterial.setTexture("DiffuseMap", assetManager.loadTexture("Textures/newspaper_diffuse.tga"))
+    boxMaterial.setTexture("NormalMap", assetManager.loadTexture("Textures/newspaper_normal.tga"))
     boxMaterial.setBoolean("UseMaterialColors",true)
     boxMaterial.setColor("Diffuse",ColorRGBA.White)  // minimum material color
     boxMaterial.setColor("Specular",ColorRGBA.White) // for shininess
@@ -107,7 +107,11 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
             replaceGeometryPathGo(childNode, o :: reversedPathSoFar, os)
 
           // draw from here
-          case _ => {
+          case _ =>
+            println("drawing here")
+            println(s"pathSoFar: ${reversedPathSoFar.reverse}")
+            println(s"path remaining: $pathRemaining")
+            println()
             val svoNode = svo.getNodePath(reversedPathSoFar.reverse)
             val maybeNewGeometry = createGeometryFromSVONode(svoNode, pathRemaining.length)
             parentNode.detachChildNamed(o.ix.toString)
@@ -118,8 +122,6 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
 
           }
 
-
-        }
     }
 
   /*
@@ -138,9 +140,9 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
   def createGeometryFromSVONode(svoNode: SVONode, svoHeight: Int): Option[Spatial] = svoNode match {
     case Full(None) => None
 
-    case Full(_) => {
+    case Full(_) =>
       Some(shinyBox(svoHeight).clone)
-    }
+
 
     case Subdivided(subSVOs) =>
       val subGeometries = subSVOs map (svo => createGeometryFromSVONode(svo.node, svo.height))
