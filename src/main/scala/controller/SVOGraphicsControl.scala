@@ -99,8 +99,7 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
               // Replace the child node
               val svoNodeToDraw = svo.getNodePath((o :: reversedPathSoFar).reverse)
               val nodeHeight = svo.height - reversedPathSoFar.length - 1
-              println(s"nodeHeight: $nodeHeight")
-              val maybeNewChildSpatial: Option[Spatial] = createGeometryFromSVONode(svoNodeToDraw, nodeHeight)
+              val maybeNewChildSpatial = createGeometryFromSVONode(svoNodeToDraw, nodeHeight)
               nodeToModify.detachChildNamed(o.ix.toString)
               maybeNewChildSpatial foreach {newChildSpatial =>
                 newChildSpatial.setLocalTranslation(o.childOrigin mult 2)
@@ -112,7 +111,6 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
           // Replace with a new spatial here
           val svoNodeToDraw = svo.getNodePath(reversedPathSoFar.reverse)
           val nodeHeight = svo.height - reversedPathSoFar.length
-          println(s"nodeHeight1: $nodeHeight")
           val maybeNewSpatial: Option[Spatial] = createGeometryFromSVONode(svoNodeToDraw, nodeHeight)
           maybeNewSpatial match {
             case Some(newSpatial) => Some(newSpatial)
