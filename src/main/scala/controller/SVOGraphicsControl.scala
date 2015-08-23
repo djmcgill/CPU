@@ -19,7 +19,7 @@ import scala.collection.mutable
  */
 class SVOGraphicsControl extends AbstractAppStateWithApp {
   private val FirstChildName = "First child"
-  private val svo: SVO = SVO.size2
+  private val svo: SVO = SVO.size3
   private var svoRootNode: Node = _
   private lazy val boxMaterial = {
     val assetManager = app.getAssetManager
@@ -50,8 +50,7 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
     TangentBinormalGenerator.generate(boxMesh)
     boxGeometry.setMaterial(boxMaterial)
 
-    //val scale = math.pow(2, -height).toFloat
-    val scale = if (height == 0) 1 else if (height == 1) 2f else 4f
+    val scale = math.pow(2, height).toFloat
     println(s"shinyBox at size $height gave a scale of $scale")
     boxGeometry.getMesh.scaleTextureCoordinates(new Vector2f(scale, scale))
 
@@ -99,7 +98,9 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
             case _ =>
               // Replace the child node
               val svoNodeToDraw = svo.getNodePath((o :: reversedPathSoFar).reverse)
-              val maybeNewChildSpatial: Option[Spatial] = createGeometryFromSVONode(svoNodeToDraw, svo.height - reversedPathSoFar.length - 1)
+              val nodeHeight = svo.height - reversedPathSoFar.length - 1
+              println(s"nodeHeight: $nodeHeight")
+              val maybeNewChildSpatial: Option[Spatial] = createGeometryFromSVONode(svoNodeToDraw, nodeHeight)
               nodeToModify.detachChildNamed(o.ix.toString)
               maybeNewChildSpatial foreach {newChildSpatial =>
                 newChildSpatial.setLocalTranslation(o.childOrigin mult 2)
@@ -110,7 +111,9 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
         case (_, Nil) =>
           // Replace with a new spatial here
           val svoNodeToDraw = svo.getNodePath(reversedPathSoFar.reverse)
-          val maybeNewSpatial: Option[Spatial] = createGeometryFromSVONode(svoNodeToDraw, reversedPathSoFar.length)
+          val nodeHeight = svo.height - reversedPathSoFar.length
+          println(s"nodeHeight1: $nodeHeight")
+          val maybeNewSpatial: Option[Spatial] = createGeometryFromSVONode(svoNodeToDraw, nodeHeight)
           maybeNewSpatial match {
             case Some(newSpatial) => Some(newSpatial)
             case None =>

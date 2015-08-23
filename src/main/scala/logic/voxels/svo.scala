@@ -68,6 +68,12 @@ object SVO {
     world
   }
 
+  def size3 = {
+    val world = new SVO(new Full(None), 3)
+    world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.1f, 0.1f), 0)
+    world
+  }
+
   def size2 = {
     val world = new SVO(new Full(None), 2)
     world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.1f, 0.1f), 0)
