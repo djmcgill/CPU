@@ -14,7 +14,7 @@ import scala.collection.mutable
  * It returns the path to the node that needs to be recreated (if any).
  */
 
-// is passing around the queue the best way? Could we instead just let the Control call a function in enqueue?
+// TODO: is passing around the queue the best way? Could we instead just let the Control call a function in enqueue?
 abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, Vector3f)])
     extends AbstractActionListenerState {
   val node: SVONode
@@ -38,11 +38,12 @@ abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, Vector
 
       // We have a point on the face of a cube, and we want to nudge it over
       // the boundary so that the insert position corresponds to the cube touching that face.
-      val diffs = for (
-        edge <- Array(0.0f, 1.0f);
-        axis <- Array(relativeHitPosition.x, relativeHitPosition.y, relativeHitPosition.z)
-      ) yield math.abs(edge - axis)
-
+      // TODO: this is pretty bad code
+      val edges = List(
+        (1.0f, relativeHitPosition.x), (0.0f, relativeHitPosition.x),
+        (1.0f, relativeHitPosition.y), (0.0f, relativeHitPosition.y),
+        (1.0f, relativeHitPosition.z), (0.0f, relativeHitPosition.z))
+      val diffs = edges map {case (x: Float, y: Float) => math.abs(x - y)}
       val indexOfSmallestDiff: Int = diffs.zipWithIndex.minBy(_._1)._2
       val EPS = 0.0001f
       val adjustment: Vector3f = indexOfSmallestDiff match {
