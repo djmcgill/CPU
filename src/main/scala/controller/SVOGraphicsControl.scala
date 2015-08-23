@@ -58,62 +58,33 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
     app.getRootNode.attachChild(svoRootNode)
     createGeometryFromSVONode(svo.node, svo.height) foreach {child =>
       child.setName(FirstChildName)
-      svoRootNode.attachChild(child)
-    }
+      svoRootNode.attachChild(child)}
   }
 
   override def update(tpf: Float): Unit = {
     super.update(tpf)
 
-    // DO something with the queue here
-
-    // TODO: this is pretty fucked
     // Will need to filter the queue for valid requests if we implement multiplayer.
-    def svoInsertionToSpatialInsertion(svoNode: SVONode, position: Vector3f): Option[(Option[Spatial], List[Octant])] =
-      for (refreshPath <- svo.insertNodeAt(svoNode, position, 0))
-           //svoToRefresh <- svo.getNodePath(refreshPath))
-        yield (Some(new Node()), refreshPath)
-
-    val insertionList = insertionQueue.toList
+    insertionQueue foreach {case (svoNode, position) =>
+      svo.insertNodeAt(svoNode, position, 0) foreach replaceGeometryPath}
     insertionQueue.clear()
-
-    val geometryUpdateRequests: List[(Option[Spatial], List[Octant])] =
-      (insertionList map Function.tupled(svoInsertionToSpatialInsertion)).flatten
-
-
-    geometryUpdateRequests foreach { case (maybeNewGeometryasd, refreshPath) =>
-      println(s"updating at $refreshPath")
-      val rootChild = svoRootNode.getChild(FirstChildName)
-      println(s"currentSpatial is: $rootChild")
-      rootChild match {case (rootChildNode: Node) => println(s"with children ${rootChildNode.getChildren}")}
-      replaceGeometryPath(refreshPath)
-      println()
-      println()
-    }
-
   }
 
-  // TODO: there's basically two different functions here:
-  //   modifyNode: Node => ()
-  //   newNode: Node
   def replaceGeometryPath(path: List[Octant]): Unit = {
     def replaceGeometryPathGo(spatialToModify: Option[Node], reversedPathSoFar: List[Octant], pathRemaining: List[Octant]): Option[Spatial] =
       (spatialToModify, pathRemaining) match {
         case (Some(nodeToModify: Node), o :: os) =>
           // Modify the node in-place
-          val childSpatial = Option(nodeToModify.getChild(o.ix.toString))
-          childSpatial match {
+          Option(nodeToModify.getChild(o.ix.toString)) match {
             case Some(childNode: Node) =>
               // Recurse into the child node
-              val maybeNodeToReplaceChildWith = replaceGeometryPathGo(Some(childNode), o :: reversedPathSoFar, os)
-              maybeNodeToReplaceChildWith map {newChildSpatial: Spatial =>
-                // Replace the child node
+              replaceGeometryPathGo(Some(childNode), o :: reversedPathSoFar, os) map {newChildSpatial: Spatial =>
+                // We need to replace the child node
                 nodeToModify.detachChildNamed(o.ix.toString)
                 newChildSpatial.setName(o.ix.toString)
                 newChildSpatial.setLocalTranslation(o.childOrigin mult 2)
                 nodeToModify.attachChild(newChildSpatial)
-                nodeToModify
-              }
+                nodeToModify}
 
             case _ =>
               // Replace the child node
@@ -124,8 +95,7 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
                 newChildSpatial.setLocalTranslation(o.childOrigin mult 2)
                 newChildSpatial.setName(o.ix.toString)
                 nodeToModify.attachChild(newChildSpatial)}
-              None
-          }
+              None}
 
         case (_, Nil) =>
           // Replace with a new spatial here
@@ -136,8 +106,7 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
             case None =>
               val newNode = new Node()
               newNode.scale(0.5f)
-              Some(newNode)
-          }
+              Some(newNode)}
 
         case (_, o :: os) =>
           // Make a new node and recurse
@@ -148,42 +117,25 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
             newChild.setName(o.ix.toString)
             newChild.setLocalTranslation(o.childOrigin mult 2)
             newNode.attachChild(newChild)}
-          Some(newNode)
+          Some(newNode)}
 
-      }
-
-    val maybeSVORoot = Option(svoRootNode.getChild(FirstChildName)) match {case Some(n: Node) => Some(n)}
-    println(s"calling replaceGeometryPathGo with $maybeSVORoot and $path")
-    val maybeNewNodeG = replaceGeometryPathGo(maybeSVORoot, List(), path)
-    maybeNewNodeG foreach {newNode =>
-      svoRootNode.detachChildNamed(FirstChildName)
-      newNode.setName(FirstChildName)
-      svoRootNode.attachChild(newNode)
+    Option(svoRootNode.getChild(FirstChildName)) match {
+      case Some(svoFirstNode: Node) =>
+        val maybeNewNodeG = replaceGeometryPathGo(Some(svoFirstNode), List(), path)
+        maybeNewNodeG foreach {newNode =>
+          svoRootNode.detachChildNamed(FirstChildName)
+          newNode.setName(FirstChildName)
+          svoRootNode.attachChild(newNode)
+        }
+      case _ => throw new IllegalStateException("You deleted the world!!!")
     }
-
-
-
-
-
-  /*
-    // if list is empty or the top spatial is a geometry, replace it all
-    // top spatial is a node, list is non-empty
-      // if child exists: recurse
-      //            else: rather than going further into the list, draw from here
-
-  path match {
-    case o::os
   }
-
-
-  */ }
 
   def createGeometryFromSVONode(svoNode: SVONode, svoHeight: Int): Option[Spatial] = svoNode match {
     case Full(None) => None
 
     case Full(_) =>
       Some(shinyBox(svoHeight).clone)
-
 
     case Subdivided(subSVOs) =>
       val subGeometries = subSVOs map (svo => createGeometryFromSVONode(svo.node, svo.height))
