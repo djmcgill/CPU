@@ -51,7 +51,6 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
     boxGeometry.setMaterial(boxMaterial)
 
     val scale = math.pow(2, height).toFloat
-    println(s"shinyBox at size $height gave a scale of $scale")
     boxGeometry.getMesh.scaleTextureCoordinates(new Vector2f(scale, scale))
 
     boxGeometry
