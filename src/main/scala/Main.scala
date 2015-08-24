@@ -10,17 +10,17 @@ import com.jme3.util.TangentBinormalGenerator
 import controller._
 
 object Main extends SimpleApplication {
-  var bulletAppState: BulletAppState = _
-
   def main(args: Array[String]): Unit = {
     Main.start()
   }
 
   override def simpleInitApp() {
+    val bulletAppState = new BulletAppState
     stateManager.attachAll(
-      new BulletAppState,
+      bulletAppState,
       new OverviewCameraControls,
-      new SVOGraphicsControl
+      new SVOGraphicsControl,
+      new SVOPhysicsControl(bulletAppState)
     )
     assetManager.registerLocator("resources", classOf[FileLocator])
 

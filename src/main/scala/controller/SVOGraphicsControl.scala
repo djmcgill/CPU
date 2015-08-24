@@ -19,7 +19,7 @@ import scala.collection.mutable
  */
 class SVOGraphicsControl extends AbstractAppStateWithApp {
   private val FirstChildName = "First child"
-  private val svo: SVO = SVO.size3
+  private val svo: SVO = SVO.initialWorld
   private var svoRootNode: Node = _
   private lazy val boxMaterial = {
     val assetManager = app.getAssetManager
@@ -78,6 +78,7 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
     insertionQueue.clear()
   }
 
+  // Could probably greatly simplify this code with getParent
   def replaceGeometryPath(path: List[Octant]): Unit = {
     def replaceGeometryPathGo(spatialToModify: Option[Node], reversedPathSoFar: List[Octant], pathRemaining: List[Octant]): Option[Spatial] =
       (spatialToModify, pathRemaining) match {
