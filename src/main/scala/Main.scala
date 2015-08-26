@@ -10,6 +10,8 @@ import com.jme3.scene.{Node, Geometry}
 import com.jme3.scene.shape.Box
 import com.jme3.util.TangentBinormalGenerator
 import controller._
+import controller.peonState.Peon
+import controller.svoState.{SVOSpatialState, SVOPhysicsState}
 
 object Main extends SimpleApplication {
   def main(args: Array[String]): Unit = {
@@ -23,9 +25,13 @@ object Main extends SimpleApplication {
       bulletAppState,
       new OverviewCameraState,
       new SVOSpatialState,
-      new SVOPhysicsState
+      new SVOPhysicsState,
+      new Peon
     )
     assetManager.registerLocator("resources", classOf[FileLocator])
+
+    cam.setFrustumNear(0.5f)
+    println(s"near: ${cam.getFrustumNear}")
 
     // Lighting
     val sun = new DirectionalLight()
@@ -37,6 +43,17 @@ object Main extends SimpleApplication {
     ambient.setColor(ColorRGBA.White)
     rootNode.addLight(ambient)
 
+    // Corners for debugging
+    renderCorners
+
+    // TODO: Entities
+  }
+
+  override def simpleUpdate(tpf: Float): Unit = {
+    super.simpleUpdate(tpf)
+  }
+
+  private def renderCorners = {
     // Draw a small box at each point on the cube (0,0,0),(1,1,1)
     val cubeMaterial = {
       val boxMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md")
@@ -62,11 +79,5 @@ object Main extends SimpleApplication {
       cornerNode.attachChild(newChild)
     }
     rootNode.attachChild(cornerNode)
-
-    // TODO: Entities
-  }
-
-  override def simpleUpdate(tpf: Float): Unit = {
-    super.simpleUpdate(tpf)
   }
 }
