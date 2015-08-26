@@ -2,6 +2,8 @@ package controller
 
 import com.jme3.app.Application
 import com.jme3.app.state.AppStateManager
+import com.jme3.bullet.BulletAppState
+import com.jme3.bullet.control.RigidBodyControl
 import com.jme3.material.Material
 import com.jme3.math._
 import com.jme3.scene._
@@ -9,6 +11,7 @@ import com.jme3.scene.shape.Box
 import com.jme3.texture.Texture
 import com.jme3.util.TangentBinormalGenerator
 import controller.svoControl.{SVODeleteElementControl, SVOInsertElementControl}
+
 import logic.voxels._
 
 import scala.collection.mutable
@@ -17,10 +20,12 @@ import scala.collection.mutable
  * Renders a svo between (0,0,0) and (1,1,1)
  * Will soon generate the physics controls too
  */
-class SVOGraphicsControl extends AbstractAppStateWithApp {
+class SVOSpatialControl extends AbstractAppStateWithApp {
   private val FirstChildName = "First child"
-  private val svo: SVO = SVO.initialWorld
+  private var bulletAppState: BulletAppState = _
+  private val svo: SVO = SVO.minimalSubdivided
   private var svoRootNode: Node = _
+  private var svoPhysicsControl: SVOPhysicsControl = _
   private lazy val boxMaterial = {
     val assetManager = app.getAssetManager
     val boxMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md")
@@ -49,10 +54,8 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
     val boxGeometry = new Geometry("Shiny box", boxMesh)
     TangentBinormalGenerator.generate(boxMesh)
     boxGeometry.setMaterial(boxMaterial)
-
-    val scale = math.pow(2, height).toFloat
-    boxGeometry.getMesh.scaleTextureCoordinates(new Vector2f(scale, scale))
-
+    val textureScale = math.pow(2, height).toFloat
+    boxGeometry.getMesh.scaleTextureCoordinates(new Vector2f(textureScale, textureScale))
     boxGeometry
   }
 
@@ -61,8 +64,10 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
     app.getStateManager.attach(new SVOInsertElementControl(insertionQueue))
     app.getStateManager.attach(new SVODeleteElementControl(insertionQueue))
     app.getRootNode.setUserData("svo", svo)
+    bulletAppState = app.getStateManager.getState[BulletAppState](classOf[BulletAppState])
 
     svoRootNode = new Node("SVO")
+    svoPhysicsControl = app.getStateManager.getState[SVOPhysicsControl](classOf[SVOPhysicsControl])
     app.getRootNode.attachChild(svoRootNode)
     createGeometryFromSVONode(svo.node, svo.height) foreach {child =>
       child.setName(FirstChildName)
@@ -73,12 +78,16 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
     super.update(tpf)
 
     // Will need to filter the queue for valid requests if we implement multiplayer.
-    insertionQueue foreach {case (svoNode, position) =>
-      svo.insertNodeAt(svoNode, position, 0) foreach replaceGeometryPath}
+    insertionQueue foreach { case (svoNode, position) =>
+      svo.insertNodeAt(svoNode, position, 0) foreach { replacePath =>
+        replaceGeometryPath(replacePath)
+        Option(svoRootNode.getChild(FirstChildName)) foreach svoPhysicsControl.attachPhysics
+      }
+    }
     insertionQueue.clear()
   }
 
-  // Could probably greatly simplify this code with getParent
+  // TODO: Could probably greatly simplify this code with getParent
   def replaceGeometryPath(path: List[Octant]): Unit = {
     def replaceGeometryPathGo(spatialToModify: Option[Node], reversedPathSoFar: List[Octant], pathRemaining: List[Octant]): Option[Spatial] =
       (spatialToModify, pathRemaining) match {
@@ -90,17 +99,21 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
               replaceGeometryPathGo(Some(childNode), o :: reversedPathSoFar, os) map {newChildSpatial: Spatial =>
                 // We need to replace the child node
                 nodeToModify.detachChildNamed(o.ix.toString)
+                bulletAppState.getPhysicsSpace.removeAll(childNode)
                 newChildSpatial.setName(o.ix.toString)
                 newChildSpatial.setLocalTranslation(o.childOrigin mult 2)
                 nodeToModify.attachChild(newChildSpatial)
                 nodeToModify}
 
-            case _ =>
+            case maybeGeometry =>
               // Replace the child node
               val svoNodeToDraw = svo.getNodePath((o :: reversedPathSoFar).reverse)
               val nodeHeight = svo.height - reversedPathSoFar.length - 1
               val maybeNewChildSpatial = createGeometryFromSVONode(svoNodeToDraw, nodeHeight)
               nodeToModify.detachChildNamed(o.ix.toString)
+              maybeGeometry foreach {case geometry: Geometry =>
+                bulletAppState.getPhysicsSpace.remove(geometry)}
+
               maybeNewChildSpatial foreach {newChildSpatial =>
                 newChildSpatial.setLocalTranslation(o.childOrigin mult 2)
                 newChildSpatial.setName(o.ix.toString)
@@ -135,9 +148,13 @@ class SVOGraphicsControl extends AbstractAppStateWithApp {
         val maybeNewNodeG = replaceGeometryPathGo(Some(svoFirstNode), List(), path)
         maybeNewNodeG foreach {newNode =>
           svoRootNode.detachChildNamed(FirstChildName)
+          bulletAppState.getPhysicsSpace.remove(svoFirstNode)
           newNode.setName(FirstChildName)
           svoRootNode.attachChild(newNode)
         }
+
+        svoPhysicsControl.addVoxelPhysicsPath(svoFirstNode, path)
+
       case _ => throw new IllegalStateException("You deleted the world!!!")
     }
   }

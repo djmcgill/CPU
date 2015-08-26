@@ -1,10 +1,12 @@
 import com.jme3.app.SimpleApplication
 import com.jme3.asset.plugins.FileLocator
 import com.jme3.bullet.BulletAppState
+import com.jme3.bullet.collision.shapes.MeshCollisionShape
+import com.jme3.bullet.control.RigidBodyControl
 import com.jme3.light.{AmbientLight, DirectionalLight}
 import com.jme3.material.Material
 import com.jme3.math.{Vector2f, ColorRGBA, Vector3f}
-import com.jme3.scene.Geometry
+import com.jme3.scene.{Node, Geometry}
 import com.jme3.scene.shape.Box
 import com.jme3.util.TangentBinormalGenerator
 import controller._
@@ -16,11 +18,12 @@ object Main extends SimpleApplication {
 
   override def simpleInitApp() {
     val bulletAppState = new BulletAppState
+    bulletAppState.setThreadingType(BulletAppState.ThreadingType.PARALLEL)
     stateManager.attachAll(
       bulletAppState,
       new OverviewCameraControls,
-      new SVOGraphicsControl,
-      new SVOPhysicsControl(bulletAppState)
+      new SVOSpatialControl,
+      new SVOPhysicsControl
     )
     assetManager.registerLocator("resources", classOf[FileLocator])
 
@@ -52,14 +55,13 @@ object Main extends SimpleApplication {
       boxGeometry
     }
 
+    val cornerNode = new Node("corners")
     for (x <- List(0, 1); y <- List(0, 1); z <- List(0, 1)) {
       val newChild = cubeGeometry.clone()
       newChild.setLocalTranslation(x, y, z)
-      rootNode.attachChild(newChild)
+      cornerNode.attachChild(newChild)
     }
-
-
-
+    rootNode.attachChild(cornerNode)
 
     // TODO: Entities
   }

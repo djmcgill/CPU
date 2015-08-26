@@ -43,7 +43,6 @@ case class Subdivided (var octants: Array[SVO]) extends SVONode {
     val savableOctants: Array[Savable] = octants map {case so: Savable => so}
     capsule.write(savableOctants, octantsName, Array[Savable]())
   }
-
   override def read(im: JmeImporter): Unit = {
     val capsule = im.getCapsule(this)
     val savableOctants = capsule.readSavableArray(octantsName, Array())
@@ -58,7 +57,6 @@ object SVO {
     val arr: Array[SVO] = Array(full, empty, empty, empty, empty, empty, empty, full)
     new SVO(Subdivided(arr), 1)
   }
-
   def minimalInserted = {
     def empty: SVO = new SVO(new Full(None), 0)
     val arr: Array[SVO] = Array(empty, empty, empty, empty, empty, empty, empty, empty)
@@ -67,19 +65,16 @@ object SVO {
     world.insertElementAt(Some(new Dirt()), new Vector3f(0.9f, 0.9f, 0.9f), 0)
     world
   }
-
   def size3 = {
     val world = new SVO(new Full(None), 3)
     world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.1f, 0.1f), 0)
     world
   }
-
   def size2 = {
     val world = new SVO(new Full(None), 2)
     world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.1f, 0.1f), 0)
     world
   }
-
   def initialWorld = {
     val world = new SVO(Full(None), 5)
     val cornerPositions = Array((-0.1f, -0.1f), (-0.1f, 0.1f), (0.1f, -0.1f), (0.1f, 0.1f))
@@ -89,11 +84,8 @@ object SVO {
     world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.6f, 0.1f), 2)
     world
   }
-
   def voxel = new SVO(Full(Some(new Dirt())), 0)
-
   def empty = new SVO(Full(None), 0)
-
   def inBounds(v: Vector3f): Boolean = {
     def inBoundsAxis(f: Float) = 0.0 <= f && f <= 1.0
     inBoundsAxis(v.x) && inBoundsAxis(v.y) && inBoundsAxis(v.z)
@@ -106,14 +98,13 @@ object SVO {
 case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLogging {
   def this() = this(new Full(None), 0)
 
-  val nodeName = "node"
-  val heightName = "height"
+  private val nodeName = "node"
+  private val heightName = "height"
   override def write(ex: JmeExporter): Unit = {
     val capsule = ex.getCapsule(this)
     capsule.write(node, nodeName, new Full(None))
     capsule.write(height, heightName, 0)
   }
-
   override def read(im: JmeImporter): Unit = {
     val capsule = im.getCapsule(this)
     capsule.readSavable(nodeName, new Full(None)) match {
