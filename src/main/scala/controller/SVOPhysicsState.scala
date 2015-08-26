@@ -8,7 +8,7 @@ import com.jme3.bullet.control.RigidBodyControl
 import com.jme3.scene._
 import logic.voxels._
 
-class SVOPhysicsControl extends AbstractAppStateWithApp {
+class SVOPhysicsState extends AbstractAppStateWithApp {
   private val FirstChildName = "First child"
   private var bulletAppState: BulletAppState = _
 

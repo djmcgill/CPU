@@ -21,9 +21,9 @@ object Main extends SimpleApplication {
     bulletAppState.setThreadingType(BulletAppState.ThreadingType.PARALLEL)
     stateManager.attachAll(
       bulletAppState,
-      new OverviewCameraControls,
-      new SVOSpatialControl,
-      new SVOPhysicsControl
+      new OverviewCameraState,
+      new SVOSpatialState,
+      new SVOPhysicsState
     )
     assetManager.registerLocator("resources", classOf[FileLocator])
 

@@ -10,7 +10,7 @@ import com.jme3.scene.Node
 /**
  * Manages the controls.
  */
-class OverviewCameraControls extends AbstractAppStateWithApp {
+class OverviewCameraState extends AbstractAppStateWithApp {
   var cameraTarget: Node = new Node("Overview Camera Target")
   var chaseCam: ChaseCamera = _
   val zoomDistance = 10

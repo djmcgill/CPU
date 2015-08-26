@@ -3,7 +3,6 @@ package controller
 import com.jme3.app.Application
 import com.jme3.app.state.AppStateManager
 import com.jme3.bullet.BulletAppState
-import com.jme3.bullet.control.RigidBodyControl
 import com.jme3.material.Material
 import com.jme3.math._
 import com.jme3.scene._
@@ -20,12 +19,12 @@ import scala.collection.mutable
  * Renders a svo between (0,0,0) and (1,1,1)
  * Will soon generate the physics controls too
  */
-class SVOSpatialControl extends AbstractAppStateWithApp {
+class SVOSpatialState extends AbstractAppStateWithApp {
+  private val svo: SVO = SVO.initialWorld
   private val FirstChildName = "First child"
   private var bulletAppState: BulletAppState = _
-  private val svo: SVO = SVO.minimalSubdivided
   private var svoRootNode: Node = _
-  private var svoPhysicsControl: SVOPhysicsControl = _
+  private var svoPhysicsControl: SVOPhysicsState = _
   private lazy val boxMaterial = {
     val assetManager = app.getAssetManager
     val boxMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md")
@@ -67,7 +66,7 @@ class SVOSpatialControl extends AbstractAppStateWithApp {
     bulletAppState = app.getStateManager.getState[BulletAppState](classOf[BulletAppState])
 
     svoRootNode = new Node("SVO")
-    svoPhysicsControl = app.getStateManager.getState[SVOPhysicsControl](classOf[SVOPhysicsControl])
+    svoPhysicsControl = app.getStateManager.getState[SVOPhysicsState](classOf[SVOPhysicsState])
     app.getRootNode.attachChild(svoRootNode)
     createGeometryFromSVONode(svo.node, svo.height) foreach {child =>
       child.setName(FirstChildName)
