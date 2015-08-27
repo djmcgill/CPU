@@ -15,11 +15,16 @@ import controller.svoState.{SVOSpatialState, SVOPhysicsState}
 
 
 object Main extends SimpleApplication {
+  val MaxHeight = 4
+
   def main(args: Array[String]): Unit = {
     Main.start()
   }
 
   override def simpleInitApp() {
+    rootNode.setUserData("maxHeight", MaxHeight)
+
+
     val bulletAppState = new BulletAppState
     bulletAppState.setThreadingType(BulletAppState.ThreadingType.PARALLEL)
 
@@ -29,7 +34,6 @@ object Main extends SimpleApplication {
       new SVOSpatialState,
       new SVOPhysicsState,
       new Peon
-      //new WASDcontrols
     )
     assetManager.registerLocator("resources", classOf[FileLocator])
 
@@ -50,7 +54,7 @@ object Main extends SimpleApplication {
     renderCorners
 
     // TODO: Entities
-    println(s"accuracy: ${bulletAppState.getPhysicsSpace.setAccuracy(0.001f)}")
+    bulletAppState.getPhysicsSpace.setAccuracy(0.001f)
 
 
   }
@@ -84,6 +88,8 @@ object Main extends SimpleApplication {
       newChild.setLocalTranslation(x, y, z)
       cornerNode.attachChild(newChild)
     }
+    val scale = math.pow(2, MaxHeight).toFloat
+    cornerNode.scale(scale)
     rootNode.attachChild(cornerNode)
   }
 }

@@ -13,7 +13,6 @@ import scala.util.Success
 
 class PeonSimplePathfinding(targetPosition: Vector3f, finish: Promise[Boolean], timeoutSeconds: Float) extends AbstractControl{
 
-
   // TODO: have world scale global variable
   // TODO: make timeout optional
   // TODO: maybe an action to undertake when succeeded?
@@ -41,7 +40,7 @@ class PeonSimplePathfinding(targetPosition: Vector3f, finish: Promise[Boolean], 
         val rotation = new Quaternion()
         rotation.lookAt(stillToGo.normalize, Vector3f.UNIT_Y)
         spatial.setLocalRotation(rotation)
-        val walkDir = rotation mult Vector3f.UNIT_Z mult tpf mult 30
+        val walkDir = rotation mult Vector3f.UNIT_Z mult tpf mult 3000
         control.setWalkDirection(walkDir)
         // TODO: something about the peon's walk speed?
         // TODO: do we need to jump?

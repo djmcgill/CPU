@@ -68,12 +68,12 @@ class OctantSpec extends FlatSpec with Matchers {
       (true, true, true)
   }
 
-  "getPathTo" should "behave as expected" in {
-    Octant.getPathTo(Vector3f.ZERO, 3) shouldBe
+  "getPathToLocal" should "behave as expected" in {
+    Octant.getPathToLocal(Vector3f.ZERO, 3) shouldBe
       Some(List(0, 0, 0) map (new Octant(_)))
-    Octant.getPathTo(Vector3f.UNIT_XYZ, 4) shouldBe
+    Octant.getPathToLocal(Vector3f.UNIT_XYZ, 4) shouldBe
       Some(List(7, 7, 7, 7) map (new Octant(_)))
-    Octant.getPathTo(new Vector3f(0.3f, 0.3f, 0.3f), 3) shouldBe
+    Octant.getPathToLocal(new Vector3f(0.3f, 0.3f, 0.3f), 3) shouldBe
       Some(List(0, 7, 0) map (new Octant(_)))
   }
 }

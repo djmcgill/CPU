@@ -50,7 +50,14 @@ class OverviewCameraState extends AbstractAppStateWithApp {
     chaseCam.setHideCursorOnRotate(true)
     chaseCam.setZoomInTrigger(zoomInTrigger)
     chaseCam.setZoomOutTrigger(zoomOutTrigger)
-    chaseCam.setZoomSensitivity(chaseCam.getZoomSensitivity * 5)
+    chaseCam.setZoomSensitivity(50)
+
+
+    // TODO: have a key to reset the camera to the defaults
+    val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
+    val scale = math.pow(2, maxHeight).toFloat
+    chaseCam.setMaxDistance(1000)
+    chaseCam.setDefaultDistance(scale * 8f)
 
 
     app.getRootNode.attachChild(cameraTarget)

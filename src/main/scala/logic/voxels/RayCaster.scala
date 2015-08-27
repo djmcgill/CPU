@@ -6,7 +6,12 @@ import com.jme3.math.Vector3f
  * A custom raycaster designed to take advantage of the structure of a SVO.
  */
 object RayCaster {
-  def cast (rayOrigin: Vector3f, rayDirection: Vector3f, svo: SVO): Option[(Vector3f, List[Octant])] = {
+  def cast (worldRayOrigin: Vector3f, rayDirection: Vector3f, svo: SVO): Option[(Vector3f, List[Octant])] = {
+
+    val scale = math.pow(2, svo.height).toFloat
+
+    // convert rayOrigin into svo coordinates
+    val rayOrigin = worldRayOrigin mult (1/scale)
 
     val Eps = 0.0001f
     def nonZero(x: Float) = if (x < 0) math.min(x,-Eps) else math.max(x, Eps)
@@ -16,7 +21,11 @@ object RayCaster {
       nonZero(rayDirection.z))
 
     castGo(rayOrigin, sanitisedDirection.normalize(), svo, List())
-      .map({case (pos, path) => (pos, path.reverse)})
+      // convert rayOrigin FROM svo coordinates and make sure that the path is the right way around
+      .map({case (pos, path) => (pos mult scale, path.reverse)})
+
+
+
   }
 
   private def castGo(
@@ -38,7 +47,7 @@ object RayCaster {
     val tMax: Float = List(tMaxX, tMaxY, tMaxZ, 100000.0f).min
 
     // Was there a hit?
-    if (tMin > tMax) return None
+    if (tMin > tMax) {return None}
 
     // Where the hit is
     lazy val hitPosition = (rayDirection mult tMin) add rayOrigin

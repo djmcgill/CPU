@@ -20,7 +20,7 @@ import scala.collection.mutable
  */
 // TODO: this should attach svophysics itself, rather than main doing it.
 class SVOSpatialState extends AbstractAppStateWithApp {
-  private val svo: SVO = SVO.initialWorld
+  private var svo: SVO = _
   private val FirstChildName = "First child"
   private var bulletAppState: BulletAppState = _
   private var svoRootNode: Node = _
@@ -60,6 +60,10 @@ class SVOSpatialState extends AbstractAppStateWithApp {
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
+    val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
+    svo = SVO.initialWorld(maxHeight)
+
+
     app.getStateManager.attach(new SVOInsertElementControl(insertionQueue))
     app.getStateManager.attach(new SVODeleteElementControl(insertionQueue))
     app.getRootNode.setUserData("svo", svo)
@@ -70,7 +74,11 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     app.getRootNode.attachChild(svoRootNode)
     createGeometryFromSVONode(svo.node, svo.height) foreach {child =>
       child.setName(FirstChildName)
-      svoRootNode.attachChild(child)}
+      svoRootNode.attachChild(child)
+      val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
+      val scale: Float = math.pow(2, maxHeight).toFloat
+      child.scale(scale)
+    }
   }
 
   override def update(tpf: Float): Unit = {

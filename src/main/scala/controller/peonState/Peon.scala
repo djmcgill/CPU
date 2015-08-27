@@ -10,7 +10,7 @@ import controller.AbstractAppStateWithApp
 
 
 class Peon extends AbstractAppStateWithApp {
-  val peonScale = 0.02f
+  val peonScale = 0.5f
   var facingAngle = 0f
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
@@ -29,7 +29,9 @@ class Peon extends AbstractAppStateWithApp {
     peonNode.addControl(peonControl)
     peonControl.setJumpForce(new Vector3f(0,1.2f,0))
     peonControl.setGravity(new Vector3f(0,0.8f,0))
-    peonControl.warp(new Vector3f(0.8f,1.1f,0.8f))
+    val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
+    val scale = math.pow(2, maxHeight).toFloat
+    peonControl.warp(new Vector3f(0.8f,scale * 2,0.8f))
 
     val bulletAppState = app.getStateManager.getState[BulletAppState](classOf[BulletAppState])
     bulletAppState.getPhysicsSpace.add(peonControl)

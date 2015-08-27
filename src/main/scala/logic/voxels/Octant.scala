@@ -7,7 +7,7 @@ object Octant {
     new Octant(v.x > 0.5f, v.y > 0.5f, v.z > 0.5f)
   }
 
-  def getPathTo(v: Vector3f, maxLength: Int): Option[List[Octant]] = {
+  def getPathToLocal(v: Vector3f, maxLength: Int): Option[List[Octant]] = {
     if (!SVO.inBounds(v)) {return None}
     var currentV = v
     Some((0 until maxLength).map {case _ =>

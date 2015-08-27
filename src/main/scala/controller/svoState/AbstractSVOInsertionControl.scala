@@ -31,9 +31,14 @@ abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, Vector
     val result = RayCaster.cast(rayOrigin, rayDirection, svo)
 
     result foreach {case (absoluteHitPosition, path) =>
+      // convert from world coordinates to the (0,0,0),(1,1,1) cube of the svo
+      val maxHeight: Int = app.getRootNode.getUserData[Int]("maxHeight")
+      val scale: Float = math.pow(2f, -maxHeight).toFloat
+      val svoAbsoluteHitPosition = absoluteHitPosition mult scale
+
       // What's the hit position relative to the clicked on cube?
       // Note that this should be on its face.
-      val relativeHitPosition = path.foldLeft(absoluteHitPosition){case (v, o) => o.toChildSpace(v)}
+      val relativeHitPosition = path.foldLeft(svoAbsoluteHitPosition){case (v, o) => o.toChildSpace(v)}
 
       // We have a point on the face of a cube, and we want to nudge it over
       // the boundary so that the insert position corresponds to the cube touching that face.

@@ -75,13 +75,19 @@ object SVO {
     world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.1f, 0.1f), 0)
     world
   }
-  def initialWorld = {
-    val world = new SVO(Full(None), 5)
-    val cornerPositions = Array((-0.1f, -0.1f), (-0.1f, 0.1f), (0.1f, -0.1f), (0.1f, 0.1f))
-    def justBelowZAxis(dx: Float, dz: Float) = new Vector3f(dx + 0.5f, 0.4f, dz + 0.5f)
-    val lowerHalfPositions = cornerPositions map Function.tupled(justBelowZAxis)
-    lowerHalfPositions foreach (pos => world.insertElementAt(Some(new Dirt()), pos, 4))
-    world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.6f, 0.1f), 2)
+  def initialWorld(maxSize: Int) = {
+    def initialFull = new SVO(Full(Some(new Dirt())), maxSize - 1)
+    def initialEmpty = new SVO(Full(None), maxSize - 1)
+    val arr = Array.fill[SVO](8)(initialEmpty)
+    for (x <- Array(true, false); z <- Array(true, false)) {
+      val y = false
+      val o = new Octant(x, y, z)
+      arr(o.ix) = initialFull
+    }
+
+
+    val world = new SVO(Subdivided(arr), maxSize)
+    world.insertElementAt(Some(new Dirt()), new Vector3f(0.51f, 0.51f, 0.51f), 2)
     world
   }
   def voxel = new SVO(Full(Some(new Dirt())), 0)
@@ -190,7 +196,7 @@ case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLog
   }
 
   def insertNodeAt(newNode: SVONode, position: Vector3f, targetHeight: Int) = {
-    val maybePath = Octant.getPathTo(position, this.height - targetHeight)
+    val maybePath = Octant.getPathToLocal(position, this.height - targetHeight)
     maybePath flatMap (insertNodePath(newNode, _))
   }
 
