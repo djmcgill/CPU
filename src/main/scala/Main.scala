@@ -6,12 +6,13 @@ import com.jme3.bullet.control.RigidBodyControl
 import com.jme3.light.{AmbientLight, DirectionalLight}
 import com.jme3.material.Material
 import com.jme3.math.{Vector2f, ColorRGBA, Vector3f}
-import com.jme3.scene.{Node, Geometry}
+import com.jme3.scene.{Spatial, Node, Geometry}
 import com.jme3.scene.shape.Box
 import com.jme3.util.TangentBinormalGenerator
 import controller._
-import controller.peonState.{WASDcontrols, Peon}
+import controller.peonState.Peon
 import controller.svoState.{SVOSpatialState, SVOPhysicsState}
+
 
 object Main extends SimpleApplication {
   def main(args: Array[String]): Unit = {
@@ -21,13 +22,14 @@ object Main extends SimpleApplication {
   override def simpleInitApp() {
     val bulletAppState = new BulletAppState
     bulletAppState.setThreadingType(BulletAppState.ThreadingType.PARALLEL)
+
     stateManager.attachAll(
       bulletAppState,
       new OverviewCameraState,
       new SVOSpatialState,
       new SVOPhysicsState,
-      new Peon,
-      new WASDcontrols
+      new Peon
+      //new WASDcontrols
     )
     assetManager.registerLocator("resources", classOf[FileLocator])
 
@@ -48,10 +50,19 @@ object Main extends SimpleApplication {
     renderCorners
 
     // TODO: Entities
+    println(s"accuracy: ${bulletAppState.getPhysicsSpace.setAccuracy(0.001f)}")
+
+
   }
 
   override def simpleUpdate(tpf: Float): Unit = {
     super.simpleUpdate(tpf)
+    val peon = Option(rootNode.getUserData[Spatial]("peon"))
+    peon foreach { actualPeon =>
+      println(s"\tpeon localTranslation: ${actualPeon.getLocalTranslation}")
+      println(s"\tpeon worldTranslation: ${actualPeon.getWorldTranslation}")
+
+    }
   }
 
   private def renderCorners = {

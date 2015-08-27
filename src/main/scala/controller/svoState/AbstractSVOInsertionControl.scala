@@ -24,7 +24,6 @@ abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, Vector
     //super.action(name: String, isPressed, tpf)
     if (!isPressed) {return}
     val svo: SVO = app.getRootNode.getUserData[SVO]("svo")
-
     val rayOrigin = app.getCamera.getLocation
     val click2d = app.getInputManager.getCursorPosition
     def worldCoordsAtZ(z: Float) = app.getCamera.getWorldCoordinates(click2d, z)

@@ -8,8 +8,10 @@ import com.jme3.math.Vector3f
 import com.jme3.scene.Node
 import controller.AbstractAppStateWithApp
 
+
 class Peon extends AbstractAppStateWithApp {
   val peonScale = 0.02f
+  var facingAngle = 0f
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
@@ -23,17 +25,19 @@ class Peon extends AbstractAppStateWithApp {
     peonSpatial.scale(peonScale)
     peonSpatial.move(0, 2*peonScale, 0)
 
-    val peonControl = new BetterCharacterControl(peonScale, 4*peonScale, 1)
+    val peonControl = new BetterCharacterControl(0.8f*peonScale, 4*peonScale, 1)
     peonNode.addControl(peonControl)
-    peonControl.setJumpForce(new Vector3f(0,1,0))
+    peonControl.setJumpForce(new Vector3f(0,1.2f,0))
     peonControl.setGravity(new Vector3f(0,0.8f,0))
-    peonControl.warp(new Vector3f(0.5f,1.5f,0.5f))
+    peonControl.warp(new Vector3f(0.8f,1.1f,0.8f))
 
     val bulletAppState = app.getStateManager.getState[BulletAppState](classOf[BulletAppState])
     bulletAppState.getPhysicsSpace.add(peonControl)
     bulletAppState.getPhysicsSpace.addAll(peonNode)
 
     app.getRootNode.attachChild(peonNode)
+
+    app.getStateManager.attach(new PeonJobControl(peonNode))
   }
 
   override def cleanup(): Unit = {

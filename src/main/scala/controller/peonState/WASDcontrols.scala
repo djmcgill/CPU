@@ -10,8 +10,7 @@ import com.jme3.scene.{Geometry, Spatial}
 import controller.AbstractAppStateWithApp
 
 class WASDcontrols extends AbstractAppStateWithApp {
-  private var facingAngle = 0f
-  private var peon: Spatial = _
+  private var peonSpatial: Spatial = _
   private var peonControl: BetterCharacterControl = _
   private var movingForwards = false
   private var movingBackwards = false
@@ -40,6 +39,7 @@ class WASDcontrols extends AbstractAppStateWithApp {
 
   override def update(tpf: Float): Unit = {
     super.update(tpf)
+    var facingAngle = 0f
 
     val walkDirection = new Vector3f(0, 0, 0)
     if (movingForwards) {
@@ -68,7 +68,7 @@ class WASDcontrols extends AbstractAppStateWithApp {
 //
 //    }
 
-    peon match {
+    peonSpatial match {
       case geom: Geometry => geom.rotate(facingRotation)
       case node =>
     }
@@ -83,8 +83,8 @@ class WASDcontrols extends AbstractAppStateWithApp {
       inputManager.addMapping(name, new KeyTrigger(key))
       inputManager.addListener(actionListener, keys: _*)
     }
-    peon = app.getRootNode.getUserData[Spatial]("peon")
-    peonControl = peon.getControl[BetterCharacterControl](classOf[BetterCharacterControl])
+    peonSpatial = app.getRootNode.getUserData[Spatial]("peon")
+    peonControl = peonSpatial.getControl[BetterCharacterControl](classOf[BetterCharacterControl])
   }
 
   override def cleanup(): Unit = {
