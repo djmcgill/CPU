@@ -57,12 +57,6 @@ object Main extends SimpleApplication {
 
   override def simpleUpdate(tpf: Float): Unit = {
     super.simpleUpdate(tpf)
-    val peon = Option(rootNode.getUserData[Spatial]("peon"))
-    peon foreach { actualPeon =>
-      println(s"\tpeon localTranslation: ${actualPeon.getLocalTranslation}")
-      println(s"\tpeon worldTranslation: ${actualPeon.getWorldTranslation}")
-
-    }
   }
 
   private def renderCorners = {
