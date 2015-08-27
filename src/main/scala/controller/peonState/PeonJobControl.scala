@@ -31,7 +31,6 @@ class PeonJobControl(peonNode: Spatial) extends AbstractActionListenerState {
 
       // create a pathfinding job
       val success = Promise.apply[Boolean]()
-      println("starting to pathfind")
       val pathfindingJob = new PeonSimplePathfinding(absoluteHitPosition, success, 3000)
 
       // assign to the peon

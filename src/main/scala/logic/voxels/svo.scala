@@ -84,10 +84,7 @@ object SVO {
       val o = new Octant(x, y, z)
       arr(o.ix) = initialFull
     }
-
-
     val world = new SVO(Subdivided(arr), maxSize)
-    world.insertElementAt(Some(new Dirt()), new Vector3f(0.51f, 0.51f, 0.51f), 2)
     world
   }
   def voxel = new SVO(Full(Some(new Dirt())), 0)
@@ -189,19 +186,15 @@ case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLog
       if (subdivided) {Some(List())} else {maybeInsertPath map (o :: _)}
   }
 
-  def deleteNodePath(path: List[Octant]): Unit = insertNodePath(Full(None), path)
-
-  def deleteNodeAt(position: Vector3f, targetHeight: Int) = {
-    insertNodeAt(new Full(None), position, targetHeight)
-  }
-
-  def insertNodeAt(newNode: SVONode, position: Vector3f, targetHeight: Int) = {
-    val maybePath = Octant.getPathToLocal(position, this.height - targetHeight)
+  def insertNodeAt(newNode: SVONode, worldPosition: Vector3f, targetHeight: Int) = {
+    val scale = math.pow(2, -this.height).toFloat
+    val svoPosition: Vector3f = worldPosition mult scale
+    val maybePath = Octant.getPathToLocal(svoPosition, this.height - targetHeight)
     maybePath flatMap (insertNodePath(newNode, _))
   }
 
-  def insertElementAt (element: Option[Block], position: Vector3f, height: Int) = {
-    insertNodeAt (Full(element), position, height)
+  def insertElementAt (element: Option[Block], worldPosition: Vector3f, height: Int) = {
+    insertNodeAt (Full(element), worldPosition, height)
   }
 }
 

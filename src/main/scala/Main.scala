@@ -15,7 +15,7 @@ import controller.svoState.{SVOSpatialState, SVOPhysicsState}
 
 
 object Main extends SimpleApplication {
-  val MaxHeight = 4
+  val MaxHeight = 2
 
   def main(args: Array[String]): Unit = {
     Main.start()

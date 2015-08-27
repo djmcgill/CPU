@@ -94,6 +94,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     insertionQueue.clear()
   }
 
+  // TODO: the old physics isn't being removed properly.
   // TODO: Could probably greatly simplify this code with getParent
   def replaceGeometryPath(path: List[Octant]): Unit = {
     def replaceGeometryPathGo(spatialToModify: Option[Node], reversedPathSoFar: List[Octant], pathRemaining: List[Octant]): Option[Spatial] =
@@ -154,9 +155,12 @@ class SVOSpatialState extends AbstractAppStateWithApp {
       case Some(svoFirstNode: Node) =>
         val maybeNewNodeG = replaceGeometryPathGo(Some(svoFirstNode), List(), path)
         maybeNewNodeG foreach {newNode =>
+
           svoRootNode.detachChildNamed(FirstChildName)
-          // FIXME: this line is throwing nullpointerexceptions in PhysicsSpace.remove
-          bulletAppState.getPhysicsSpace.remove(svoFirstNode)
+          val physicsSpace = bulletAppState.getPhysicsSpace
+          if (physicsSpace != null && svoFirstNode != null) {
+            bulletAppState.getPhysicsSpace.remove(svoFirstNode)
+          } else {println(s"physicsSpace: $physicsSpace, svoFirstNode: $svoFirstNode")}
           newNode.setName(FirstChildName)
           svoRootNode.attachChild(newNode)
         }
