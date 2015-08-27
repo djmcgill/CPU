@@ -18,7 +18,7 @@ import scala.collection.mutable
  * Renders a svo between (0,0,0) and (1,1,1)
  * Will soon generate the physics controls too
  */
-// FIXME: it's a bad idea to draw everything between 0,0,0 and 1,1,1. Instead draw size 0 as that size.
+// TODO: this should attach svophysics itself, rather than main doing it.
 class SVOSpatialState extends AbstractAppStateWithApp {
   private val svo: SVO = SVO.initialWorld
   private val FirstChildName = "First child"

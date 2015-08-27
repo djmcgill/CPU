@@ -10,7 +10,7 @@ import com.jme3.scene.{Node, Geometry}
 import com.jme3.scene.shape.Box
 import com.jme3.util.TangentBinormalGenerator
 import controller._
-import controller.peonState.Peon
+import controller.peonState.{WASDcontrols, Peon}
 import controller.svoState.{SVOSpatialState, SVOPhysicsState}
 
 object Main extends SimpleApplication {
@@ -26,12 +26,13 @@ object Main extends SimpleApplication {
       new OverviewCameraState,
       new SVOSpatialState,
       new SVOPhysicsState,
-      new Peon
+      new Peon,
+      new WASDcontrols
     )
     assetManager.registerLocator("resources", classOf[FileLocator])
 
-    cam.setFrustumNear(0.5f)
-    println(s"near: ${cam.getFrustumNear}")
+    cam.setFrustumPerspective(45f, cam.getWidth / cam.getHeight, 0.01f, 1000f)
+    cam.update()
 
     // Lighting
     val sun = new DirectionalLight()
