@@ -27,7 +27,7 @@ class RayCasterSpec extends FlatSpec with Matchers {
   "SVO.minimalSubdivided" should "be hit as expected by a horizontal line" in {
     val origin = new Vector3f(0.2f, 0.2f, 5)
     val direction = new Vector3f(0, 0, -1)
-    val predeterminedHit = new Vector3f(0.2f, 0.2f, 0.5f)
+    val predeterminedHit = new Vector3f(0.2f, 0.2f, 1)
     val predeterminedPath = List(new Octant(0))
     val Some((calculatedHit, calculatedPath)) = RayCaster.cast(origin, direction, SVO.minimalSubdivided)
     almostEqual(calculatedHit, predeterminedHit) shouldBe true
@@ -35,9 +35,9 @@ class RayCasterSpec extends FlatSpec with Matchers {
   }
 
   "SVO.minimalSubdivided" should "be hit as expected by a diagonal line" in {
-    val origin = new Vector3f(0.6f, 1.1f, 1.5f)
+    val origin = new Vector3f(1.2f, 3, 3)
     val direction = new Vector3f(0, -1, -1)
-    val predeterminedHit = new Vector3f(0.6f, 0.6f, 1)
+    val predeterminedHit = new Vector3f(1.2f, 2, 2)
     val predeterminedPath = List(new Octant(7))
     val Some((calculatedHit, calculatedPath)) = RayCaster.cast(origin, direction, SVO.minimalSubdivided)
     almostEqual(calculatedHit, predeterminedHit) shouldBe true
