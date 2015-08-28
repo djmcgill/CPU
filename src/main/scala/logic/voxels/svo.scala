@@ -62,7 +62,7 @@ object SVO {
     val arr: Array[SVO] = Array(empty, empty, empty, empty, empty, empty, empty, empty)
     val world: SVO = new SVO(new Subdivided(arr), 1)
     world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.1f, 0.1f), 0)
-    world.insertElementAt(Some(new Dirt()), new Vector3f(0.9f, 0.9f, 0.9f), 0)
+    world.insertElementAt(Some(new Dirt()), new Vector3f(1.9f, 1.9f, 1.9f), 0)
     world
   }
   def size3 = {
@@ -133,6 +133,14 @@ case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLog
     case o :: os => this.node match {
       case Full(element) => Full(element)
       case Subdivided(subSVOs) => subSVOs(o.ix).getNodePath(os)
+    }
+  }
+
+  def getSVOPath(path: List[Octant]): SVO = path match {
+    case Nil     => this
+    case o :: os => this.node match {
+      case Full(element) => this
+      case Subdivided(subSVOs) => subSVOs(o.ix).getSVOPath(os)
     }
   }
 

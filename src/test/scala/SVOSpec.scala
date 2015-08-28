@@ -3,13 +3,13 @@ import logic.voxels._
 import org.scalatest._
 
 class SVOSpec extends FlatSpec with Matchers {
-  "SVO.minimalInserted" should "correctly produce the same results as hard coding it" in {
+  "insertElementAt" should "correctly produce the same results as hard coding it" in {
     SVO.minimalInserted shouldBe SVO.minimalSubdivided
   }
 
   it should "insert correctly into SVO.minimalInserted" in {
     val svo = SVO.minimalInserted
-    svo.insertElementAt(Some(new Dirt()), new Vector3f(0.9f, 0.1f, 0.1f), 0)
+    svo.insertElementAt(Some(new Dirt()), new Vector3f(1.9f, 0.1f, 0.1f), 0)
     val expectedSVO = octants(1, List(0, 1, 7))
     svo shouldBe expectedSVO
   }
@@ -22,7 +22,7 @@ class SVOSpec extends FlatSpec with Matchers {
 
   it should "delete correctly from SVO.minimalInserted" in {
     val svo = SVO.minimalInserted
-    svo.insertElementAt(None, new Vector3f(0.9f, 0.9f, 0.9f), 0)
+    svo.insertElementAt(None, new Vector3f(1.9f, 1.9f, 1.9f), 0)
     val expectedSVO = octants(1, List(0))
     svo shouldBe expectedSVO
   }
@@ -36,7 +36,7 @@ class SVOSpec extends FlatSpec with Matchers {
     svo shouldBe SVO.size2
   }
 
-  it should "insert correctly into size2" in {
+  "insertNodetPath" should "insert correctly into size2" in {
     val expectedSVO = octants(2, List())
     expectedSVO.node match {
       case Subdivided(arr) =>
