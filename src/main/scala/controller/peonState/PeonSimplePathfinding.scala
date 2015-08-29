@@ -42,6 +42,7 @@ class PeonSimplePathfinding(targetPosition: Vector3f, finish: Promise[Boolean], 
         spatial.setLocalRotation(rotation)
         val walkDir = rotation mult Vector3f.UNIT_Z mult tpf mult 3000
         control.setWalkDirection(walkDir)
+        control.jump()
         // TODO: something about the peon's walk speed?
         // TODO: do we need to jump?
       }

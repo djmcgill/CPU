@@ -88,8 +88,8 @@ object Main extends SimpleApplication {
       newChild.setLocalTranslation(x, y, z)
       cornerNode.attachChild(newChild)
     }
-    val scale = math.pow(2, MaxHeight).toFloat
-    cornerNode.scale(scale)
+    //val scale = math.pow(2, MaxHeight).toFloat
+    //cornerNode.scale(scale)
     rootNode.attachChild(cornerNode)
   }
 }

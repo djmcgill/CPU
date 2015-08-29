@@ -16,44 +16,48 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
     bulletAppState = app.getStateManager.getState[BulletAppState](classOf[BulletAppState])
-    Option(app.getRootNode.getChild(FirstChildName)) foreach attachPhysics
+    Option(app.getRootNode.getChild(FirstChildName)) foreach attachSVOPhysics
   }
 
-  private def attachPhysicsToGeometryVoxel(cubeGeometry: Geometry) = {
-    val physicsShape = new MeshCollisionShape(cubeGeometry.getMesh)
-    physicsShape.setScale(cubeGeometry.getWorldScale)
-    val physicsControl = new RigidBodyControl(physicsShape, 0)
-    physicsControl.setKinematic(false)
-    cubeGeometry.addControl(physicsControl)
-    bulletAppState.getPhysicsSpace.add(physicsControl)
-  }
-
-  def detachPhysicsFromSVOSpatial(svoSpatial: Spatial) = {
-    svoSpatial match {
-      case geo: Geometry => geo.removeControl(classOf[RigidBodyControl])
-      case _ => }
-    bulletAppState.getPhysicsSpace.removeAll(svoSpatial)
-  }
-
-  def attachPhysics(svoSpatial: Spatial): Unit = svoSpatial match {
+  /** Recurse over a SVOSpatial, adding RigidBodyControls to each of the geometries.
+    * Would using CompoundPhysicsShapes on the nodes be better?
+    */
+  def attachSVOPhysics(svoSpatial: Spatial): Unit = svoSpatial match {
     case cubeGeometry: Geometry =>
-      attachPhysicsToGeometryVoxel(cubeGeometry)
+      // Attach a cubic RigidBodyControl to this geometry.
+      val physicsShape = new MeshCollisionShape(cubeGeometry.getMesh)
+      physicsShape.setScale(cubeGeometry.getWorldScale)
+      val physicsControl = new RigidBodyControl(physicsShape, 0)
+      physicsControl.setKinematic(false)
+      cubeGeometry.addControl(physicsControl)
+      bulletAppState.getPhysicsSpace.add(physicsControl)
+
     case cubeNode: Node =>
+      // Recurse on all the sub-octants
       val possibleChildNames = Array("0", "1", "2", "3", "4", "5", "6", "7")
       possibleChildNames foreach {childName =>
-        Option(cubeNode.getChild(childName)) foreach attachPhysics}
+        Option(cubeNode.getChild(childName)) foreach attachSVOPhysics}
     case _ => throw new ClassCastException
   }
 
-  def addVoxelPhysicsPath(svoGeometry: Spatial, path: List[Octant]): Unit = (svoGeometry, path) match {
-    case (voxelGeom: Geometry, _) => attachPhysicsToGeometryVoxel(voxelGeom)
-    case (svoNode: Node,     Nil) =>
-      detachPhysicsFromSVOSpatial(svoNode)
-      attachPhysics(svoNode)
-    case (svoNode: Node, o :: os) => Option(svoNode.getChild(o.ix.toString)) match {
-      case Some(spatial: Spatial) => addVoxelPhysicsPath(spatial, os)
-      case _ =>
-    }
-    case _ => throw new IllegalStateException
+  override def cleanup(): Unit = {
+    Option(app.getRootNode.getChild(FirstChildName)) foreach detachSVOPhysics
+    super.cleanup()
+  }
+
+  /** Recurse over a SVOSpatial, removing RigidBodyControls from each of the
+    * sub-svo geometries.
+    */
+  def detachSVOPhysics(svoSpatial: Spatial): Unit = svoSpatial match {
+    case cubeGeometry: Geometry =>
+      // Detach a RigidBodyControl from this geometry.
+      cubeGeometry.removeControl(classOf[RigidBodyControl])
+
+    case cubeNode: Node =>
+      // Recurse on all the sub-octants
+      val possibleChildNames = Array("0", "1", "2", "3", "4", "5", "6", "7")
+      possibleChildNames foreach {childName =>
+        Option(cubeNode.getChild(childName)) foreach detachSVOPhysics}
+    case _ => throw new ClassCastException
   }
 }
