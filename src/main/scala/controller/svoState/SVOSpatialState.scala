@@ -103,7 +103,6 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     val svoToInsert: SVO = svo.getSVOPath(path)
     assert(svoToInsert.height + path.length == svo.height)
 
-    // FIXME: this is not correct in all cases
     val oldChild: Spatial = getSpatialAtAbsolute(svoSpatial, path)
 
     assert(oldChild.getUserData[Int]("height") == svoToInsert.height)
@@ -116,6 +115,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     println(s"parent's ($parentSpatial) child named ${oldChild.getName} before detaching is ${parentSpatial.getChild(oldChild.getName)}")
     println(s"that child's parent before detaching is ${oldChild.getParent}")
 
+    // FIXME XXX this line is broken - to witness, run and delete all the voxels at the front-top from left to right (or right to left)
     parentSpatial.detachChild(oldChild) // same results
 //    oldChild.removeFromParent() // same results
 //    parentSpatial.detachChildNamed(oldChild.getName) // same results
