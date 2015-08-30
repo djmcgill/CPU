@@ -1,21 +1,19 @@
 import com.jme3.app.SimpleApplication
 import com.jme3.asset.plugins.FileLocator
 import com.jme3.bullet.BulletAppState
-import com.jme3.bullet.collision.shapes.MeshCollisionShape
-import com.jme3.bullet.control.RigidBodyControl
 import com.jme3.light.{AmbientLight, DirectionalLight}
 import com.jme3.material.Material
-import com.jme3.math.{Vector2f, ColorRGBA, Vector3f}
-import com.jme3.scene.{Spatial, Node, Geometry}
+import com.jme3.math._
+import com.jme3.scene._
 import com.jme3.scene.shape.Box
 import com.jme3.util.TangentBinormalGenerator
 import controller._
 import controller.peonState.Peon
-import controller.svoState.{SVOSpatialState, SVOPhysicsState}
+import controller.svoState.SVOSpatialState
 
 
 object Main extends SimpleApplication {
-  val MaxHeight = 2
+  val MaxHeight = 5
 
   def main(args: Array[String]): Unit = {
     Main.start()

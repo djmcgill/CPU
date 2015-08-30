@@ -2,7 +2,6 @@ package logic.voxels
 
 import com.jme3.export._
 import com.jme3.math.Vector3f
-import com.typesafe.scalalogging.LazyLogging
 
 
 /**
@@ -98,7 +97,7 @@ object SVO {
 /**
  * Each Sparse Voxel Octree thinks that it is the cube (0,0,0) to (1,1,1)
  */
-case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLogging {
+case class SVO (var node: SVONode, var height: Int) extends Savable {
   def this() = this(new Full(None), 0)
 
   private val nodeName = "node"
@@ -179,7 +178,6 @@ case class SVO (var node: SVONode, var height: Int) extends Savable with LazyLog
             // this could be better
             val allAreFull = subNodes forall {case Full(_) => true; case _ => false}
             if (allAreFull && subNodes.distinct.length == 1) {
-              logger.debug("All of the subnodes were the same, now combining them.")
               Some(subNodes(0) match {case Full(b) => b})
             } else None
         }

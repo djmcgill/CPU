@@ -5,7 +5,7 @@ import com.jme3.app.state.AppStateManager
 import com.jme3.bullet.control.BetterCharacterControl
 import com.jme3.input.KeyInput
 import com.jme3.input.controls._
-import com.jme3.math.{Quaternion, Vector3f}
+import com.jme3.math._
 import com.jme3.scene.{Geometry, Spatial}
 import controller.AbstractAppStateWithApp
 
@@ -49,10 +49,10 @@ class WASDcontrols extends AbstractAppStateWithApp {
       walkDirection.addLocal(0, 0, -1)
     }
     if (turningLeft) {
-      facingAngle = (facingAngle + (math.Pi.toFloat/2) * tpf) % (2 * math.Pi.toFloat)
+      facingAngle = (facingAngle + FastMath.HALF_PI * tpf) % FastMath.TWO_PI
     }
     if (turningRight) {
-      facingAngle = (facingAngle - (math.Pi.toFloat/2) * tpf) % (2 * math.Pi.toFloat)
+      facingAngle = (facingAngle - FastMath.HALF_PI * tpf) % FastMath.TWO_PI
     }
 
     walkDirection.multLocal(100).multLocal(tpf)
@@ -62,11 +62,6 @@ class WASDcontrols extends AbstractAppStateWithApp {
     val finalWalkDirection = facingRotation mult walkDirection
     if (finalWalkDirection != Vector3f.ZERO) {
       println(s"walking: $finalWalkDirection at angle $facingAngle")}
-
-    // TODO: the model won't actually rotate
-//    def pleaseRotate(spatial: Spatial) = spatial match {
-//
-//    }
 
     peonSpatial match {
       case geom: Geometry => geom.rotate(facingRotation)

@@ -20,8 +20,7 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
     Option(app.getRootNode.getChild(SvoRootName)) foreach attachSVOPhysics
   }
 
-  /**
-    * Recurse over a SVOSpatial, adding RigidBodyControls to each of the geometries.
+  /** Recurse over a SVOSpatial, adding RigidBodyControls to each of the geometries.
     * Would using CompoundPhysicsShapes on the nodes be better?
     */
   def attachSVOPhysics(svoSpatial: Spatial): Unit = svoSpatial match {
@@ -43,7 +42,9 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
   /** Recurse over a SVOSpatial, removing RigidBodyControls from each of the sub-svo geometries. */
   def detachSVOPhysics(svoSpatial: Spatial): Unit = svoSpatial match {
     case cubeGeometry: Geometry =>
-      bulletAppState.getPhysicsSpace.remove(cubeGeometry)
+      if (cubeGeometry != null && svoSpatial.getControl[RigidBodyControl](classOf[RigidBodyControl]) != null) {
+        bulletAppState.getPhysicsSpace.remove(cubeGeometry)
+      }
 
     case cubeNode: Node =>
       // Recurse on all the sub-octants
@@ -53,10 +54,5 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
 
   private def getImmediateChild(node: Node, childName: String): Option[Spatial] = {
     node.getChildren.toList find (_.getName == childName)
-  }
-
-  override def cleanup(): Unit = {
-    Option(app.getRootNode.getChild(SvoRootName)) foreach detachSVOPhysics
-    super.cleanup()
   }
 }

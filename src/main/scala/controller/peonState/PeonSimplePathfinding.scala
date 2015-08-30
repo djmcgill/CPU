@@ -11,13 +11,11 @@ import com.jme3.system.lwjgl.LwjglTimer
 import scala.concurrent.Promise
 import scala.util.Success
 
-class PeonSimplePathfinding(targetPosition: Vector3f, finish: Promise[Boolean], timeoutSeconds: Float) extends AbstractControl{
+class PeonSimplePathfinding(targetPosition: Vector3f,
+                            finish: Promise[Boolean],
+                            maybeTimeoutSeconds: Option[Float]) extends AbstractControl{
 
-  // TODO: have world scale global variable
-  // TODO: make timeout optional
-  // TODO: maybe an action to undertake when succeeded?
-  val CloseEnough = 0.02f
-  val CloseEnoughSquared = CloseEnough * CloseEnough
+  val CloseEnoughSquared = 0.2f * 0.2f
   val timer = new LwjglTimer()
 
   override def controlRender(renderManager: RenderManager, viewPort: ViewPort): Unit = {}
@@ -25,7 +23,7 @@ class PeonSimplePathfinding(targetPosition: Vector3f, finish: Promise[Boolean], 
   override def controlUpdate(tpf: Float): Unit = {
     val control = spatial.getControl[BetterCharacterControl](classOf[BetterCharacterControl])
 
-    if (timer.getTimeInSeconds > timeoutSeconds) {
+    if (maybeTimeoutSeconds exists (timer.getTimeInSeconds > _)) {
       finish.failure(new TimeoutException)
       control.setWalkDirection(Vector3f.ZERO)
       spatial.removeControl(this)
@@ -44,7 +42,6 @@ class PeonSimplePathfinding(targetPosition: Vector3f, finish: Promise[Boolean], 
         control.setWalkDirection(walkDir)
         control.jump()
         // TODO: something about the peon's walk speed?
-        // TODO: do we need to jump?
       }
     }
   }
