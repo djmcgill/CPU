@@ -7,7 +7,8 @@ import com.jme3.bullet.collision.shapes._
 import com.jme3.bullet.control.RigidBodyControl
 import com.jme3.scene._
 import controller.AbstractAppStateWithApp
-import logic.voxels._
+
+import scala.collection.JavaConversions._
 
 class SVOPhysicsState extends AbstractAppStateWithApp {
   private val SvoRootName = "svoSpatial"
@@ -50,12 +51,17 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
   def detachSVOPhysics(svoSpatial: Spatial): Unit = svoSpatial match {
     case cubeGeometry: Geometry =>
       // Detach a RigidBodyControl from this geometry.
-      cubeGeometry.removeControl(classOf[RigidBodyControl])
+      //cubeGeometry.removeControl(classOf[RigidBodyControl])
+      bulletAppState.getPhysicsSpace.remove(cubeGeometry)
 
     case cubeNode: Node =>
       // Recurse on all the sub-octants
       (0 until 8) foreach {ix =>
-        Option(cubeNode.getChild(ix.toString)) foreach detachSVOPhysics}
+        getImmediateChild(cubeNode, ix.toString) foreach detachSVOPhysics}
     case _ => throw new ClassCastException
+  }
+
+  private def getImmediateChild(node: Node, childName: String): Option[Spatial] = {
+    node.getChildren.toList find (_.getName == childName)
   }
 }
