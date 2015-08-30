@@ -12,15 +12,16 @@ import scala.collection.JavaConversions._
 
 class SVOPhysicsState extends AbstractAppStateWithApp {
   private val SvoRootName = "svoSpatial"
-  private var bulletAppState: BulletAppState = _
+  private lazy val bulletAppState: BulletAppState =
+    app.getStateManager.getState[BulletAppState](classOf[BulletAppState])
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
-    bulletAppState = app.getStateManager.getState[BulletAppState](classOf[BulletAppState])
     Option(app.getRootNode.getChild(SvoRootName)) foreach attachSVOPhysics
   }
 
-  /** Recurse over a SVOSpatial, adding RigidBodyControls to each of the geometries.
+  /**
+    * Recurse over a SVOSpatial, adding RigidBodyControls to each of the geometries.
     * Would using CompoundPhysicsShapes on the nodes be better?
     */
   def attachSVOPhysics(svoSpatial: Spatial): Unit = svoSpatial match {
@@ -35,33 +36,27 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
 
     case cubeNode: Node =>
       // Recurse on all the sub-octants
-      (0 until 8) foreach {ix =>
-        Option(cubeNode.getChild(ix.toString)) foreach attachSVOPhysics}
+      (0 until 8) foreach {ix => Option(cubeNode.getChild(ix.toString)) foreach attachSVOPhysics}
     case _ => throw new ClassCastException
   }
 
-  override def cleanup(): Unit = {
-    Option(app.getRootNode.getChild(SvoRootName)) foreach detachSVOPhysics
-    super.cleanup()
-  }
-
-  /** Recurse over a SVOSpatial, removing RigidBodyControls from each of the
-    * sub-svo geometries.
-    */
+  /** Recurse over a SVOSpatial, removing RigidBodyControls from each of the sub-svo geometries. */
   def detachSVOPhysics(svoSpatial: Spatial): Unit = svoSpatial match {
     case cubeGeometry: Geometry =>
-      // Detach a RigidBodyControl from this geometry.
-      //cubeGeometry.removeControl(classOf[RigidBodyControl])
       bulletAppState.getPhysicsSpace.remove(cubeGeometry)
 
     case cubeNode: Node =>
       // Recurse on all the sub-octants
-      (0 until 8) foreach {ix =>
-        getImmediateChild(cubeNode, ix.toString) foreach detachSVOPhysics}
+      (0 until 8) foreach {ix => getImmediateChild(cubeNode, ix.toString) foreach detachSVOPhysics}
     case _ => throw new ClassCastException
   }
 
   private def getImmediateChild(node: Node, childName: String): Option[Spatial] = {
     node.getChildren.toList find (_.getName == childName)
+  }
+
+  override def cleanup(): Unit = {
+    Option(app.getRootNode.getChild(SvoRootName)) foreach detachSVOPhysics
+    super.cleanup()
   }
 }
