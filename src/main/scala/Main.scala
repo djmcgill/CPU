@@ -32,7 +32,6 @@ object Main extends SimpleApplication {
       bulletAppState,
       new OverviewCameraState,
       new SVOSpatialState,
-      new SVOPhysicsState,
       new Peon
     )
     assetManager.registerLocator("resources", classOf[FileLocator])

@@ -10,13 +10,13 @@ import controller.AbstractAppStateWithApp
 import logic.voxels._
 
 class SVOPhysicsState extends AbstractAppStateWithApp {
-  private val FirstChildName = "First child"
+  private val SvoRootName = "svoSpatial"
   private var bulletAppState: BulletAppState = _
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
     bulletAppState = app.getStateManager.getState[BulletAppState](classOf[BulletAppState])
-    Option(app.getRootNode.getChild(FirstChildName)) foreach attachSVOPhysics
+    Option(app.getRootNode.getChild(SvoRootName)) foreach attachSVOPhysics
   }
 
   /** Recurse over a SVOSpatial, adding RigidBodyControls to each of the geometries.
@@ -34,14 +34,13 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
 
     case cubeNode: Node =>
       // Recurse on all the sub-octants
-      val possibleChildNames = Array("0", "1", "2", "3", "4", "5", "6", "7")
-      possibleChildNames foreach {childName =>
-        Option(cubeNode.getChild(childName)) foreach attachSVOPhysics}
+      (0 until 8) foreach {ix =>
+        Option(cubeNode.getChild(ix.toString)) foreach attachSVOPhysics}
     case _ => throw new ClassCastException
   }
 
   override def cleanup(): Unit = {
-    Option(app.getRootNode.getChild(FirstChildName)) foreach detachSVOPhysics
+    Option(app.getRootNode.getChild(SvoRootName)) foreach detachSVOPhysics
     super.cleanup()
   }
 
@@ -55,9 +54,8 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
 
     case cubeNode: Node =>
       // Recurse on all the sub-octants
-      val possibleChildNames = Array("0", "1", "2", "3", "4", "5", "6", "7")
-      possibleChildNames foreach {childName =>
-        Option(cubeNode.getChild(childName)) foreach detachSVOPhysics}
+      (0 until 8) foreach {ix =>
+        Option(cubeNode.getChild(ix.toString)) foreach detachSVOPhysics}
     case _ => throw new ClassCastException
   }
 }

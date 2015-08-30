@@ -14,15 +14,18 @@ import logic.voxels._
 
 import scala.collection.mutable
 
+import scala.collection.JavaConversions._
+
 /**
- * Renders a svo between (0,0,0) and (1,1,1)
- * Will soon generate the physics controls too
+ * Renders a svo and attaches the physics.
  */
 // TODO: this should attach svophysics itself, rather than main doing it.
 class SVOSpatialState extends AbstractAppStateWithApp {
+  // TODO: switch these to lazy vals
+  private var SvoRootName = "svoSpatial"
   private var svo: SVO = _
   private var bulletAppState: BulletAppState = _
-  private var svoPhysicsControl: SVOPhysicsState = _
+  private var svoPhysicsState: SVOPhysicsState = _
 
   private lazy val boxMaterial = {
     val assetManager = app.getAssetManager
@@ -69,7 +72,8 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     app.getStateManager.attach(new SVOInsertElementControl(insertionQueue))
     app.getStateManager.attach(new SVODeleteElementControl(insertionQueue))
 
-    svoPhysicsControl = app.getStateManager.getState[SVOPhysicsState](classOf[SVOPhysicsState])
+    svoPhysicsState = new SVOPhysicsState
+    app.getStateManager.attach(svoPhysicsState)
 
     // Create a spatial for the SVO and call it "svoSpatial".
     createSpatialFromSVONode(svo.node, svo.height) foreach {svoSpatial =>
@@ -93,10 +97,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     insertionQueue.clear()
   }
 
-  def replaceGeometryPath(path: List[Octant]): Unit = {
-
-
-    println(s"path: $path")
+  private def replaceGeometryPath(path: List[Octant]): Unit = {
     val svoSpatial = app.getRootNode.getChild("svoSpatial")
     if (svoSpatial == null) {throw new IllegalStateException("You deleted the world!!")}
 
@@ -104,37 +105,22 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     assert(svoToInsert.height + path.length == svo.height)
 
     val oldChild: Spatial = getSpatialAtAbsolute(svoSpatial, path)
-
     assert(oldChild.getUserData[Int]("height") == svoToInsert.height)
 
     val parentSpatial = oldChild.getParent
 
-    // Delete the old spatial
-    println(s"about to delete '$oldChild' from '$parentSpatial'")
-    println(s"parentSpatial's children before detaching '$oldChild' are: ${parentSpatial.getChildren}")
-    println(s"parent's ($parentSpatial) child named ${oldChild.getName} before detaching is ${parentSpatial.getChild(oldChild.getName)}")
-    println(s"that child's parent before detaching is ${oldChild.getParent}")
+    parentSpatial.detachChild(oldChild)
 
-    // FIXME XXX this line is broken - to witness, run and delete all the voxels at the front-top from left to right (or right to left)
-    parentSpatial.detachChild(oldChild) // same results
-//    oldChild.removeFromParent() // same results
-//    parentSpatial.detachChildNamed(oldChild.getName) // same results
-
-    println(s"parentSpatial's children after: detaching '$oldChild' are: ${parentSpatial.getChildren}")
-    println(s"parent's ($parentSpatial) child named ${oldChild.getName} after detaching is ${parentSpatial.getChild(oldChild.getName)}")
-    println(s"that child's parent after detaching is ${oldChild.getParent}")
-
-    // Add the new spatial
+    // Add the new spatial if it was generated.
     createSpatialFromSVONode(svoToInsert.node, svoToInsert.height) foreach { newChild =>
       newChild.setName(oldChild.getName)
-
       newChild.setLocalTranslation(oldChild.getLocalTranslation)
       parentSpatial.attachChild(newChild)
     }
   }
 
   /** Turn a SVONode into a Spatial. */
-  def createSpatialFromSVONode(svoNode: SVONode, svoHeight: Int): Option[Spatial] = svoNode match {
+  private def createSpatialFromSVONode(svoNode: SVONode, svoHeight: Int): Option[Spatial] = svoNode match {
     case Full(None) => None
 
     // Create a cube geometry here
@@ -159,14 +145,13 @@ class SVOSpatialState extends AbstractAppStateWithApp {
   /** Go down a path until the spatial is returned. Will create child nodes if necessary
     * but will NOT split a geometry.
     */
-  def getSpatialAtAbsolute(svoSpatial: Spatial, path: List[Octant]): Spatial = {
+  private def getSpatialAtAbsolute(svoSpatial: Spatial, path: List[Octant]): Spatial = {
     val height = svoSpatial.getUserData[Int]("height")
     println(s"getSpatialAtAbsolute height: $height path: $path")
     (svoSpatial, path) match {
       case (geo: Geometry, Nil) => geo
       case (geo: Geometry, o :: os) =>
         val parent = geo.getParent
-
         val newChildNode = new Node(o.ix.toString)
         newChildNode.scale(0.5f)
         val parentHeight = parent.getUserData[Int]("height")
@@ -178,7 +163,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
         newChildNode
 
       case (node: Node, Nil) => node
-      case (node: Node, o :: os) => Option(node.getChild(o.ix.toString)) match {
+      case (node: Node, o :: os) => getImmediateChild(node, o.ix.toString) match {
         case Some(childNode) =>
           val nodeHeight = node.getUserData[Int]("height")
           val childHeight = childNode.getUserData[Int]("height")
@@ -198,5 +183,15 @@ class SVOSpatialState extends AbstractAppStateWithApp {
           getSpatialAtAbsolute(newChildNode, os)
       }
     }
+  }
+
+  override def cleanup(): Unit = {
+    app.getStateManager.detach(svoPhysicsState)
+    super.cleanup()
+  }
+
+  private def getImmediateChild(node: Node, childName: String): Option[Spatial] = {
+    node.getChildren.toList foreach {case child:Spatial => if (child.getName == childName) {return Some(child)}}
+    None
   }
 }
