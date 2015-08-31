@@ -112,6 +112,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     box
   }
 
+  // TODO: rename to dirt
   private lazy val boxMaterial = {
     val assetManager = app.getAssetManager
     val boxMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md")
@@ -141,6 +142,16 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     boxMat.setColor("Diffuse", new ColorRGBA(1, 1, 1, 0.7f))
     boxMat.getAdditionalRenderState.setBlendMode(BlendMode.Alpha)
     boxMat
+  }
+
+  private lazy val metalMaterial = {
+    val assetManager = app.getAssetManager
+    val boxMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
+
+    val colourTexture = assetManager.loadTexture("Textures/ScratchedMetal/ScratchedMetal.jpg")
+    colourTexture.setWrap(Texture.WrapMode.Repeat)
+    boxMaterial.setTexture("ColorMap", colourTexture)
+    boxMaterial
   }
 
   /** Turn a SVONode into a Spatial. */
