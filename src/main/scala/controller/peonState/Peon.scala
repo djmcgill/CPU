@@ -27,11 +27,11 @@ class Peon extends AbstractAppStateWithApp {
 
     val peonControl = new BetterCharacterControl(0.8f*peonScale, 4*peonScale, 1)
     peonNode.addControl(peonControl)
-    peonControl.setJumpForce(new Vector3f(0,1.2f,0))
+    peonControl.setJumpForce(new Vector3f(0,0.2f,0))
     peonControl.setGravity(new Vector3f(0,0.8f,0))
     val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
     val scale = math.pow(2, maxHeight).toFloat
-    peonControl.warp(new Vector3f(0.8f,scale * 2,0.8f))
+    peonControl.warp(new Vector3f(0.8f,scale * 1.1f,0.8f))
 
     val bulletAppState = app.getStateManager.getState[BulletAppState](classOf[BulletAppState])
     bulletAppState.getPhysicsSpace.add(peonControl)
@@ -39,7 +39,8 @@ class Peon extends AbstractAppStateWithApp {
 
     app.getRootNode.attachChild(peonNode)
 
-    app.getStateManager.attach(new PeonJobControl(peonNode))
+    val jobQueue = app.getStateManager.getState[PeonJobQueue](classOf[PeonJobQueue])
+    peonNode.addControl(new JobSeekerControl(jobQueue))
   }
 
   override def cleanup(): Unit = {

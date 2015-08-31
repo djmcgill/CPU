@@ -15,8 +15,7 @@ import scala.collection.mutable
  */
 
 // TODO: is passing around the queue the best way? Could we instead just let the Control call a function in enqueue?
-abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, Vector3f)])
-    extends AbstractActionListenerState {
+abstract class AbstractSVOInsertionControl extends AbstractActionListenerState {
   val node: SVONode
   val insertion: Boolean
 
@@ -32,13 +31,9 @@ abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, Vector
 
     result foreach {case (absoluteHitPosition, path) =>
       // convert from world coordinates to the (0,0,0),(1,1,1) cube of the svo
-      val maxHeight: Int = app.getRootNode.getUserData[Int]("maxHeight")
-      val scale: Float = math.pow(2f, -maxHeight).toFloat
 
-      val svoAbsoluteHitPosition = absoluteHitPosition mult scale
-      // What's the hit position relative to the clicked on cube?
-      // Note that this should be on its face.
-      val relativeHitPosition = path.foldLeft(svoAbsoluteHitPosition){case (v, o) => o.toChildSpace(v)}
+      val maxHeight: Int = app.getRootNode.getUserData[Int]("maxHeight")
+      val relativeHitPosition = Octant.globalToLocal(maxHeight, absoluteHitPosition, path)
 
       // We have a point on the face of a cube, and we want to nudge it over
       // the boundary so that the insert position corresponds to the cube touching that face.
@@ -59,7 +54,9 @@ abstract class AbstractSVOInsertionControl(queue: mutable.Queue[(SVONode, Vector
         case _ => throw new IllegalStateException
       }
       val onBlockOrNewBlock = if (insertion) {adjustment} else {adjustment mult -1}
-      queue.enqueue((node, absoluteHitPosition add onBlockOrNewBlock))
+      val insertPosition = absoluteHitPosition add onBlockOrNewBlock
+      val queueManager = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
+      queueManager.requestSVOInsertion(node, insertPosition)
     }
   }
 }

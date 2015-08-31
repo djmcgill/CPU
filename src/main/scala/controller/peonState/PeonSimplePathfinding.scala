@@ -15,7 +15,7 @@ class PeonSimplePathfinding(targetPosition: Vector3f,
                             finish: Promise[Boolean],
                             maybeTimeoutSeconds: Option[Float]) extends AbstractControl{
 
-  val CloseEnoughSquared = 0.2f * 0.2f
+  val CloseEnoughSquared = math.pow(1.5f, 2)
   val timer = new LwjglTimer()
 
   override def controlRender(renderManager: RenderManager, viewPort: ViewPort): Unit = {}

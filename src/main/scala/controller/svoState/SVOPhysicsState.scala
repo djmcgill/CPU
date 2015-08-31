@@ -25,13 +25,15 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
     */
   def attachSVOPhysics(svoSpatial: Spatial): Unit = svoSpatial match {
     case cubeGeometry: Geometry =>
-      // Attach a cubic RigidBodyControl to this geometry.
-      val physicsShape = new MeshCollisionShape(cubeGeometry.getMesh)
-      physicsShape.setScale(cubeGeometry.getWorldScale)
-      val physicsControl = new RigidBodyControl(physicsShape, 0)
-      physicsControl.setKinematic(false)
-      cubeGeometry.addControl(physicsControl)
-      bulletAppState.getPhysicsSpace.add(physicsControl)
+      if(!Option(cubeGeometry.getUserData[Boolean]("phantom")).contains(true)) {
+        // Attach a cubic RigidBodyControl to this geometry.
+        val physicsShape = new MeshCollisionShape(cubeGeometry.getMesh)
+        physicsShape.setScale(cubeGeometry.getWorldScale)
+        val physicsControl = new RigidBodyControl(physicsShape, 0)
+        physicsControl.setKinematic(false)
+        cubeGeometry.addControl(physicsControl)
+        bulletAppState.getPhysicsSpace.add(physicsControl)
+      }
 
     case cubeNode: Node =>
       // Recurse on all the sub-octants

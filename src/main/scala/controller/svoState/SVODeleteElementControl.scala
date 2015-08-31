@@ -7,8 +7,7 @@ import logic.voxels._
 
 import scala.collection.mutable
 
-class SVODeleteElementControl(queue: mutable.Queue[(SVONode, Vector3f)])
-    extends AbstractSVOInsertionControl(queue) {
+class SVODeleteElementControl extends AbstractSVOInsertionControl {
   override val name = "DELETE FROM FACE"
   override val triggers = Seq(new MouseButtonTrigger(MouseInput.BUTTON_RIGHT))
   override val node: SVONode = Full(None)

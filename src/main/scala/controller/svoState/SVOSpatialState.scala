@@ -4,7 +4,9 @@ import com.jme3.app.Application
 import com.jme3.app.state.AppStateManager
 import com.jme3.bullet.BulletAppState
 import com.jme3.material.Material
+import com.jme3.material.RenderState.BlendMode
 import com.jme3.math._
+import com.jme3.renderer.queue.RenderQueue.Bucket
 import com.jme3.scene._
 import com.jme3.scene.shape.Box
 import com.jme3.texture.Texture
@@ -28,14 +30,18 @@ class SVOSpatialState extends AbstractAppStateWithApp {
   /** You can't make changes directly to the SVO or its geometry, you have to register your intention here. */
   val insertionQueue = new mutable.Queue[(SVONode, Vector3f)]()
 
+  def requestSVOInsertion(node: SVONode, position: Vector3f) = {
+    insertionQueue.enqueue((node, position))
+  }
+
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
 
     val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
     app.getRootNode.setUserData("svo", svo)
 
-    app.getStateManager.attach(new SVOInsertElementControl(insertionQueue))
-    app.getStateManager.attach(new SVODeleteElementControl(insertionQueue))
+    app.getStateManager.attach(new SVOInsertElementControl)
+    app.getStateManager.attach(new SVODeleteElementControl)
     app.getStateManager.attach(svoPhysicsState)
 
     // Create a spatial for the SVO and call it "svoSpatial".
@@ -52,7 +58,8 @@ class SVOSpatialState extends AbstractAppStateWithApp {
 
     // Will need to filter the queue for valid requests if we implement multiplayer.
     insertionQueue foreach { case (svoNode, position) =>
-      svo.insertNodeAt(svoNode, position, 0) foreach replaceGeometryPath}
+        svo.insertNodeAt (svoNode, position, 0) foreach replaceGeometryPath
+    }
     insertionQueue.clear()
   }
 
@@ -97,6 +104,14 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     boxGeometry
   }
 
+  private def transparentBox(height: Int) = {
+    val box = shinyBox(height)
+    box.setMaterial(transparentBoxMaterial)
+    box.setQueueBucket(Bucket.Translucent)
+    box.setUserData("phantom", true)
+    box
+  }
+
   private lazy val boxMaterial = {
     val assetManager = app.getAssetManager
     val boxMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md")
@@ -117,14 +132,23 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     boxMaterial
   }
 
+  private lazy val transparentBoxMaterial = {
+    val boxMat = boxMaterial.clone()
+    boxMat.setColor("Diffuse", new ColorRGBA(1, 1, 1, 0.7f))
+    boxMat.getAdditionalRenderState.setBlendMode(BlendMode.Alpha)
+    boxMat
+  }
+
   /** Turn a SVONode into a Spatial. */
   // TODO: refactor to creteSpatialFromSVO?
   private def createSpatialFromSVONode(svoNode: SVONode, svoHeight: Int): Option[Spatial] = svoNode match {
     case Full(None) => None
 
-    // Create a cube geometry here
-    case Full(_) =>
-      Some(shinyBox(svoHeight).clone)
+    case Full(Some(_: Dirt)) =>
+      Some(shinyBox(svoHeight))
+
+    case Full(Some(block: Phantom)) =>
+      Some(transparentBox(svoHeight))
 
     // Create a new node which contains the spatials of the sub-SVOs
     case Subdivided(subSVOs) =>

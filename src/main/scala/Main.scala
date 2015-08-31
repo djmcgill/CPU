@@ -8,7 +8,7 @@ import com.jme3.scene._
 import com.jme3.scene.shape.Box
 import com.jme3.util.TangentBinormalGenerator
 import controller._
-import controller.peonState.Peon
+import controller.peonState.{PeonJobQueue, Peon}
 import controller.svoState.SVOSpatialState
 
 
@@ -30,6 +30,7 @@ object Main extends SimpleApplication {
       bulletAppState,
       new OverviewCameraState,
       new SVOSpatialState,
+      new PeonJobQueue,
       new Peon
     )
     assetManager.registerLocator("resources", classOf[FileLocator])

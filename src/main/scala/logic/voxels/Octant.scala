@@ -7,6 +7,13 @@ object Octant {
     new Octant(v.x > 0.5f, v.y > 0.5f, v.z > 0.5f)
   }
 
+  def globalToLocal(maxHeight: Int, globalPosition: Vector3f, path: List[Octant]) = {
+    val scale: Float = math.pow(2f, -maxHeight).toFloat
+    val svoPosition = globalPosition mult scale
+    path.foldLeft(svoPosition){case (v, o) => o.toChildSpace(v)}
+  }
+
+
   def getPathToLocal(v: Vector3f, maxLength: Int): Option[List[Octant]] = {
     if (!SVO.inBounds(v)) {return None}
     var currentV = v
