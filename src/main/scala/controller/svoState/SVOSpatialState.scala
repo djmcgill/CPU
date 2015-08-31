@@ -53,6 +53,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     }
   }
 
+  // TODO: can batch the replacements of geometries by modifying the SVO first and then combining redundant paths
   override def update(tpf: Float): Unit = {
     super.update(tpf)
 

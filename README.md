@@ -33,3 +33,4 @@ You are a paralysed robot (just a head?) that can have a large throne built arou
  - proper pathfinding using a built-in library
  - skybox
  - sort out the refactor the code for blocks and their textures
+ - make the camera controls and default position somewhat sensible
