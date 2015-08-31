@@ -31,7 +31,7 @@ class Peon extends AbstractAppStateWithApp {
     peonControl.setGravity(new Vector3f(0,0.8f,0))
     val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
     val scale = math.pow(2, maxHeight).toFloat
-    peonControl.warp(new Vector3f(0.8f,scale * 1.1f,0.8f))
+    peonControl.warp(new Vector3f(scale * 0.6f, scale, scale * 0.6f))
 
     val bulletAppState = app.getStateManager.getState[BulletAppState](classOf[BulletAppState])
     bulletAppState.getPhysicsSpace.add(peonControl)

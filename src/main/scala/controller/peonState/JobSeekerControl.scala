@@ -1,7 +1,8 @@
 package controller.peonState
 
 import com.jme3.renderer.{ViewPort, RenderManager}
-import com.jme3.scene.control.AbstractControl
+import com.jme3.scene.control.{Control, AbstractControl}
+import controller.peonState.jobs.PeonSimplePathfinding
 
 class JobSeekerControl(jobQueueManager: PeonJobQueue) extends AbstractControl{
 
@@ -9,7 +10,7 @@ class JobSeekerControl(jobQueueManager: PeonJobQueue) extends AbstractControl{
 
   override def controlUpdate(v: Float): Unit = {
     if (spatial.getControl[PeonSimplePathfinding](classOf[PeonSimplePathfinding]) == null) {
-      val newJob = jobQueueManager.requestJob()
+      val newJob: Control = jobQueueManager.requestJob()
       spatial.addControl(newJob)
     }
   }

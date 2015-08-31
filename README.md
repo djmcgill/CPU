@@ -19,4 +19,15 @@ the artisan/non-practical ones or do you keep the oil-lines pure?
 What would multiplayer be like? Raids on each other's maps?
 You are a paralysed robot (just a head?) that can have a large throne built around it in order to control more minions.
 
-## 
+## TODO to be in alpha
+ - left-click to place a construction order and right-click to place a deletion order
+ - left-click-drag to create squares, and scroll up and down to create cuboids
+ - proper textures for the cubes
+   - some kind of sand or wasteland for all the existing ones
+   - some kind of metal that gets constructed
+ - animation for the peon models
+ - multiple peons and a pooled job queue
+ - sort out lighting properly, with ambient occlusion or whatever
+ - pausing, with a menu to save, load, and rebind keys
+   - make sure that it pauses the various timers and movement too
+ - proper pathfinding using a built-in library

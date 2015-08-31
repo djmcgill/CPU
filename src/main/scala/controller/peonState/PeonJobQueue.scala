@@ -3,18 +3,19 @@ package controller.peonState
 import com.jme3.input.KeyInput
 import com.jme3.input.controls.{KeyTrigger, Trigger}
 import com.jme3.math.Vector3f
+import com.jme3.scene.control.Control
 import controller.AbstractActionListenerState
+import controller.peonState.jobs.{Idle, PeonSimplePathfinding}
 import controller.svoState.SVOSpatialState
 import logic.voxels._
 
 import scala.collection.mutable
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Success
 
 
 class PeonJobQueue() extends AbstractActionListenerState {
-  private val jobQueue: mutable.Queue[PeonSimplePathfinding] = new mutable.Queue()
+  private val jobQueue: mutable.Queue[Control] = new mutable.Queue()
 
   def requestBlockPlacement(globalPosition: Vector3f) = {
     val svo = app.getRootNode.getUserData[SVO]("svo")
@@ -26,16 +27,11 @@ class PeonJobQueue() extends AbstractActionListenerState {
     // have some way to cancel the job maybe?
     val promise: Promise[Boolean] = Promise()
 
-    // TODO: change to onSuccess
-    promise.future.onComplete{
-      case Success(true) =>
-        svo.getNodeAt(globalPosition, 0) match {
-            case Some(Full(Some(Phantom(block)))) if block == blockToInsert =>
-              println("completed, inserting full block")
+    promise.future.onSuccess { case true =>
+        svo.getNodeAt(globalPosition, 0) foreach {
+            case Full(Some(Phantom(block))) if block == blockToInsert =>
               svoInsertionQueue.requestSVOInsertion(Full(Some(blockToInsert)), globalPosition)
-            case _ =>
           }
-      case _ =>
     }
     val pathfinding = new PeonSimplePathfinding(globalPosition, promise, None)
     jobQueue.enqueue(pathfinding)
@@ -45,11 +41,13 @@ class PeonJobQueue() extends AbstractActionListenerState {
     if (jobQueue.isEmpty) {idleJob} else {jobQueue.dequeue()}
   }
 
-  private def idleJob = {
+  // Go to a corner and wait for a time.
+  private def idleJob: Control = {
     val target: Vector3f = new Vector3f(1,1,1) // this is in svo coords
     val promise = Promise[Boolean]()
     val timeout = Some(10f)
-    new PeonSimplePathfinding(target, promise, timeout)
+    val goToCorner = new PeonSimplePathfinding(target, promise, timeout)
+    goToCorner
   }
 
   override val triggers: Seq[Trigger] = Seq(new KeyTrigger(KeyInput.KEY_E))
