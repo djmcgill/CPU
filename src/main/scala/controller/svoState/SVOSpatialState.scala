@@ -116,13 +116,17 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     val assetManager = app.getAssetManager
     val boxMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md")
 
-    val diffuseTexture = assetManager.loadTexture("Textures/newspaper_diffuse.tga")
+    val diffuseTexture = assetManager.loadTexture("Textures/SandPebbles/SandPebblesDiffuse.jpg")
     diffuseTexture.setWrap(Texture.WrapMode.Repeat)
     boxMaterial.setTexture("DiffuseMap", diffuseTexture)
 
-    val normalTexture = assetManager.loadTexture("Textures/newspaper_normal.tga")
+    val normalTexture = assetManager.loadTexture("Textures/SandPebbles/SandPebblesNormal.jpg")
     normalTexture.setWrap(Texture.WrapMode.Repeat)
     boxMaterial.setTexture("NormalMap", normalTexture)
+
+    val specularTexture = assetManager.loadTexture("Textures/SandPebbles/SandPebblesSpecular.jpg")
+    specularTexture.setWrap(Texture.WrapMode.Repeat)
+    boxMaterial.setTexture("SpecularMap", specularTexture)
 
     boxMaterial.setBoolean("UseMaterialColors",true)
     boxMaterial.setColor("Diffuse",ColorRGBA.White)  // minimum material color
