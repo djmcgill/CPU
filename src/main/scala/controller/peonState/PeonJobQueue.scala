@@ -25,18 +25,19 @@ class PeonJobQueue() extends AbstractActionListenerState {
     svoInsertionQueue.requestSVOInsertion(Full(Some(phantomBlock)), globalPosition)
     // have some way to cancel the job maybe?
     val promise: Promise[Boolean] = Promise()
-    val pathfinding = new PeonSimplePathfinding(globalPosition, promise, None)
 
+    // TODO: change to onSuccess
     promise.future.onComplete{
       case Success(true) =>
-        Octant.getPathToLocal(globalPosition, svo.height) foreach {path =>
-          svo.getNodePath(path) match {
-            case Full(Some(Phantom(block))) if block == blockToInsert =>
+        svo.getNodeAt(globalPosition, 0) match {
+            case Some(Full(Some(Phantom(block)))) if block == blockToInsert =>
+              println("completed, inserting full block")
               svoInsertionQueue.requestSVOInsertion(Full(Some(blockToInsert)), globalPosition)
             case _ =>
-          }}
+          }
       case _ =>
     }
+    val pathfinding = new PeonSimplePathfinding(globalPosition, promise, None)
     jobQueue.enqueue(pathfinding)
   }
 

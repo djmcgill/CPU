@@ -126,7 +126,6 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
   }
 
   // Get the node at a given path.
-  // Returns None if the path isn't valid (because the SVO is not subdivided as expected)
   def getNodePath(path: List[Octant]): SVONode = path match {
     case Nil     => this.node
     case o :: os => this.node match {
@@ -134,6 +133,14 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
       case Subdivided(subSVOs) => subSVOs(o.ix).getNodePath(os)
     }
   }
+
+  def getNodeAt(worldPosition: Vector3f, targetHeight: Int) = {
+    val scale = math.pow(2, -this.height).toFloat
+    val svoPosition: Vector3f = worldPosition mult scale
+    val maybePath = Octant.getPathToLocal(svoPosition, this.height - targetHeight)
+    maybePath map getNodePath
+  }
+
 
   def getSVOPath(path: List[Octant]): SVO = path match {
     case Nil     => this
