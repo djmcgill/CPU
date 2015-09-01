@@ -5,7 +5,7 @@ import com.jme3.input.controls.{KeyTrigger, Trigger}
 import com.jme3.math.Vector3f
 import com.jme3.scene.control.Control
 import controller.AbstractActionListenerState
-import controller.peonState.jobs.{Idle, PeonSimplePathfinding}
+import controller.peonState.jobs.PeonSimplePathfinding
 import controller.svoState.SVOSpatialState
 import logic.voxels._
 
