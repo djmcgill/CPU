@@ -28,21 +28,40 @@ You are a paralysed robot (just a head?) that can have a large throne built arou
  - animation for the peon models
  - multiple peons and a pooled job queue
  - sort out lighting properly, with ambient occlusion or whatever
- - pausing, with a menu to save, load, and rebind keys
-   - make sure that it pauses the various timers and movement too
+ - GUIs
+   - pausing
+     - save
+     - load
+     - options
+   - insert mode with different editing options
+   - main menu
+     - new
+     - continue
+     - load
+     - options
+   - options
+     - video
+     - controls
  - proper pathfinding using a built-in library
  - skybox
- - sort out the refactor the code for blocks and their textures
- - make the camera controls and default position somewhat sensible
- - could save images of what octants look like from a distance
-   - one image for each compass direction?
-   - there'd be no parallelax in a single octant of the minimum size
-   - It'd look weird if it happened to octants that were too close
-   - how often to update? More often for closer?
+ - refactor the code for blocks and their textures
+ - make the camera controls, limits and default position somewhat sensible
+
  - fluid simulation
    - see http://www.dwarfcorp.com/site/2013/06/19/how-water-works-in-dwarfcorp/
    - if too far away, could abstract to flow into and out of each octant?
      - would need to go back and forth seamlessly
    - could make sand a very limited fluid too?
+   
+## Beta TODOS:
+ - could save images of what octants look like from a distance
+   - one image for each compass direction?
+   - there'd be no parallelax in a single octant of the minimum size
+   - It'd look weird if it happened to octants that were too close
+   - how often to update? More often for closer?
  - vechicles/tools
+ - there should be two types of subdivided
+   - if height > BRANCHING_LIMIT then SubdividedOctrees else Subdivided3DArray
+   - octrees better for large volumes
+   - arrays better for very varied expanses
  
