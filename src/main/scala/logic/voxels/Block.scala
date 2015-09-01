@@ -28,3 +28,9 @@ case class Phantom(block: Block) extends Block {
   override def write(jmeExporter: JmeExporter): Unit = ???
   override def read(jmeImporter: JmeImporter): Unit = ???
 }
+
+case class Metal() extends Block {
+  override val blockID = 2
+  override def write(ex: JmeExporter): Unit = {}
+  override def read(im: JmeImporter): Unit = {}
+}

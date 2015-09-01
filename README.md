@@ -34,3 +34,15 @@ You are a paralysed robot (just a head?) that can have a large throne built arou
  - skybox
  - sort out the refactor the code for blocks and their textures
  - make the camera controls and default position somewhat sensible
+ - could save images of what octants look like from a distance
+   - one image for each compass direction?
+   - there'd be no parallelax in a single octant of the minimum size
+   - It'd look weird if it happened to octants that were too close
+   - how often to update? More often for closer?
+ - fluid simulation
+   - see http://www.dwarfcorp.com/site/2013/06/19/how-water-works-in-dwarfcorp/
+   - if too far away, could abstract to flow into and out of each octant?
+     - would need to go back and forth seamlessly
+   - could make sand a very limited fluid too?
+ - vechicles/tools
+ 

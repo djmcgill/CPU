@@ -94,6 +94,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     }
   }
 
+  // TODO: memoise this so that meshes etc are shared for each height
   private def shinyBox(height: Int) = {
     val boxMesh = new Box(Vector3f.ZERO, Vector3f.UNIT_XYZ)
     val boxGeometry = new Geometry("Shiny box", boxMesh)
@@ -113,6 +114,18 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     box
   }
 
+  // TODO: refactor to reduce deplicated code
+  private def metalBox(height: Int) = {
+    val boxMesh = new Box(Vector3f.ZERO, Vector3f.UNIT_XYZ)
+    val boxGeometry = new Geometry("Metal box", boxMesh)
+    TangentBinormalGenerator.generate(boxMesh)
+    boxGeometry.setMaterial(metalMaterial)
+    val textureScale = math.pow(2, height).toFloat
+    boxGeometry.getMesh.scaleTextureCoordinates(new Vector2f(textureScale, textureScale))
+    boxGeometry.setUserData("height", height)
+    boxGeometry
+  }
+
   // TODO: rename to dirt
   private lazy val boxMaterial = {
     val assetManager = app.getAssetManager
@@ -120,21 +133,23 @@ class SVOSpatialState extends AbstractAppStateWithApp {
 
     val diffuseTexture = assetManager.loadTexture("Textures/SandPebbles/SandPebblesDiffuse.jpg")
     diffuseTexture.setWrap(Texture.WrapMode.Repeat)
+    diffuseTexture.setAnisotropicFilter(8)
     boxMaterial.setTexture("DiffuseMap", diffuseTexture)
 
     val normalTexture = assetManager.loadTexture("Textures/SandPebbles/SandPebblesNormal.jpg")
     normalTexture.setWrap(Texture.WrapMode.Repeat)
+    normalTexture.setAnisotropicFilter(8)
     boxMaterial.setTexture("NormalMap", normalTexture)
 
-    val specularTexture = assetManager.loadTexture("Textures/SandPebbles/SandPebblesSpecular.jpg")
-    specularTexture.setWrap(Texture.WrapMode.Repeat)
-    boxMaterial.setTexture("SpecularMap", specularTexture)
+//    val specularTexture = assetManager.loadTexture("Textures/SandPebbles/SandPebblesSpecular.jpg")
+//    specularTexture.setWrap(Texture.WrapMode.Repeat)
+//    specularTexture.setAnisotropicFilter(8)
+//    boxMaterial.setTexture("SpecularMap", specularTexture)
 
     boxMaterial.setBoolean("UseMaterialColors",true)
     boxMaterial.setColor("Diffuse",ColorRGBA.White)  // minimum material color
-    boxMaterial.setColor("Specular",ColorRGBA.White) // for shininess
+//    boxMaterial.setColor("Specular",ColorRGBA.White) // for shininess
     boxMaterial.setColor("Ambient", ColorRGBA.White)
-    boxMaterial.setFloat("Shininess", 64f) // [1,128] for shininess
     boxMaterial
   }
 
@@ -150,6 +165,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     val boxMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
 
     val colourTexture = assetManager.loadTexture("Textures/ScratchedMetal/ScratchedMetal.jpg")
+    colourTexture.setAnisotropicFilter(8)
     colourTexture.setWrap(Texture.WrapMode.Repeat)
     boxMaterial.setTexture("ColorMap", colourTexture)
     boxMaterial
@@ -165,6 +181,9 @@ class SVOSpatialState extends AbstractAppStateWithApp {
 
     case Full(Some(block: Phantom)) =>
       Some(transparentBox(svoHeight))
+
+    case Full(Some(_: Metal)) =>
+      Some(metalBox(svoHeight))
 
     // Create a new node which contains the spatials of the sub-SVOs
     case Subdivided(subSVOs) =>

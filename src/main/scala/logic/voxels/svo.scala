@@ -8,6 +8,7 @@ import com.jme3.math.Vector3f
  * An octant's node can either be completely filled with voxels of a given newNode
  * (which can be None i.e. empty space) or subdivided into eight suboctants.
  */
+// TODO: move SVONode into its own file
 sealed abstract class SVONode extends Savable
 case class Full (var contents: Option[Block]) extends SVONode {
   def this() = this(None)

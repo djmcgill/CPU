@@ -21,7 +21,7 @@ class PeonJobQueue() extends AbstractActionListenerState {
     val svo = app.getRootNode.getUserData[SVO]("svo")
     val svoInsertionQueue = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
 
-    val blockToInsert: Block = new Dirt()
+    val blockToInsert: Block = new Metal()
     val phantomBlock = new Phantom(blockToInsert)
     svoInsertionQueue.requestSVOInsertion(Full(Some(phantomBlock)), globalPosition)
     // have some way to cancel the job maybe?
