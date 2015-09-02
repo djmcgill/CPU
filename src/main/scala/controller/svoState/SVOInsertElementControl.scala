@@ -11,8 +11,7 @@ import scala.collection.mutable
   * This control implements new blocks appearing in the SVO when they're clicked on.
   */
 class SVOInsertElementControl extends AbstractSVOInsertionControl {
-  override val name = "INSERT ONTO FACE"
-  override val triggers = Seq(new MouseButtonTrigger(MouseInput.BUTTON_LEFT))
+  override val name = "PLACE DIRT"
   override val node: SVONode = {
     val block: Block = new Dirt()
     Full(Some(block))

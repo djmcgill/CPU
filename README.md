@@ -29,25 +29,14 @@ You are a paralysed robot (just a head?) that can have a large throne built arou
  - multiple peons and a pooled job queue
  - sort out lighting properly, with ambient occlusion or whatever
  - GUIs
-   - pausing
-     - save
-     - load
-     - options
+   - pausing (save, load, options)
    - insert mode with different editing options
-   - main menu
-     - new
-     - continue
-     - load
-     - options
-   - options
-     - video
-     - controls
+   - main menu (new, continue, load, options)
+   - options (graphics, controls)
  - proper pathfinding using a built-in library
  - skybox
- - refactor the code for blocks and their textures
- - make the camera controls, limits and default position somewhat sensible
- - refactor the keybindings into one object
-
+ - fighting
+ - tools
  - fluid simulation
    - see http://www.dwarfcorp.com/site/2013/06/19/how-water-works-in-dwarfcorp/
    - if too far away, could abstract to flow into and out of each octant?
@@ -60,9 +49,9 @@ You are a paralysed robot (just a head?) that can have a large throne built arou
    - there'd be no parallelax in a single octant of the minimum size
    - It'd look weird if it happened to octants that were too close
    - how often to update? More often for closer?
- - vechicles/tools
  - there should be two types of subdivided
    - if height > BRANCHING_LIMIT then SubdividedOctrees else Subdivided3DArray
    - octrees better for large volumes
    - arrays better for very varied expanses
+ - vehicles
  

@@ -1,7 +1,5 @@
 package controller.svoState
 
-import com.jme3.input.KeyInput
-import com.jme3.input.controls._
 import com.jme3.material.Material
 import com.jme3.material.RenderState.BlendMode
 import com.jme3.math.{ColorRGBA, Vector3f}
@@ -24,8 +22,7 @@ class SVOCuboidSelectionState extends AbstractActionListenerState {
     geo
   }
 
-  override val triggers: Seq[Trigger] = Seq(new KeyTrigger(KeyInput.KEY_R))
-  override val name: String = "cuboid selection"
+  override val name: String = "SELECT CUBOID"
   override def action(name: String, isPressed: Boolean, tpf: Float): Unit = {
     if (isPressed) {
       initialPosition = Some(pointUnderMouse())

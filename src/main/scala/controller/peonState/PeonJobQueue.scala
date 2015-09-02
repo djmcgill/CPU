@@ -1,7 +1,5 @@
 package controller.peonState
 
-import com.jme3.input.KeyInput
-import com.jme3.input.controls.{KeyTrigger, Trigger}
 import com.jme3.math.Vector3f
 import com.jme3.scene.control.Control
 import controller.AbstractActionListenerState
@@ -12,7 +10,6 @@ import logic.voxels._
 import scala.collection.mutable
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
-
 
 class PeonJobQueue() extends AbstractActionListenerState {
   private val jobQueue: mutable.Queue[Control] = new mutable.Queue()
@@ -43,14 +40,13 @@ class PeonJobQueue() extends AbstractActionListenerState {
 
   // Go to a corner and wait for a time.
   private def idleJob: Control = {
-    val target: Vector3f = new Vector3f(1,1,1) // this is in svo coords
+    val svoWidth = math.pow(2, app.getRootNode.getUserData[Int]("maxHeight")).toFloat
+    val target: Vector3f = new Vector3f(svoWidth/2,svoWidth/2 + 2,svoWidth/2)
     val promise = Promise[Boolean]()
     val timeout = Some(10f)
     val goToCorner = new PeonSimplePathfinding(target, promise, timeout)
     goToCorner
   }
-
-  override val triggers: Seq[Trigger] = Seq(new KeyTrigger(KeyInput.KEY_E))
 
   /** The actual action to perform */
   override def action(name: String, isPressed: Boolean, tpf: Float): Unit = {
@@ -91,5 +87,5 @@ class PeonJobQueue() extends AbstractActionListenerState {
 
   }
 
-  override val name: String = "Request block placement"
+  override val name: String = "PLACE PHANTOM DIRT"
 }

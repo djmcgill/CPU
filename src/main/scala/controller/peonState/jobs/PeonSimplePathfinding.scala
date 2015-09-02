@@ -11,9 +11,11 @@ import com.jme3.system.lwjgl.LwjglTimer
 import scala.concurrent.Promise
 import scala.util.Success
 
-class PeonSimplePathfinding(targetPosition: Vector3f,
-                            finish: Promise[Boolean],
-                            maybeTimeoutSeconds: Option[Float]) extends AbstractControl{
+class PeonSimplePathfinding(
+    targetPosition: Vector3f,
+    finish: Promise[Boolean],
+    maybeTimeoutSeconds: Option[Float])
+  extends AbstractControl{
 
   val CloseEnoughSquared = 1.1f
   val TooCloseSquared = 0.5f

@@ -8,6 +8,7 @@ class JobSeekerControl(jobQueueManager: PeonJobQueue) extends AbstractControl{
 
   override def controlRender(renderManager: RenderManager, viewPort: ViewPort): Unit = {}
 
+  // TODO: not so sure about checking for new jobs every single frame
   override def controlUpdate(v: Float): Unit = {
     if (spatial.getControl[PeonSimplePathfinding](classOf[PeonSimplePathfinding]) == null) {
       val newJob: Control = jobQueueManager.requestJob()

@@ -19,6 +19,7 @@ object Main extends SimpleApplication {
 
     stateManager.attachAll(
       bulletAppState,
+      new KeyBindings,
       new LightingState,
       new OverviewCameraState,
       new SVOSpatialState,

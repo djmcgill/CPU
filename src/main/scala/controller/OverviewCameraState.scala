@@ -4,7 +4,7 @@ import com.jme3.app._
 import com.jme3.app.state._
 import com.jme3.input._
 import com.jme3.input.controls._
-import com.jme3.math.Vector3f
+import com.jme3.math.{FastMath, Vector3f}
 import com.jme3.scene.Node
 
 /**
@@ -19,23 +19,24 @@ class OverviewCameraState extends AbstractAppStateWithApp {
   val moveY = Vector3f.UNIT_Y mult 10
   val moveZ = Vector3f.UNIT_Z mult 10
 
+  // TODO: these triggers too
   var zoomInTrigger: Trigger = new KeyTrigger(KeyInput.KEY_EQUALS)
   var zoomOutTrigger: Trigger = new KeyTrigger(KeyInput.KEY_MINUS)
 
   val cameraTranslations = Seq(
-    ("CAMERA TARGET LEFT"    , KeyInput.KEY_LEFT , moveX mult -1),
-    ("CAMERA TARGET RIGHT"   , KeyInput.KEY_RIGHT, moveX),
-    ("CAMERA TARGET FORWARD" , KeyInput.KEY_UP   , moveZ mult -1),
-    ("CAMERA TARGET BACKWARD", KeyInput.KEY_DOWN , moveZ),
-    ("CAMERA TARGET UP"      , KeyInput.KEY_PGUP , moveY),
-    ("CAMERA TARGET DOWN"    , KeyInput.KEY_PGDN , moveY mult -1))
+    ("CAMERA TARGET LEFT"    , moveX mult -1),
+    ("CAMERA TARGET RIGHT"   , moveX),
+    ("CAMERA TARGET FORWARD" , moveZ mult -1),
+    ("CAMERA TARGET BACKWARD", moveZ),
+    ("CAMERA TARGET UP"      , moveY),
+    ("CAMERA TARGET DOWN"    , moveY mult -1))
 
   val keys = cameraTranslations map (_._1)
 
   // When a key is pressed, move the camera according to the offset specified in cameraTranslations
   val analogListener = new AnalogListener() {
     override def onAnalog(name: String, value: Float, tpf: Float) = {
-      cameraTranslations find (_._1 == name) foreach { case (_, _, offset) =>
+      cameraTranslations find (_._1 == name) foreach { case (_, offset) =>
         cameraTarget.move(offset mult tpf)
       }
     }
@@ -52,20 +53,21 @@ class OverviewCameraState extends AbstractAppStateWithApp {
     chaseCam.setZoomOutTrigger(zoomOutTrigger)
     chaseCam.setZoomSensitivity(50)
 
+    chaseCam.setDefaultHorizontalRotation(FastMath.HALF_PI)
+
 
     // TODO: have a key to reset the camera to the defaults
     val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
     val scale = math.pow(2, maxHeight).toFloat
     chaseCam.setMaxDistance(1000)
-    chaseCam.setDefaultDistance(scale * 8f)
-
+    chaseCam.setDefaultDistance(15)
 
     app.getRootNode.attachChild(cameraTarget)
+    cameraTarget.setLocalTranslation(scale/2, scale/2 + 5, scale/2)
+
+
     chaseCam.setToggleRotationTrigger(new MouseButtonTrigger(MouseInput.BUTTON_RIGHT))
 
-    // Set up the key mappings and corresponding actions.
-    cameraTranslations foreach {case (name, key, _) =>
-      app.getInputManager.addMapping(name, new KeyTrigger(key))}
     app.getInputManager.addListener(analogListener, keys: _*)
   }
 
@@ -73,9 +75,6 @@ class OverviewCameraState extends AbstractAppStateWithApp {
     super.cleanup()
     app.getFlyByCamera.setEnabled(true)
     app.getInputManager.removeListener(analogListener)
-
-    cameraTranslations foreach {case (name,_,_) =>
-      app.getInputManager.deleteMapping(name)}
 
     app.getRootNode.detachChild(cameraTarget)
   }

@@ -17,14 +17,7 @@ class WASDcontrols extends AbstractAppStateWithApp {
   private var turningLeft = false
   private var turningRight = false
 
-  private val keyBinds = Array(
-    ("CharForwards", KeyInput.KEY_W),
-    ("CharBackwards", KeyInput.KEY_S),
-    ("CharTurnLeft", KeyInput.KEY_A),
-    ("CharTurnRight", KeyInput.KEY_D),
-    ("CharJump", KeyInput.KEY_SPACE)
-  )
-  private val keys: Array[String] = keyBinds map (_._1)
+  private val keys = Array("CharForwards", "CharBackwards", "CharTurnLeft", "CharTurnRight", "CharJump")
 
   def actionListener: ActionListener = new ActionListener {
     override def onAction(s: String, b: Boolean, v: Float): Unit = s match {
@@ -73,19 +66,13 @@ class WASDcontrols extends AbstractAppStateWithApp {
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
-    val inputManager = app.getInputManager
-    keyBinds foreach { case (name, key) =>
-      inputManager.addMapping(name, new KeyTrigger(key))
-      inputManager.addListener(actionListener, keys: _*)
-    }
+    app.getInputManager.addListener(actionListener, keys: _*)
     peonSpatial = app.getRootNode.getUserData[Spatial]("peon")
     peonControl = peonSpatial.getControl[BetterCharacterControl](classOf[BetterCharacterControl])
   }
 
   override def cleanup(): Unit = {
-      val inputManager = app.getInputManager
-      keys foreach inputManager.deleteMapping
-      inputManager.removeListener(actionListener)
+      app.getInputManager.removeListener(actionListener)
       super.cleanup()
     }
 

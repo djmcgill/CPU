@@ -13,12 +13,6 @@ import scala.concurrent.Promise
 class Idle(finish: Promise[Boolean], maybeTimeoutSeconds: Option[Float]) extends AbstractControl {
   val timer = new LwjglTimer()
 
-
-  override def setEnabled(enabled: Boolean): Unit = {
-    println(s"enabling idle: $enabled")
-    super.setEnabled(enabled)
-  }
-
   override def controlRender(renderManager: RenderManager, viewPort: ViewPort): Unit = {}
 
   override def controlUpdate(v: Float): Unit = {

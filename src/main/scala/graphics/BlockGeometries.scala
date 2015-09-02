@@ -33,7 +33,6 @@ class BlockGeometries(assetManager: AssetManager) {
   }
 
   // TODO: memoise this so that meshes etc are shared for each height
-  // TODO: rename this
   private def dirtBox(height: Int) = {
     val boxMesh = new Box(Vector3f.ZERO, Vector3f.UNIT_XYZ)
     val boxGeometry = new Geometry("Shiny box", boxMesh)
@@ -84,13 +83,14 @@ class BlockGeometries(assetManager: AssetManager) {
   }
 
   private lazy val metalMaterial = {
-    // TODO: this should not be unshaded, it should use Lighting.j3md
-    val boxMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
-
-    val colourTexture = assetManager.loadTexture("Textures/ScratchedMetal/ScratchedMetal.jpg")
-    colourTexture.setAnisotropicFilter(8)
-    colourTexture.setWrap(Texture.WrapMode.Repeat)
-    boxMaterial.setTexture("ColorMap", colourTexture)
+    val boxMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md")
+    val diffuseTexture = assetManager.loadTexture("Textures/ScratchedMetal/ScratchedMetal.jpg")
+    diffuseTexture.setAnisotropicFilter(8)
+    diffuseTexture.setWrap(Texture.WrapMode.Repeat)
+    boxMaterial.setBoolean("UseMaterialColors",true)
+    boxMaterial.setTexture("DiffuseMap", diffuseTexture)
+    boxMaterial.setColor("Diffuse", ColorRGBA.White)
+    boxMaterial.setColor("Ambient", ColorRGBA.White)
     boxMaterial
   }
 }

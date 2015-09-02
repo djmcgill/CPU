@@ -8,9 +8,6 @@ import com.jme3.input.controls.{ActionListener, Trigger}
  * Scala wrapper class for a single action to be performed in response to the specified triggers.
  */
 abstract class AbstractActionListenerState extends AbstractAppStateWithApp {
-  /** Which triggers should this action respond to? */
-  val triggers: Seq[Trigger]
-
   /** The name of this action. WARNING: this needs to be unique and it isn't checked. */
   val name: String
 
@@ -25,13 +22,11 @@ abstract class AbstractActionListenerState extends AbstractAppStateWithApp {
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
-    app.getInputManager.addMapping(name, triggers: _*)
     app.getInputManager.addListener(actionListener, name)
   }
 
   override def cleanup(): Unit = {
     super.cleanup()
-    app.getInputManager.deleteMapping(name)
     app.getInputManager.removeListener(actionListener)
   }
 }
