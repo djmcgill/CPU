@@ -23,6 +23,14 @@ object Octant {
       o
     }.toList)
   }
+
+  // Should this be targetHeight instead of maxPathLength?
+  def getPathToGlobal(globalPosition: Vector3f, targetHeight: Int, svoHeight: Int): Option[List[Octant]] = {
+    val scale = math.pow(2, -svoHeight).toFloat
+    val svoPosition: Vector3f = globalPosition mult scale
+    Octant.getPathToLocal(svoPosition, svoHeight - targetHeight)
+  }
+
 }
 
 

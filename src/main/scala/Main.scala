@@ -3,7 +3,7 @@ import com.jme3.asset.plugins.FileLocator
 import com.jme3.bullet.BulletAppState
 import controller._
 import controller.peonState._
-import controller.svoState.SVOSpatialState
+import controller.svoState.{SVOCuboidSelectionState, SVOSpatialState}
 
 object Main extends SimpleApplication {
   val MaxHeight = 5
@@ -23,7 +23,8 @@ object Main extends SimpleApplication {
       new OverviewCameraState,
       new SVOSpatialState,
       new PeonJobQueue,
-      new Peon
+      new Peon,
+      new SVOCuboidSelectionState
     )
     bulletAppState.getPhysicsSpace.setAccuracy(0.001f)
     assetManager.registerLocator("resources", classOf[FileLocator])

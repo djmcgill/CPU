@@ -162,6 +162,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
 
   private lazy val metalMaterial = {
     val assetManager = app.getAssetManager
+    // TODO: this should not be unshaded, it should use Lighting.j3md
     val boxMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
 
     val colourTexture = assetManager.loadTexture("Textures/ScratchedMetal/ScratchedMetal.jpg")

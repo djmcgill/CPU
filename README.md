@@ -46,6 +46,7 @@ You are a paralysed robot (just a head?) that can have a large throne built arou
  - skybox
  - refactor the code for blocks and their textures
  - make the camera controls, limits and default position somewhat sensible
+ - refactor the keybindings into one object
 
  - fluid simulation
    - see http://www.dwarfcorp.com/site/2013/06/19/how-water-works-in-dwarfcorp/

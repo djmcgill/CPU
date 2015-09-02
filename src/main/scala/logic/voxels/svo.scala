@@ -135,11 +135,8 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
     }
   }
 
-  def getNodeAt(worldPosition: Vector3f, targetHeight: Int) = {
-    val scale = math.pow(2, -this.height).toFloat
-    val svoPosition: Vector3f = worldPosition mult scale
-    val maybePath = Octant.getPathToLocal(svoPosition, this.height - targetHeight)
-    maybePath map getNodePath
+  def getNodeAt(globalPosition: Vector3f, targetHeight: Int) = {
+    Octant.getPathToGlobal(globalPosition, targetHeight, this.height) map getNodePath
   }
 
 
@@ -200,10 +197,8 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
       if (subdivided) {Some(List())} else {maybeInsertPath map (o :: _)}
   }
 
-  def insertNodeAt(newNode: SVONode, worldPosition: Vector3f, targetHeight: Int) = {
-    val scale = math.pow(2, -this.height).toFloat
-    val svoPosition: Vector3f = worldPosition mult scale
-    val maybePath = Octant.getPathToLocal(svoPosition, this.height - targetHeight)
+  def insertNodeAt(newNode: SVONode, globalPosition: Vector3f, targetHeight: Int) = {
+    val maybePath = Octant.getPathToGlobal(globalPosition, targetHeight, this.height)
     maybePath flatMap (insertNodePath(newNode, _))
   }
 
