@@ -38,10 +38,7 @@ class BlockGeometries(assetManager: AssetManager) {
     val boxMesh = new Box(Vector3f.ZERO, Vector3f.UNIT_XYZ)
     val boxGeometry = new Geometry("Shiny box", boxMesh)
     TangentBinormalGenerator.generate(boxMesh)
-    println(s"everything good so far")
-    println(s"setting $boxMaterial")
     boxGeometry.setMaterial(boxMaterial)
-    println("yep still good")
     val textureScale = math.pow(2, height).toFloat
     boxGeometry.getMesh.scaleTextureCoordinates(new Vector2f(textureScale, textureScale))
     boxGeometry.setUserData("height", height)
