@@ -12,6 +12,7 @@ import com.jme3.scene.shape.Box
 import com.jme3.texture.Texture
 import com.jme3.util.TangentBinormalGenerator
 import controller.AbstractAppStateWithApp
+import graphics.BlockGeometries
 import logic.voxels._
 
 import scala.collection.mutable
@@ -26,6 +27,13 @@ class SVOSpatialState extends AbstractAppStateWithApp {
   private lazy val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
   private lazy val svo = SVO.initialWorld(maxHeight)
   private lazy val svoPhysicsState = new SVOPhysicsState
+  private lazy val blockGeometries = new BlockGeometries(app.getAssetManager)
+  private lazy val states = Seq(
+    new SVOInsertElementControl,
+    new SVODeleteElementControl,
+    svoPhysicsState,
+    new SVOCuboidSelectionState
+  )
 
   /** You can't make changes directly to the SVO or its geometry, you have to register your intention here. */
   val insertionQueue = new mutable.Queue[(SVONode, Vector3f)]()
@@ -40,9 +48,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
     app.getRootNode.setUserData("svo", svo)
 
-    app.getStateManager.attach(new SVOInsertElementControl)
-    app.getStateManager.attach(new SVODeleteElementControl)
-    app.getStateManager.attach(svoPhysicsState)
+    stateManager.attachAll(states)
 
     // Create a spatial for the SVO and call it "svoSpatial".
     createSpatialFromSVONode(svo.node, svo.height) foreach {svoSpatial =>
@@ -65,7 +71,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
   }
 
   override def cleanup(): Unit = {
-    app.getStateManager.detach(svoPhysicsState)
+    states foreach {state => app.getStateManager.detach(state)}
     super.cleanup()
   }
 
@@ -94,97 +100,15 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     }
   }
 
-  // TODO: memoise this so that meshes etc are shared for each height
-  private def shinyBox(height: Int) = {
-    val boxMesh = new Box(Vector3f.ZERO, Vector3f.UNIT_XYZ)
-    val boxGeometry = new Geometry("Shiny box", boxMesh)
-    TangentBinormalGenerator.generate(boxMesh)
-    boxGeometry.setMaterial(boxMaterial)
-    val textureScale = math.pow(2, height).toFloat
-    boxGeometry.getMesh.scaleTextureCoordinates(new Vector2f(textureScale, textureScale))
-    boxGeometry.setUserData("height", height)
-    boxGeometry
-  }
 
-  private def transparentBox(height: Int) = {
-    val box = shinyBox(height)
-    box.setMaterial(transparentBoxMaterial)
-    box.setQueueBucket(Bucket.Translucent)
-    box.setUserData("phantom", true)
-    box
-  }
-
-  // TODO: refactor to reduce deplicated code
-  private def metalBox(height: Int) = {
-    val boxMesh = new Box(Vector3f.ZERO, Vector3f.UNIT_XYZ)
-    val boxGeometry = new Geometry("Metal box", boxMesh)
-    TangentBinormalGenerator.generate(boxMesh)
-    boxGeometry.setMaterial(metalMaterial)
-    val textureScale = math.pow(2, height).toFloat
-    boxGeometry.getMesh.scaleTextureCoordinates(new Vector2f(textureScale, textureScale))
-    boxGeometry.setUserData("height", height)
-    boxGeometry
-  }
-
-  // TODO: rename to dirt
-  private lazy val boxMaterial = {
-    val assetManager = app.getAssetManager
-    val boxMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md")
-
-    val diffuseTexture = assetManager.loadTexture("Textures/SandPebbles/SandPebblesDiffuse.jpg")
-    diffuseTexture.setWrap(Texture.WrapMode.Repeat)
-    diffuseTexture.setAnisotropicFilter(8)
-    boxMaterial.setTexture("DiffuseMap", diffuseTexture)
-
-    val normalTexture = assetManager.loadTexture("Textures/SandPebbles/SandPebblesNormal.jpg")
-    normalTexture.setWrap(Texture.WrapMode.Repeat)
-    normalTexture.setAnisotropicFilter(8)
-    boxMaterial.setTexture("NormalMap", normalTexture)
-
-//    val specularTexture = assetManager.loadTexture("Textures/SandPebbles/SandPebblesSpecular.jpg")
-//    specularTexture.setWrap(Texture.WrapMode.Repeat)
-//    specularTexture.setAnisotropicFilter(8)
-//    boxMaterial.setTexture("SpecularMap", specularTexture)
-
-    boxMaterial.setBoolean("UseMaterialColors",true)
-    boxMaterial.setColor("Diffuse",ColorRGBA.White)  // minimum material color
-//    boxMaterial.setColor("Specular",ColorRGBA.White) // for shininess
-    boxMaterial.setColor("Ambient", ColorRGBA.White)
-    boxMaterial
-  }
-
-  private lazy val transparentBoxMaterial = {
-    val boxMat = boxMaterial.clone()
-    boxMat.setColor("Diffuse", new ColorRGBA(1, 1, 1, 0.7f))
-    boxMat.getAdditionalRenderState.setBlendMode(BlendMode.Alpha)
-    boxMat
-  }
-
-  private lazy val metalMaterial = {
-    val assetManager = app.getAssetManager
-    // TODO: this should not be unshaded, it should use Lighting.j3md
-    val boxMaterial = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md")
-
-    val colourTexture = assetManager.loadTexture("Textures/ScratchedMetal/ScratchedMetal.jpg")
-    colourTexture.setAnisotropicFilter(8)
-    colourTexture.setWrap(Texture.WrapMode.Repeat)
-    boxMaterial.setTexture("ColorMap", colourTexture)
-    boxMaterial
-  }
 
   /** Turn a SVONode into a Spatial. */
   // TODO: refactor to creteSpatialFromSVO?
   private def createSpatialFromSVONode(svoNode: SVONode, svoHeight: Int): Option[Spatial] = svoNode match {
     case Full(None) => None
 
-    case Full(Some(_: Dirt)) =>
-      Some(shinyBox(svoHeight))
-
-    case Full(Some(block: Phantom)) =>
-      Some(transparentBox(svoHeight))
-
-    case Full(Some(_: Metal)) =>
-      Some(metalBox(svoHeight))
+    case Full(Some(block)) =>
+      Some(blockGeometries.getGeometryForBlock(block, svoHeight))
 
     // Create a new node which contains the spatials of the sub-SVOs
     case Subdivided(subSVOs) =>

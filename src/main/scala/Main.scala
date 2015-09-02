@@ -23,8 +23,7 @@ object Main extends SimpleApplication {
       new OverviewCameraState,
       new SVOSpatialState,
       new PeonJobQueue,
-      new Peon,
-      new SVOCuboidSelectionState
+      new Peon
     )
     bulletAppState.getPhysicsSpace.setAccuracy(0.001f)
     assetManager.registerLocator("resources", classOf[FileLocator])

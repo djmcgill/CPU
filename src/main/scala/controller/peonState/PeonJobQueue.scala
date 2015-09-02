@@ -19,18 +19,18 @@ class PeonJobQueue() extends AbstractActionListenerState {
 
   def requestBlockPlacement(globalPosition: Vector3f) = {
     val svo = app.getRootNode.getUserData[SVO]("svo")
-    val svoInsertionQueue = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
+    val svoSpatialState = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
 
     val blockToInsert: Block = new Metal()
     val phantomBlock = new Phantom(blockToInsert)
-    svoInsertionQueue.requestSVOInsertion(Full(Some(phantomBlock)), globalPosition)
+    svoSpatialState.requestSVOInsertion(Full(Some(phantomBlock)), globalPosition)
     // have some way to cancel the job maybe?
     val promise: Promise[Boolean] = Promise()
 
     promise.future.onSuccess { case true =>
         svo.getNodeAt(globalPosition, 0) foreach {
             case Full(Some(Phantom(block))) if block == blockToInsert =>
-              svoInsertionQueue.requestSVOInsertion(Full(Some(blockToInsert)), globalPosition)
+              svoSpatialState.requestSVOInsertion(Full(Some(blockToInsert)), globalPosition)
           }
     }
     val pathfinding = new PeonSimplePathfinding(globalPosition, promise, None)

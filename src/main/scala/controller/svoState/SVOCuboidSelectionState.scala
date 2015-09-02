@@ -5,11 +5,9 @@ import com.jme3.input.controls._
 import com.jme3.material.Material
 import com.jme3.material.RenderState.BlendMode
 import com.jme3.math.{ColorRGBA, Vector3f}
-import com.jme3.renderer.RenderManager
 import com.jme3.renderer.queue.RenderQueue.Bucket
 import com.jme3.scene.Geometry
 import com.jme3.scene.shape.Box
-import com.jme3.texture.Texture
 import controller.AbstractActionListenerState
 
 class SVOCuboidSelectionState extends AbstractActionListenerState {
@@ -89,7 +87,7 @@ class SVOCuboidSelectionState extends AbstractActionListenerState {
     // (y - origin.y) / dir.y = t
     val Eps = 0.01f
     if (math.abs(rayDirection.y) < Eps) {rayDirection.y = -Eps}
-    assert (rayDirection.y < 0) // Weird things happen if this isn't true.
+    assert (rayDirection.y < 0) // TODO: allow for this case
 
     val t = (cameraTarget.y - rayOrigin.y) / rayDirection.y
     val hit = rayOrigin add (rayDirection mult t)
