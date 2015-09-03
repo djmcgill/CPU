@@ -1,4 +1,4 @@
-package controller.svoState
+package controller.svoState.placement
 
 import com.jme3.material.Material
 import com.jme3.material.RenderState.BlendMode
@@ -7,6 +7,9 @@ import com.jme3.renderer.queue.RenderQueue.Bucket
 import com.jme3.scene.Geometry
 import com.jme3.scene.shape.Box
 import controller.AbstractActionListenerState
+import controller.peonState.PeonJobQueue
+import controller.svoState.SVOSpatialState
+import logic.voxels._
 
 class SVOCuboidSelectionState extends AbstractActionListenerState {
   private var initialPosition: Option[Vector3f] = None
@@ -23,16 +26,32 @@ class SVOCuboidSelectionState extends AbstractActionListenerState {
   }
 
   override val name: String = "SELECT CUBOID"
+  // TODO: right click to clear selection
   override def action(name: String, isPressed: Boolean, tpf: Float): Unit = {
     if (isPressed) {
       initialPosition = Some(pointUnderMouse())
       app.getRootNode.attachChild(geometry)
-      app.getInputManager.setCursorVisible(false)
+  //    app.getInputManager.setCursorVisible(false)
     } else {
-      // TODO: do something with the selected cuboid. Insert at all those bits?
       initialPosition = None
       app.getRootNode.detachChild(geometry)
-      app.getInputManager.setCursorVisible(true)
+//      app.getInputManager.setCursorVisible(true)
+
+      // Insert at the center of each of the selected size-0 cubes.
+      selectedCorners foreach {case (lower, upper) =>
+        val queueManager = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
+        val jobQueue = app.getStateManager.getState[PeonJobQueue](classOf[PeonJobQueue])
+        val List(lowerX, lowerY, lowerZ) = List(lower.x, lower.y, lower.z) map {f: Float => math.round(math.floor(f).toFloat)}
+        val List(upperX, upperY, upperZ) = List(upper.x, upper.y, upper.z) map {f: Float => math.round(math.ceil(f).toFloat)}
+
+        val blockToInsert: Block = new Dirt()
+        val phantomNode: SVONode = Full(Some(blockToInsert))
+        for (x <- lowerX until upperX; y <- lowerY until upperY; z <- lowerZ until upperZ) {
+          val position = new Vector3f(x+0.5f, y+0.5f, z+0.5f)
+          queueManager.requestSVOInsertion(phantomNode, position)
+          jobQueue.requestBlockPlacement(position)
+        }
+      }
     }
   }
 
@@ -53,9 +72,9 @@ class SVOCuboidSelectionState extends AbstractActionListenerState {
   }
 
   private def updateCorners(currentMousePosition: Vector3f): Unit = {
-    initialPosition = Some(initialPosition.getOrElse(currentMousePosition))
+    val corner1 = initialPosition.getOrElse(currentMousePosition)
+    initialPosition = Some(corner1)
 
-    val Some(corner1) = initialPosition
     val corner2 = currentMousePosition
     def floorMin(a: Float, b: Float): Float = math.floor(math.min(a, b)).toFloat
     val lowerLeftCorner = new Vector3f(
@@ -63,11 +82,15 @@ class SVOCuboidSelectionState extends AbstractActionListenerState {
       floorMin(corner1.y, corner2.y),
       floorMin(corner1.z, corner2.z))
 
-    def ceilMax(a: Float, b: Float): Float = math.ceil(math.max(a, b)).toFloat
+    //def ceilMax(a: Float, b: Float, min: Float): Float = math.min(min+0.01f, math.ceil(math.max(a, b)).toFloat)
+    def ceilMax(a: Float, b: Float, min: Float): Float = {
+      val ans: Float = math.max(a, b)
+      math.ceil(if (ans == min) {ans + 0.01f} else {ans}).toFloat
+    }
     val upperRightCorner = new Vector3f(
-      ceilMax(corner1.x, corner2.x),
-      ceilMax(corner1.y, corner2.y),
-      ceilMax(corner1.z, corner2.z))
+      ceilMax(corner1.x, corner2.x, lowerLeftCorner.x),
+      ceilMax(corner1.y, corner2.y, lowerLeftCorner.y),
+      ceilMax(corner1.z, corner2.z, lowerLeftCorner.z))
 
     selectedCorners = Some((lowerLeftCorner, upperRightCorner))
   }

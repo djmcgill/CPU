@@ -1,4 +1,4 @@
-package controller.svoState
+package controller.svoState.selection
 
 import logic.voxels._
 

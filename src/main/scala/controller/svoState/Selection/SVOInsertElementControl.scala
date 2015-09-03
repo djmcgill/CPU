@@ -1,11 +1,6 @@
-package controller.svoState
+package controller.svoState.selection
 
-import com.jme3.input.MouseInput
-import com.jme3.input.controls.MouseButtonTrigger
-import com.jme3.math.Vector3f
 import logic.voxels._
-
-import scala.collection.mutable
 
 /**
   * This control implements new blocks appearing in the SVO when they're clicked on.

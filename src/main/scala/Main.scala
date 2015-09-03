@@ -3,7 +3,7 @@ import com.jme3.asset.plugins.FileLocator
 import com.jme3.bullet.BulletAppState
 import controller._
 import controller.peonState._
-import controller.svoState.{SVOCuboidSelectionState, SVOSpatialState}
+import controller.svoState.SVOSpatialState
 
 object Main extends SimpleApplication {
   val MaxHeight = 5

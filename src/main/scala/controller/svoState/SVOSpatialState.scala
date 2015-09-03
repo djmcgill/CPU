@@ -12,6 +12,8 @@ import com.jme3.scene.shape.Box
 import com.jme3.texture.Texture
 import com.jme3.util.TangentBinormalGenerator
 import controller.AbstractAppStateWithApp
+import controller.svoState.placement.SVOCuboidSelectionState
+import controller.svoState.selection.{SVOInsertElementControl, SVODeleteElementControl}
 import graphics.BlockGeometries
 import logic.voxels._
 
