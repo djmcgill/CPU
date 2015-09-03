@@ -20,11 +20,7 @@ What would multiplayer be like? Raids on each other's maps?
 You are a paralysed robot (just a head?) that can have a large throne built around it in order to control more minions.
 
 ## TODO before alpha:
- - left-click to place a construction order and right-click to place a deletion order
- - left-click-drag to create squares, and scroll up and down to create cuboids
- - proper textures for the cubes
-   - some kind of sand or wasteland for all the existing ones
-   - some kind of metal that gets constructed
+ - right-click to place a deletion order
  - animation for the peon models
  - multiple peons and a pooled job queue
  - sort out lighting properly, with ambient occlusion or whatever
@@ -34,7 +30,6 @@ You are a paralysed robot (just a head?) that can have a large throne built arou
    - main menu (new, continue, load, options)
    - options (graphics, controls)
  - proper pathfinding using a built-in library
- - skybox
  - fighting
  - tools
  - fluid simulation
