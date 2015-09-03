@@ -55,8 +55,6 @@ class OverviewCameraState extends AbstractAppStateWithApp {
 
     chaseCam.setDefaultHorizontalRotation(FastMath.HALF_PI)
 
-
-    // TODO: have a key to reset the camera to the defaults
     val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
     val scale = math.pow(2, maxHeight).toFloat
     chaseCam.setMaxDistance(1000)

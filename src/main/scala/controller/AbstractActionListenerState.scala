@@ -8,8 +8,8 @@ import com.jme3.input.controls.{ActionListener, Trigger}
  * Scala wrapper class for a single action to be performed in response to the specified triggers.
  */
 abstract class AbstractActionListenerState extends AbstractAppStateWithApp {
-  /** The name of this action. WARNING: this needs to be unique and it isn't checked. */
-  val name: String
+  /** The names that this handler is interested in. WARNING: Still need to register in KeyBindings. */
+  val names: List[String]
 
   /** The actual action to perform */
   def action(name: String, isPressed: Boolean, tpf: Float): Unit
@@ -22,7 +22,7 @@ abstract class AbstractActionListenerState extends AbstractAppStateWithApp {
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
-    app.getInputManager.addListener(actionListener, name)
+    app.getInputManager.addListener(actionListener, names: _*)
   }
 
   override def cleanup(): Unit = {

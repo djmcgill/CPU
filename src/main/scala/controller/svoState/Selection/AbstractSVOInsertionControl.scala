@@ -13,7 +13,7 @@ import logic.voxels._
  * It returns the path to the node that needs to be recreated (if any).
  */
 
-// TODO: is passing around the queue the best way? Could we instead just let the Control call a function in enqueue?
+// TODO: change so that this class returns the block currently being hovered on.
 abstract class AbstractSVOInsertionControl extends AbstractActionListenerState {
   val node: SVONode
   val insertion: Boolean

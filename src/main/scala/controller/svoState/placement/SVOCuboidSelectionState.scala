@@ -25,31 +25,35 @@ class SVOCuboidSelectionState extends AbstractActionListenerState {
     geo
   }
 
-  override val name: String = "SELECT CUBOID"
-  // TODO: right click to clear selection
+  override val names = List("SELECT CUBOID")
   override def action(name: String, isPressed: Boolean, tpf: Float): Unit = {
     if (isPressed) {
       initialPosition = Some(pointUnderMouse())
       app.getRootNode.attachChild(geometry)
-  //    app.getInputManager.setCursorVisible(false)
+      app.getInputManager.setCursorVisible(false)
     } else {
       initialPosition = None
       app.getRootNode.detachChild(geometry)
-//      app.getInputManager.setCursorVisible(true)
+      app.getInputManager.setCursorVisible(true)
 
       // Insert at the center of each of the selected size-0 cubes.
-      selectedCorners foreach {case (lower, upper) =>
+      selectedCorners foreach { case (lower, upper) =>
         val queueManager = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
         val jobQueue = app.getStateManager.getState[PeonJobQueue](classOf[PeonJobQueue])
-        val List(lowerX, lowerY, lowerZ) = List(lower.x, lower.y, lower.z) map {f: Float => math.round(math.floor(f).toFloat)}
-        val List(upperX, upperY, upperZ) = List(upper.x, upper.y, upper.z) map {f: Float => math.round(math.ceil(f).toFloat)}
+        val List(lowerX, lowerY, lowerZ) = List(lower.x, lower.y, lower.z) map { f: Float => math.round(math.floor(f).toFloat) }
+        val List(upperX, upperY, upperZ) = List(upper.x, upper.y, upper.z) map { f: Float => math.round(math.ceil(f).toFloat) }
 
-        val blockToInsert: Block = new Dirt()
-        val phantomNode: SVONode = Full(Some(blockToInsert))
-        for (x <- lowerX until upperX; y <- lowerY until upperY; z <- lowerZ until upperZ) {
-          val position = new Vector3f(x+0.5f, y+0.5f, z+0.5f)
-          queueManager.requestSVOInsertion(phantomNode, position)
-          jobQueue.requestBlockPlacement(position)
+        val placementState = app.getStateManager.getState[SVOPlacementState](classOf[SVOPlacementState])
+        placementState.maybeChosenBlock foreach { maybeBlockToInsert =>
+
+          for (x <- lowerX until upperX; y <- lowerY until upperY; z <- lowerZ until upperZ) {
+            val position = new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f)
+
+            val maybePhantomBlockToInsert = maybeBlockToInsert map (new Phantom(_))
+            // TODO: deal properly with deletion
+            queueManager.requestSVOInsertion(Full(maybePhantomBlockToInsert), position)
+            if (maybeBlockToInsert.isDefined) {jobQueue.requestBlockPlacement(position)}
+          }
         }
       }
     }

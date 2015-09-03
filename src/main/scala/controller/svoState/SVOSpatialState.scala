@@ -2,17 +2,10 @@ package controller.svoState
 
 import com.jme3.app.Application
 import com.jme3.app.state.AppStateManager
-import com.jme3.bullet.BulletAppState
-import com.jme3.material.Material
-import com.jme3.material.RenderState.BlendMode
 import com.jme3.math._
-import com.jme3.renderer.queue.RenderQueue.Bucket
 import com.jme3.scene._
-import com.jme3.scene.shape.Box
-import com.jme3.texture.Texture
-import com.jme3.util.TangentBinormalGenerator
 import controller.AbstractAppStateWithApp
-import controller.svoState.placement.SVOCuboidSelectionState
+import controller.svoState.placement.{SVOPlacementState, SVOCuboidSelectionState}
 import controller.svoState.selection.{SVOInsertElementControl, SVODeleteElementControl}
 import graphics.BlockGeometries
 import logic.voxels._
@@ -31,6 +24,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
   private lazy val svoPhysicsState = new SVOPhysicsState
   private lazy val blockGeometries = new BlockGeometries(app.getAssetManager)
   private lazy val states = Seq(
+    new SVOPlacementState,
     new SVOInsertElementControl,
     new SVODeleteElementControl,
     svoPhysicsState,
@@ -40,6 +34,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
   /** You can't make changes directly to the SVO or its geometry, you have to register your intention here. */
   val insertionQueue = new mutable.Queue[(SVONode, Vector3f)]()
 
+  // TODO: special case if node = Full(None)
   def requestSVOInsertion(node: SVONode, position: Vector3f) = {
     insertionQueue.enqueue((node, position))
   }
@@ -53,7 +48,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     stateManager.attachAll(states)
 
     // Create a spatial for the SVO and call it "svoSpatial".
-    createSpatialFromSVONode(svo.node, svo.height) foreach {svoSpatial =>
+    createSpatialFromSVO(svo) foreach {svoSpatial =>
       svoSpatial.setName(SvoRootName)
       app.getRootNode.attachChild(svoSpatial)
       val scale = math.pow(2, maxHeight).toFloat
@@ -93,30 +88,26 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     parentSpatial.detachChild(oldChild)
 
     // Add the new spatial if it was generated.
-    createSpatialFromSVONode(svoToInsert.node, svoToInsert.height) foreach { newChild =>
+    createSpatialFromSVO(svoToInsert) foreach { newChild =>
       newChild.setName(oldChild.getName)
       newChild.setLocalTranslation(oldChild.getLocalTranslation)
       parentSpatial.attachChild(newChild)
       svoPhysicsState.attachSVOPhysics(newChild)
-
     }
   }
 
-
-
   /** Turn a SVONode into a Spatial. */
-  // TODO: refactor to creteSpatialFromSVO?
-  private def createSpatialFromSVONode(svoNode: SVONode, svoHeight: Int): Option[Spatial] = svoNode match {
+  private def createSpatialFromSVO(svo: SVO): Option[Spatial] = svo.node match {
     case Full(None) => None
 
     case Full(Some(block)) =>
-      Some(blockGeometries.getGeometryForBlock(block, svoHeight))
+      Some(blockGeometries.getGeometryForBlock(block, svo.height))
 
     // Create a new node which contains the spatials of the sub-SVOs
     case Subdivided(subSVOs) =>
-      val subSpatials = subSVOs map {svo => createSpatialFromSVONode(svo.node, svo.height)}
+      val subSpatials = subSVOs map {subSVO => createSpatialFromSVO(subSVO)}
       val newNode = new Node()
-      newNode.setUserData("height", svoHeight)
+      newNode.setUserData("height", svo.height)
       newNode.scale(0.5f)
       for (ix <- 0 until 8;
            subSpatial <- subSpatials(ix)) {

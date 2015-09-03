@@ -37,7 +37,7 @@ class BlockGeometries(assetManager: AssetManager) {
     val boxMesh = new Box(Vector3f.ZERO, Vector3f.UNIT_XYZ)
     val boxGeometry = new Geometry("Shiny box", boxMesh)
     TangentBinormalGenerator.generate(boxMesh)
-    boxGeometry.setMaterial(boxMaterial)
+    boxGeometry.setMaterial(dirtMaterial)
     val textureScale = math.pow(2, height).toFloat
     boxGeometry.getMesh.scaleTextureCoordinates(new Vector2f(textureScale, textureScale))
     boxGeometry.setUserData("height", height)
@@ -56,8 +56,7 @@ class BlockGeometries(assetManager: AssetManager) {
     boxGeometry
   }
 
-  // TODO: rename to dirt
-  private lazy val boxMaterial = {
+  private lazy val dirtMaterial = {
     val boxMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md")
 
     val diffuseTexture = assetManager.loadTexture("Textures/SandPebbles/SandPebblesDiffuse.jpg")
@@ -73,11 +72,11 @@ class BlockGeometries(assetManager: AssetManager) {
     //    val specularTexture = assetManager.loadTexture("Textures/SandPebbles/SandPebblesSpecular.jpg")
     //    specularTexture.setWrap(Texture.WrapMode.Repeat)
     //    specularTexture.setAnisotropicFilter(8)
-    //    boxMaterial.setTexture("SpecularMap", specularTexture)
+    //    dirtMaterial.setTexture("SpecularMap", specularTexture)
 
     boxMaterial.setBoolean("UseMaterialColors",true)
     boxMaterial.setColor("Diffuse",ColorRGBA.White)  // minimum material color
-    //    boxMaterial.setColor("Specular",ColorRGBA.White) // for shininess
+    //    dirtMaterial.setColor("Specular",ColorRGBA.White) // for shininess
     boxMaterial.setColor("Ambient", ColorRGBA.White)
     boxMaterial
   }

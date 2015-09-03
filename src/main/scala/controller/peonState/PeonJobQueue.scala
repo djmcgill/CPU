@@ -18,17 +18,15 @@ class PeonJobQueue() extends AbstractActionListenerState {
     val svo = app.getRootNode.getUserData[SVO]("svo")
     val svoSpatialState = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
 
-    val blockToInsert: Block = new Metal()
-    val phantomBlock = new Phantom(blockToInsert)
-    svoSpatialState.requestSVOInsertion(Full(Some(phantomBlock)), globalPosition)
     // have some way to cancel the job maybe?
     val promise: Promise[Boolean] = Promise()
 
     promise.future.onSuccess { case true =>
         svo.getNodeAt(globalPosition, 0) foreach {
-            case Full(Some(Phantom(block))) if block == blockToInsert =>
-              svoSpatialState.requestSVOInsertion(Full(Some(blockToInsert)), globalPosition)
-          }
+            case Full(Some(Phantom(block))) =>
+              svoSpatialState.requestSVOInsertion(Full(Some(block)), globalPosition)
+            case _ =>
+        }
     }
     val pathfinding = new PeonSimplePathfinding(globalPosition, promise, None)
     jobQueue.enqueue(pathfinding)
@@ -87,5 +85,5 @@ class PeonJobQueue() extends AbstractActionListenerState {
 
   }
 
-  override val name: String = "PLACE PHANTOM DIRT"
+  override val names = List("PLACE PHANTOM DIRT")
 }

@@ -18,7 +18,13 @@ class KeyBindings extends AbstractAppStateWithApp {
     ("CAMERA TARGET FORWARD" , new KeyTrigger(KeyInput.KEY_UP   )),
     ("CAMERA TARGET BACKWARD", new KeyTrigger(KeyInput.KEY_DOWN )),
     ("CAMERA TARGET UP"      , new KeyTrigger(KeyInput.KEY_PGUP )),
-    ("CAMERA TARGET DOWN"    , new KeyTrigger(KeyInput.KEY_PGDN )))
+    ("CAMERA TARGET DOWN"    , new KeyTrigger(KeyInput.KEY_PGDN )),
+
+    // SVOPlacementState
+    ("CHOOSE DIRT"   , new KeyTrigger(KeyInput.KEY_4)),
+    ("CHOOSE METAL"  , new KeyTrigger(KeyInput.KEY_3)),
+    ("CHOOSE AIR"    , new KeyTrigger(KeyInput.KEY_2)),
+    ("CHOOSE NOTHING", new KeyTrigger(KeyInput.KEY_1)))
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
