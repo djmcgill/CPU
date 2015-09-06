@@ -5,7 +5,7 @@ import com.jme3.app.state.AppStateManager
 import com.jme3.input.controls.{ActionListener, Trigger}
 
 /**
- * Scala wrapper class for a single action to be performed in response to the specified triggers.
+ * Scala wrapper class for actions to be performed in response to the specified named events.
  */
 abstract class AbstractActionListenerState extends AbstractAppStateWithApp {
   /** The names that this handler is interested in. WARNING: Still need to register in KeyBindings. */
@@ -15,7 +15,6 @@ abstract class AbstractActionListenerState extends AbstractAppStateWithApp {
   def action(name: String, isPressed: Boolean, tpf: Float): Unit
 
   def actionListener = new ActionListener {
-    // Do we really need to specify all the parameters?
     override def onAction(name: String, isPressed: Boolean, tpf: Float) =
       action(name, isPressed, tpf)
   }

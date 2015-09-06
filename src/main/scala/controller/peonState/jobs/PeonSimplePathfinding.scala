@@ -23,6 +23,12 @@ class PeonSimplePathfinding(
 
   override def controlRender(renderManager: RenderManager, viewPort: ViewPort): Unit = {}
 
+
+  override def setEnabled(enabled: Boolean): Unit = {
+    super.setEnabled(enabled)
+    ???
+  }
+
   override def controlUpdate(tpf: Float): Unit = {
     val control = spatial.getControl[BetterCharacterControl](classOf[BetterCharacterControl])
 

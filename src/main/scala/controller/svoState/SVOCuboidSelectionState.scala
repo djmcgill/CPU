@@ -1,4 +1,4 @@
-package controller.svoState.placement
+package controller.svoState
 
 import com.jme3.material.Material
 import com.jme3.material.RenderState.BlendMode
@@ -8,12 +8,25 @@ import com.jme3.scene.Geometry
 import com.jme3.scene.shape.Box
 import controller.AbstractActionListenerState
 import controller.peonState.PeonJobQueue
-import controller.svoState.SVOSpatialState
 import logic.voxels._
 
-class SVOCuboidSelectionState extends AbstractActionListenerState {
+object SVOCuboidSelectionState {
+  val ChooseDirtName = "CHOOSE DIRT"
+  val ChooseMetalName = "CHOOSE METAL"
+  val ChooseAirName = "CHOOSE AIR"
+  val NoChoiceName = "CHOOSE NOTHING"
+
+  val StartSelectionName = "SELECT CUBOID"
+  val ChoiceNames = List(ChooseDirtName, ChooseMetalName, ChooseAirName, NoChoiceName)
+}
+
+
+class SVOCuboidSelectionState extends AbstractActionListenerState with SVOState {
   private var initialPosition: Option[Vector3f] = None
   private var selectedCorners: Option[(Vector3f, Vector3f)] = None
+  private var maybeBlockToPlace: Option[Option[Block]] = None
+
+  var magicallyInsert = false
   private lazy val geometry = {
     val geo = new Geometry("Cuboid selection", new Box(1, 1, 1))
     val boxMat = new Material(app.getAssetManager, "Common/MatDefs/Misc/Unshaded.j3md")
@@ -25,36 +38,50 @@ class SVOCuboidSelectionState extends AbstractActionListenerState {
     geo
   }
 
-  override val names = List("SELECT CUBOID")
+  override val names = SVOCuboidSelectionState.StartSelectionName :: SVOCuboidSelectionState.ChoiceNames
   override def action(name: String, isPressed: Boolean, tpf: Float): Unit = {
-    if (isPressed) {
-      initialPosition = Some(pointUnderMouse())
-      app.getRootNode.attachChild(geometry)
-      app.getInputManager.setCursorVisible(false)
-    } else {
-      initialPosition = None
-      app.getRootNode.detachChild(geometry)
-      app.getInputManager.setCursorVisible(true)
+    if (name == SVOCuboidSelectionState.StartSelectionName) {
+      if (isPressed) {
+        initialPosition = Some(pointUnderMouse())
+        app.getRootNode.attachChild(geometry)
+        app.getInputManager.setCursorVisible(false)
+      } else {
+        initialPosition = None
+        app.getRootNode.detachChild(geometry)
+        app.getInputManager.setCursorVisible(true)
 
-      // Insert at the center of each of the selected size-0 cubes.
-      selectedCorners foreach { case (lower, upper) =>
-        val queueManager = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
-        val jobQueue = app.getStateManager.getState[PeonJobQueue](classOf[PeonJobQueue])
-        val List(lowerX, lowerY, lowerZ) = List(lower.x, lower.y, lower.z) map { f: Float => math.round(math.floor(f).toFloat) }
-        val List(upperX, upperY, upperZ) = List(upper.x, upper.y, upper.z) map { f: Float => math.round(math.ceil(f).toFloat) }
+        // Insert at the center of each of the selected size-0 cubes.
+        selectedCorners foreach { case (lower, upper) =>
+          val queueManager = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
+          val jobQueue = app.getStateManager.getState[PeonJobQueue](classOf[PeonJobQueue])
+          val List(lowerX, lowerY, lowerZ) = List(lower.x, lower.y, lower.z) map { f: Float => math.round(math.floor(f).toFloat) }
+          val List(upperX, upperY, upperZ) = List(upper.x, upper.y, upper.z) map { f: Float => math.round(math.ceil(f).toFloat) }
 
-        val placementState = app.getStateManager.getState[SVOPlacementState](classOf[SVOPlacementState])
-        placementState.maybeChosenBlock foreach { maybeBlockToInsert =>
+          maybeBlockToPlace foreach { maybeBlockToInsert =>
+            for (x <- lowerX until upperX; y <- lowerY until upperY; z <- lowerZ until upperZ) {
+              val position = new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f)
 
-          for (x <- lowerX until upperX; y <- lowerY until upperY; z <- lowerZ until upperZ) {
-            val position = new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f)
-
-            val maybePhantomBlockToInsert = maybeBlockToInsert map (new Phantom(_))
-            // TODO: deal properly with deletion
-            queueManager.requestSVOInsertion(Full(maybePhantomBlockToInsert), position)
-            if (maybeBlockToInsert.isDefined) {jobQueue.requestBlockPlacement(position)}
+              val maybePhantomBlockToInsert = maybeBlockToInsert map (new Phantom(_))
+              // TODO: deal properly with deletion
+              if (magicallyInsert) {
+                queueManager.requestSVOInsertion(Full(maybeBlockToInsert), position)
+              } else {
+                queueManager.requestSVOInsertion(Full(maybePhantomBlockToInsert), position)
+                if (maybeBlockToInsert.isDefined) {
+                  jobQueue.requestBlockPlacement(position)
+                }
+              }
+            }
           }
         }
+      }
+    } else if(isPressed) {
+      print("new block chosen is: ")
+      maybeBlockToPlace = () match {
+        case _ if name == SVOCuboidSelectionState.ChooseDirtName => println("dirt"); Some(Some(new Dirt()))
+        case _ if name == SVOCuboidSelectionState.ChooseMetalName => println("metal"); Some(Some(new Metal()))
+        case _ if name == SVOCuboidSelectionState.ChooseAirName => println("air"); Some(None)
+        case _ if name == SVOCuboidSelectionState.NoChoiceName => println("none"); None
       }
     }
   }

@@ -4,27 +4,24 @@ import com.jme3.math.Vector3f
 import com.jme3.scene.control.Control
 import controller.AbstractActionListenerState
 import controller.peonState.jobs.PeonSimplePathfinding
-import controller.svoState.SVOSpatialState
+import controller.svoState.{SVOState, SVOSpatialState}
 import logic.voxels._
 
 import scala.collection.mutable
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class PeonJobQueue() extends AbstractActionListenerState {
+class PeonJobQueue() extends AbstractActionListenerState with SVOState {
   private val jobQueue: mutable.Queue[Control] = new mutable.Queue()
 
   def requestBlockPlacement(globalPosition: Vector3f) = {
-    val svo = app.getRootNode.getUserData[SVO]("svo")
-    val svoSpatialState = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
-
     // have some way to cancel the job maybe?
     val promise: Promise[Boolean] = Promise()
 
     promise.future.onSuccess { case true =>
         svo.getNodeAt(globalPosition, 0) foreach {
             case Full(Some(Phantom(block))) =>
-              svoSpatialState.requestSVOInsertion(Full(Some(block)), globalPosition)
+              spatialState.requestSVOInsertion(Full(Some(block)), globalPosition)
             case _ =>
         }
     }

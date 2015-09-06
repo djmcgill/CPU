@@ -7,9 +7,17 @@ import com.jme3.input.controls._
 import com.jme3.math.{FastMath, Vector3f}
 import com.jme3.scene.Node
 
-/**
- * Manages the controls.
- */
+object OverviewCameraState {
+  val TargetLeftName = "CAMERA TARGET LEFT"
+  val TargetRightName = "CAMERA TARGET RIGHT"
+  val TargetForwardName = "CAMERA TARGET FORWARD"
+  val TargetBackwardName = "CAMERA TARGET BACKWARD"
+  val TargetUpName = "CAMERA TARGET UP"
+  val TargetDownName = "CAMERA TARGET DOWN"
+  val ZoomInName = ChaseCamera.ChaseCamZoomIn
+  val ZoomOutName = ChaseCamera.ChaseCamZoomOut
+}
+
 class OverviewCameraState extends AbstractAppStateWithApp {
   var cameraTarget: Node = new Node("Overview Camera Target")
   var chaseCam: ChaseCamera = _
@@ -20,8 +28,7 @@ class OverviewCameraState extends AbstractAppStateWithApp {
   val moveZ = Vector3f.UNIT_Z mult 10
 
   // TODO: these triggers too
-  var zoomInTrigger: Trigger = new KeyTrigger(KeyInput.KEY_EQUALS)
-  var zoomOutTrigger: Trigger = new KeyTrigger(KeyInput.KEY_MINUS)
+
 
   val cameraTranslations = Seq(
     ("CAMERA TARGET LEFT"    , moveX mult -1),
@@ -49,8 +56,6 @@ class OverviewCameraState extends AbstractAppStateWithApp {
     app.getFlyByCamera.setEnabled(false)
     chaseCam = new ChaseCamera(app.getCamera, cameraTarget, app.getInputManager)
     chaseCam.setHideCursorOnRotate(true)
-    chaseCam.setZoomInTrigger(zoomInTrigger)
-    chaseCam.setZoomOutTrigger(zoomOutTrigger)
     chaseCam.setZoomSensitivity(50)
 
     chaseCam.setDefaultHorizontalRotation(FastMath.HALF_PI)

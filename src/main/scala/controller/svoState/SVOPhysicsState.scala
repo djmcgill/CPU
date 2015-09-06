@@ -4,11 +4,17 @@ import com.jme3.app.Application
 import com.jme3.app.state.AppStateManager
 import com.jme3.bullet.BulletAppState
 import com.jme3.bullet.collision.shapes._
-import com.jme3.bullet.control.RigidBodyControl
+import com.jme3.bullet.control.{GhostControl, RigidBodyControl}
+import com.jme3.bullet.objects.PhysicsGhostObject
+import com.jme3.bullet.util.CollisionShapeFactory
+import com.jme3.math.Vector3f
 import com.jme3.scene._
+import com.jme3.scene.shape.Box
 import controller.AbstractAppStateWithApp
+import logic.voxels.{Octant, Subdivided, Full, SVO}
 
 import scala.collection.JavaConversions._
+import scala.concurrent.Promise
 
 class SVOPhysicsState extends AbstractAppStateWithApp {
   private val SvoRootName = "svoSpatial"
@@ -19,6 +25,31 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
     super.initialize(stateManager, superApp)
     Option(app.getRootNode.getChild(SvoRootName)) foreach attachSVOPhysics
   }
+
+  // FIXME: not working
+  def svoSpatialCollidesWithEntity(svoSpatial: Spatial, worldTranslation: Vector3f): Boolean = {
+    println(s"world translation: $worldTranslation")
+    val worldSpatial = svoSpatial.clone
+
+
+
+    println(s"local translations: ${worldSpatial.getLocalTranslation} and ${svoSpatial.getLocalTranslation}")
+
+    worldSpatial.move(worldTranslation)
+    //val ghost = new GhostControl(CollisionShapeFactory.createBoxShape(worldSpatial))
+    val ghost = new GhostControl(new BoxCollisionShape(new Vector3f(1000, 1000, 1000)))
+    val ghostNode: Node = new Node("proposed svo ghost")
+    ghostNode.addControl(ghost)
+    bulletAppState.getPhysicsSpace.add(ghost)
+    app.getRootNode.attachChild(ghostNode)
+    // TODO: need to wait for a physics tick
+    val overlaps = ghost.getOverlappingCount > 0
+    println(s"overlaps: $overlaps")
+    overlaps
+  }
+
+
+
 
   /** Recurse over a SVOSpatial, adding RigidBodyControls to each of the geometries.
     * Would using CompoundPhysicsShapes on the nodes be better?

@@ -4,27 +4,27 @@ import com.jme3.app.Application
 import com.jme3.app.state.AppStateManager
 import com.jme3.input.{MouseInput, KeyInput}
 import com.jme3.input.controls.{MouseButtonTrigger, KeyTrigger, Trigger}
+import controller.svoState.{SVOSelectVoxel, SVOCuboidSelectionState}
 
 class KeyBindings extends AbstractAppStateWithApp {
   private val bindings: Map[String, Trigger] = Map(
-    ("SELECT CUBOID"     , new MouseButtonTrigger(MouseInput.BUTTON_LEFT)),
-    ("PLACE DIRT"        , new KeyTrigger(KeyInput.KEY_Q)),
-    ("DELETE BLOCK"      , new KeyTrigger(KeyInput.KEY_W)),
-    ("PLACE PHANTOM DIRT", new KeyTrigger(KeyInput.KEY_E)),
+    (SVOSelectVoxel.SelectVoxelName, new KeyTrigger(KeyInput.KEY_Q)),
 
-    // OverviewCameraState
-    ("CAMERA TARGET LEFT"    , new KeyTrigger(KeyInput.KEY_LEFT)),
-    ("CAMERA TARGET RIGHT"   , new KeyTrigger(KeyInput.KEY_RIGHT)),
-    ("CAMERA TARGET FORWARD" , new KeyTrigger(KeyInput.KEY_UP   )),
-    ("CAMERA TARGET BACKWARD", new KeyTrigger(KeyInput.KEY_DOWN )),
-    ("CAMERA TARGET UP"      , new KeyTrigger(KeyInput.KEY_PGUP )),
-    ("CAMERA TARGET DOWN"    , new KeyTrigger(KeyInput.KEY_PGDN )),
+    (OverviewCameraState.TargetLeftName    , new KeyTrigger(KeyInput.KEY_LEFT)),
+    (OverviewCameraState.TargetRightName   , new KeyTrigger(KeyInput.KEY_RIGHT)),
+    (OverviewCameraState.TargetForwardName , new KeyTrigger(KeyInput.KEY_UP   )),
+    (OverviewCameraState.TargetBackwardName, new KeyTrigger(KeyInput.KEY_DOWN )),
+    (OverviewCameraState.TargetUpName, new KeyTrigger(KeyInput.KEY_PGUP )),
+    (OverviewCameraState.TargetDownName, new KeyTrigger(KeyInput.KEY_PGDN )),
 
-    // SVOPlacementState
-    ("CHOOSE DIRT"   , new KeyTrigger(KeyInput.KEY_4)),
-    ("CHOOSE METAL"  , new KeyTrigger(KeyInput.KEY_3)),
-    ("CHOOSE AIR"    , new KeyTrigger(KeyInput.KEY_2)),
-    ("CHOOSE NOTHING", new KeyTrigger(KeyInput.KEY_1)))
+    (OverviewCameraState.ZoomInName, new KeyTrigger(KeyInput.KEY_EQUALS)),
+    (OverviewCameraState.ZoomOutName, new KeyTrigger(KeyInput.KEY_MINUS)),
+
+    (SVOCuboidSelectionState.StartSelectionName, new MouseButtonTrigger(MouseInput.BUTTON_LEFT)),
+    (SVOCuboidSelectionState.ChooseDirtName , new KeyTrigger(KeyInput.KEY_4)),
+    (SVOCuboidSelectionState.ChooseMetalName, new KeyTrigger(KeyInput.KEY_3)),
+    (SVOCuboidSelectionState.ChooseAirName  , new KeyTrigger(KeyInput.KEY_2)),
+    (SVOCuboidSelectionState.NoChoiceName   , new KeyTrigger(KeyInput.KEY_1)))
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)

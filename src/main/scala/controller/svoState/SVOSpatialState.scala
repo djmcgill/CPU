@@ -1,12 +1,10 @@
 package controller.svoState
 
 import com.jme3.app.Application
-import com.jme3.app.state.AppStateManager
+import com.jme3.app.state.{AppState, AbstractAppState, AppStateManager}
 import com.jme3.math._
 import com.jme3.scene._
 import controller.AbstractAppStateWithApp
-import controller.svoState.placement.{SVOPlacementState, SVOCuboidSelectionState}
-import controller.svoState.selection.{SVOInsertElementControl, SVODeleteElementControl}
 import graphics.BlockGeometries
 import logic.voxels._
 
@@ -14,8 +12,12 @@ import scala.collection.mutable
 
 import scala.collection.JavaConversions._
 
+
+// TODO: hard code inserted block's size to 0
+
 /**
  * Renders a svo and attaches the physics.
+ * Updates the SVO but DOES NOT touch the jobs or anything.
  */
 class SVOSpatialState extends AbstractAppStateWithApp {
   private val SvoRootName = "svoSpatial"
@@ -23,20 +25,23 @@ class SVOSpatialState extends AbstractAppStateWithApp {
   private lazy val svo = SVO.initialWorld(maxHeight)
   private lazy val svoPhysicsState = new SVOPhysicsState
   private lazy val blockGeometries = new BlockGeometries(app.getAssetManager)
-  private lazy val states = Seq(
-    new SVOPlacementState,
-    new SVOInsertElementControl,
-    new SVODeleteElementControl,
+  private lazy val states: Seq[AppState] = Seq(
+    // These states can all assume that the SVO and it's spatial exists and is static throughout their lifetime.
+    new SVOCuboidSelectionState,
     svoPhysicsState,
-    new SVOCuboidSelectionState
+    new SVOSelectVoxel
   )
 
   /** You can't make changes directly to the SVO or its geometry, you have to register your intention here. */
-  val insertionQueue = new mutable.Queue[(SVONode, Vector3f)]()
+  private val insertionQueue = new mutable.Queue[(SVONode, Vector3f)]()
 
-  // TODO: special case if node = Full(None)
   def requestSVOInsertion(node: SVONode, position: Vector3f) = {
     insertionQueue.enqueue((node, position))
+  }
+
+  override def setEnabled(enabled: Boolean): Unit = {
+    super.setEnabled(enabled)
+    states foreach (_.setEnabled(enabled))
   }
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
@@ -91,6 +96,14 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     createSpatialFromSVO(svoToInsert) foreach { newChild =>
       newChild.setName(oldChild.getName)
       newChild.setLocalTranslation(oldChild.getLocalTranslation)
+
+      if(svoPhysicsState.svoSpatialCollidesWithEntity(newChild, parentSpatial.getWorldTranslation)) {
+        println("collision!")
+        return
+      } else {
+        println("no collision")
+      }
+
       parentSpatial.attachChild(newChild)
       svoPhysicsState.attachSVOPhysics(newChild)
     }
