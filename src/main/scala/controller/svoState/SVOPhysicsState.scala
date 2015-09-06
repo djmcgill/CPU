@@ -7,7 +7,7 @@ import com.jme3.bullet.collision.shapes._
 import com.jme3.bullet.control.{GhostControl, RigidBodyControl}
 import com.jme3.bullet.objects.PhysicsGhostObject
 import com.jme3.bullet.util.CollisionShapeFactory
-import com.jme3.math.Vector3f
+import com.jme3.math.{Transform, Vector3f}
 import com.jme3.scene._
 import com.jme3.scene.shape.Box
 import controller.AbstractAppStateWithApp
@@ -26,30 +26,19 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
     Option(app.getRootNode.getChild(SvoRootName)) foreach attachSVOPhysics
   }
 
-  // FIXME: not working
+  // TODO: test
   def svoSpatialCollidesWithEntity(svoSpatial: Spatial, worldTranslation: Vector3f): Boolean = {
-    println(s"world translation: $worldTranslation")
-    val worldSpatial = svoSpatial.clone
+    val height = svoSpatial.getUserData[Int]("height")
+    val extent = math.pow(2, height).toFloat
+    val extents = new Vector3f(extent, extent, extent)
+    val transform = svoSpatial.getWorldTransform
 
-
-
-    println(s"local translations: ${worldSpatial.getLocalTranslation} and ${svoSpatial.getLocalTranslation}")
-
-    worldSpatial.move(worldTranslation)
-    //val ghost = new GhostControl(CollisionShapeFactory.createBoxShape(worldSpatial))
-    val ghost = new GhostControl(new BoxCollisionShape(new Vector3f(1000, 1000, 1000)))
-    val ghostNode: Node = new Node("proposed svo ghost")
-    ghostNode.addControl(ghost)
-    bulletAppState.getPhysicsSpace.add(ghost)
-    app.getRootNode.attachChild(ghostNode)
-    // TODO: need to wait for a physics tick
-    val overlaps = ghost.getOverlappingCount > 0
-    println(s"overlaps: $overlaps")
-    overlaps
+    // Because our cubes are centered on extent/2, and BoxCollisionShapes are centered on 0
+    transform.setTranslation(transform.getTranslation add (extents mult 0.5f))
+    val shape: CollisionShape = new BoxCollisionShape(extents)
+    val sweepResults = bulletAppState.getPhysicsSpace.sweepTest(shape, transform, transform)
+    !sweepResults.isEmpty
   }
-
-
-
 
   /** Recurse over a SVOSpatial, adding RigidBodyControls to each of the geometries.
     * Would using CompoundPhysicsShapes on the nodes be better?
