@@ -70,8 +70,9 @@ class SVOSpatialState extends AbstractAppStateWithApp {
         svo.insertBlockStateAt(Some(blockState), location, 0)
     }
 
-    val highestPath: Option[List[Octant]] = ??? // TODO: combine all of modified paths
-    highestPath foreach replaceGeometryPath
+    //val highestPath: Option[List[Octant]] = ??? // TODO: combine all of modified paths
+    //highestPath foreach replaceGeometryPath
+    (removedPaths ++ insertedPaths) foreach (_ foreach replaceGeometryPath)
     insertionQueue.clear()
   }
 
