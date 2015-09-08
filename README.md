@@ -37,17 +37,17 @@ You are a paralysed robot (just a head?) that can have a large throne built arou
    - if too far away, could abstract to flow into and out of each octant?
      - would need to go back and forth seamlessly
    - could make sand a very limited fluid too?
- - refactor block insertion:
-    1) make block phantom
+ - refactor data insertion:
+    1) make data phantom
     2) enqueue job
     3) wait for worker to get there (implement with callback)
-        4) worker deletes old block (if there was one)
+        4) worker deletes old data (if there was one)
         5) check for a collision where we would place it 
-        6) worker places new block (if required)
+        6) worker places new data (if required)
  - overhaul job system
    - when a worker is idle, polls the job queue every so often (and picks one nearby?)
    - accepting a job (with timeout) removes it from the global queue
- - when selecting a cuboid: if cheatmode then just replace, else normal block insertion
+ - when selecting a cuboid: if cheatmode then just replace, else normal data insertion
    
 ## Later TODOS:
  - could save images of what octants look like from a distance

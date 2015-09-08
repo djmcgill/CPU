@@ -6,8 +6,8 @@ import logic.voxels._
 
 /**
  * This class will modify the SVO with a given function.
- * It can modify either the block actually clicked on (with insertion = false)
- * Or the block that's created on the side of the block that is clicked on.
+ * It can modify either the data actually clicked on (with insertion = false)
+ * Or the data that's created on the side of the data that is clicked on.
  *
  * It returns the path to the node that needs to be recreated (if any).
  */

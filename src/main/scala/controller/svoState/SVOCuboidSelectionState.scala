@@ -60,23 +60,13 @@ class SVOCuboidSelectionState extends AbstractActionListenerState with SVOState 
           maybeBlockToPlace foreach { maybeBlockToInsert =>
             for (x <- lowerX until upperX; y <- lowerY until upperY; z <- lowerZ until upperZ) {
               val position = new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f)
-
-              val maybePhantomBlockToInsert = maybeBlockToInsert map (new Phantom(_))
-              // TODO: deal properly with deletion
-              if (magicallyInsert) {
-                queueManager.requestSVOInsertion(Full(maybeBlockToInsert), position)
-              } else {
-                queueManager.requestSVOInsertion(Full(maybePhantomBlockToInsert), position)
-                if (maybeBlockToInsert.isDefined) {
-                  jobQueue.requestBlockPlacement(position)
-                }
-              }
+              ???
             }
           }
         }
       }
     } else if(isPressed) {
-      print("new block chosen is: ")
+      print("new data chosen is: ")
       maybeBlockToPlace = () match {
         case _ if name == SVOCuboidSelectionState.ChooseDirtName => println("dirt"); Some(Some(new Dirt()))
         case _ if name == SVOCuboidSelectionState.ChooseMetalName => println("metal"); Some(Some(new Metal()))

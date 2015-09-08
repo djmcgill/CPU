@@ -9,18 +9,36 @@ import com.jme3.scene.Geometry
 import com.jme3.scene.shape.Box
 import com.jme3.texture.Texture
 import com.jme3.util.TangentBinormalGenerator
+import controller._
 import logic.voxels._
 
 /** The geometries for the various blocks. */
 class BlockGeometries(assetManager: AssetManager) {
 
-  def getGeometryForBlock(block: Block, height: Int): Geometry = block match {
-    case Dirt() => dirtBox(height)
-    case Metal() => metalBox(height)
-    case Phantom(realBlock) => phantom(getGeometryForBlock(realBlock, height))
+  // TODO: memoise!
+  def getGeometryForBlock(blockState: BlockState, height: Int): Geometry = {
+    val geom: Geometry = blockState.data match {
+      case (_: Metal) => metalBox(height)
+      case (_: Dirt) => dirtBox(height)
+    }
+    blockState match {
+      case Placed(block) => geom
+      case PlacementPending(block, _) =>
+        val newGeom = phantom(geom)
+        newGeom.setUserData("phantom", true)
+        newGeom
+      case PlacementScheduled(block, _, _) =>
+        val newGeom = phantom(geom)
+        newGeom.setUserData("phantom", true)
+        newGeom
+      case RemovalPending(block, _) => phantom(geom)
+      case RemovalScheduled(block, _, _) => phantom(geom)
+    }
   }
 
-  /** Make a block transparent */
+
+
+  /** Make a data transparent */
   private def phantom(block: Geometry): Geometry = {
     val newBlock = block.clone
     val newMaterial = newBlock.getMaterial.clone
@@ -32,7 +50,6 @@ class BlockGeometries(assetManager: AssetManager) {
     newBlock
   }
 
-  // TODO: memoise this so that meshes etc are shared for each height
   private def dirtBox(height: Int) = {
     val boxMesh = new Box(Vector3f.ZERO, Vector3f.UNIT_XYZ)
     val boxGeometry = new Geometry("Shiny box", boxMesh)

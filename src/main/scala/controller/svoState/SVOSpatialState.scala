@@ -4,7 +4,7 @@ import com.jme3.app.Application
 import com.jme3.app.state.{AppState, AbstractAppState, AppStateManager}
 import com.jme3.math._
 import com.jme3.scene._
-import controller.AbstractAppStateWithApp
+import controller._
 import graphics.BlockGeometries
 import logic.voxels._
 
@@ -13,7 +13,7 @@ import scala.collection.mutable
 import scala.collection.JavaConversions._
 
 
-// TODO: hard code inserted block's size to 0
+// TODO: hard code inserted data's size to 0
 
 /**
  * Renders a svo and attaches the physics.
@@ -23,7 +23,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
   private val SvoRootName = "svoSpatial"
   private lazy val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
   private lazy val svo = SVO.initialWorld(maxHeight)
-  private lazy val svoPhysicsState = new SVOPhysicsState
+  lazy val svoPhysicsState = new SVOPhysicsState
   private lazy val blockGeometries = new BlockGeometries(app.getAssetManager)
   private lazy val states: Seq[AppState] = Seq(
     // These states can all assume that the SVO and it's spatial exists and is static throughout their lifetime.
@@ -32,12 +32,12 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     new SVOSelectVoxel
   )
 
-  /** You can't make changes directly to the SVO or its geometry, you have to register your intention here. */
-  private val insertionQueue = new mutable.Queue[(SVONode, Vector3f)]()
+  /** You can't make changes directly to the SVO, you have to register your intention here. */
+  private val insertionQueue = new mutable.Queue[(BlockState, Vector3f)]()
+  def requestSVOInsertion(blockState: BlockState, location: Vector3f) = insertionQueue.enqueue((blockState, location))
 
-  def requestSVOInsertion(node: SVONode, position: Vector3f) = {
-    insertionQueue.enqueue((node, position))
-  }
+  private val deletionQueue = new mutable.Queue[Vector3f]()
+  def requestSVODeletion(location: Vector3f) = deletionQueue.enqueue(location)
 
   override def setEnabled(enabled: Boolean): Unit = {
     super.setEnabled(enabled)
@@ -61,14 +61,17 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     }
   }
 
-  // TODO: can batch the replacements of geometries by modifying the SVO first and then combining redundant paths
+  // TODO: replace block in the SVO with BlockState
   override def update(tpf: Float): Unit = {
     super.update(tpf)
 
-    // Will need to filter the queue for valid requests if we implement multiplayer.
-    insertionQueue foreach { case (svoNode, position) =>
-        svo.insertNodeAt (svoNode, position, 0) foreach replaceGeometryPath
+    val removedPaths = deletionQueue map {location => svo.insertBlockStateAt(None, location, 0)}
+    val insertedPaths = insertionQueue map {case (blockState, location) =>
+        svo.insertBlockStateAt(Some(blockState), location, 0)
     }
+
+    val highestPath: Option[List[Octant]] = ??? // TODO: combine all of modified paths
+    highestPath foreach replaceGeometryPath
     insertionQueue.clear()
   }
 
@@ -96,14 +99,6 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     createSpatialFromSVO(svoToInsert) foreach { newChild =>
       newChild.setName(oldChild.getName)
       newChild.setLocalTranslation(oldChild.getLocalTranslation)
-
-      if(svoPhysicsState.svoSpatialCollidesWithEntity(newChild, parentSpatial.getWorldTranslation)) {
-        println("collision!")
-        return
-      } else {
-        println("no collision")
-      }
-
       parentSpatial.attachChild(newChild)
       svoPhysicsState.attachSVOPhysics(newChild)
     }
@@ -113,8 +108,8 @@ class SVOSpatialState extends AbstractAppStateWithApp {
   private def createSpatialFromSVO(svo: SVO): Option[Spatial] = svo.node match {
     case Full(None) => None
 
-    case Full(Some(block)) =>
-      Some(blockGeometries.getGeometryForBlock(block, svo.height))
+    case Full(Some(blockState)) =>
+      Some(blockGeometries.getGeometryForBlock(blockState, svo.height))
 
     // Create a new node which contains the spatials of the sub-SVOs
     case Subdivided(subSVOs) =>

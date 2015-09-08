@@ -26,15 +26,10 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
     Option(app.getRootNode.getChild(SvoRootName)) foreach attachSVOPhysics
   }
 
-  // TODO: test
-  def svoSpatialCollidesWithEntity(svoSpatial: Spatial, worldTranslation: Vector3f): Boolean = {
-    val height = svoSpatial.getUserData[Int]("height")
+  def svoSpatialCollidesWithEntity(height: Int, worldTranslation: Vector3f): Boolean = {
     val extent = math.pow(2, height).toFloat
     val extents = new Vector3f(extent, extent, extent)
-    val transform = svoSpatial.getWorldTransform
-
-    // Because our cubes are centered on extent/2, and BoxCollisionShapes are centered on 0
-    transform.setTranslation(transform.getTranslation add (extents mult 0.5f))
+    val transform = new Transform(worldTranslation)
     val shape: CollisionShape = new BoxCollisionShape(extents)
     val sweepResults = bulletAppState.getPhysicsSpace.sweepTest(shape, transform, transform)
     !sweepResults.isEmpty
@@ -43,6 +38,7 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
   /** Recurse over a SVOSpatial, adding RigidBodyControls to each of the geometries.
     * Would using CompoundPhysicsShapes on the nodes be better?
     */
+
   def attachSVOPhysics(svoSpatial: Spatial): Unit = svoSpatial match {
     case cubeGeometry: Geometry =>
       if(!Option(cubeGeometry.getUserData[Boolean]("phantom")).contains(true)) {

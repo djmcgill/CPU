@@ -2,6 +2,7 @@ package logic.voxels
 
 import com.jme3.export._
 import com.jme3.math.Vector3f
+import controller.{Placed, BlockState}
 
 
 /**
@@ -10,20 +11,12 @@ import com.jme3.math.Vector3f
  */
 // TODO: move SVONode into its own file
 sealed abstract class SVONode extends Savable
-case class Full (var contents: Option[Block]) extends SVONode {
+case class Full (var contents: Option[BlockState]) extends SVONode {
   def this() = this(None)
   val contentsName = "contents"
-  override def write(ex: JmeExporter): Unit = {
-    val capsule = ex.getCapsule(this)
-    capsule.write(contents.orNull, contentsName, null)
-  }
+  override def write(ex: JmeExporter): Unit = ???
 
-  override def read(im: JmeImporter): Unit = {
-    val capsule = im.getCapsule(this)
-    capsule.readSavable(contentsName, null) match {
-      case block: Block => contents = Option(block)
-    }
-  }
+  override def read(im: JmeImporter): Unit = ???
 }
 case class Subdivided (var octants: Array[SVO]) extends SVONode {
   override def equals(that: Any): Boolean = that match {
@@ -53,7 +46,7 @@ case class Subdivided (var octants: Array[SVO]) extends SVONode {
 object SVO {
   def minimalSubdivided = {
     def empty: SVO = new SVO(new Full(None), 0)
-    def full: SVO = new SVO(new Full(Some(new Dirt())), 0)
+    def full: SVO = new SVO(new Full(Some(Placed(new Dirt()))), 0)
     val arr: Array[SVO] = Array(full, empty, empty, empty, empty, empty, empty, full)
     new SVO(Subdivided(arr), 1)
   }
@@ -76,7 +69,7 @@ object SVO {
     world
   }
   def initialWorld(maxSize: Int) = {
-    def initialFull = new SVO(Full(Some(new Dirt())), maxSize - 1)
+    def initialFull = new SVO(Full(Some(Placed(new Dirt()))), maxSize - 1)
     def initialEmpty = new SVO(Full(None), maxSize - 1)
     val arr = Array.fill[SVO](8)(initialEmpty)
     for (x <- Array(true, false); z <- Array(true, false)) {
@@ -87,7 +80,7 @@ object SVO {
     val world = new SVO(Subdivided(arr), maxSize)
     world
   }
-  def voxel = new SVO(Full(Some(new Dirt())), 0)
+  def voxel = new SVO(Full(Some(Placed(new Dirt()))), 0)
   def empty = new SVO(Full(None), 0)
   def inBounds(v: Vector3f): Boolean = {
     def inBoundsAxis(f: Float) = 0.0 <= f && f <= 1.0
@@ -148,6 +141,12 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
     }
   }
 
+  def insertBlockStateAt(maybeBlockState: Option[BlockState], globalPosition: Vector3f, targetHeight: Int) = {
+    val maybePath = Octant.getPathToGlobal(globalPosition, targetHeight, this.height)
+    val newNode: SVONode = ???
+    maybePath flatMap (insertNodePath(newNode, _))
+  }
+
   // Insert the given node at the end of the path. Return a path to the highest node that has changed.
   def insertNodePath(newNode: SVONode, path: List[Octant]): Option[List[Octant]] = path match {
 
@@ -176,7 +175,7 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
       }
       val maybeInsertPath = childSVO.insertNodePath(newNode, os) flatMap {insertPath =>
         // Check to see if we've make all the subNodes the same
-        val maybeOnlyNode: Option[Option[Block]] = this.node match {
+        val maybeOnlyNode: Option[Option[BlockState]] = this.node match {
           case Full(_) => None
           case Subdivided(subSVOs) =>
             val subNodes = subSVOs map (_.node)
@@ -203,7 +202,7 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
   }
 
   def insertElementAt (element: Option[Block], worldPosition: Vector3f, height: Int) = {
-    insertNodeAt (Full(element), worldPosition, height)
+    insertNodeAt (Full(element map Placed), worldPosition, height)
   }
 }
 
