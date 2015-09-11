@@ -13,8 +13,6 @@ import scala.collection.mutable
 import scala.collection.JavaConversions._
 
 
-// TODO: hard code inserted data's size to 0
-
 /**
  * Renders a svo and attaches the physics.
  * Updates the SVO but DOES NOT touch the jobs or anything.
@@ -33,11 +31,8 @@ class SVOSpatialState extends AbstractAppStateWithApp {
   )
 
   /** You can't make changes directly to the SVO, you have to register your intention here. */
-  private val insertionQueue = new mutable.Queue[(BlockState, Vector3f)]()
-  def requestSVOInsertion(blockState: BlockState, location: Vector3f) = insertionQueue.enqueue((blockState, location))
-
-  private val deletionQueue = new mutable.Queue[Vector3f]()
-  def requestSVODeletion(location: Vector3f) = deletionQueue.enqueue(location)
+  private val insertionQueue = new mutable.Queue[(Option[BlockState], Vector3f)]()
+  def requestSVOInsertion(maybeBlockState: Option[BlockState], location: Vector3f) = insertionQueue.enqueue((maybeBlockState, location))
 
   override def setEnabled(enabled: Boolean): Unit = {
     super.setEnabled(enabled)
@@ -65,14 +60,13 @@ class SVOSpatialState extends AbstractAppStateWithApp {
   override def update(tpf: Float): Unit = {
     super.update(tpf)
 
-    val removedPaths = deletionQueue map {location => svo.insertBlockStateAt(None, location, 0)}
-    val insertedPaths = insertionQueue map {case (blockState, location) =>
-        svo.insertBlockStateAt(Some(blockState), location, 0)
+    val insertedPaths = insertionQueue map {case (maybeBlockState, location) =>
+        svo.insertBlockStateAt(maybeBlockState, location, 0)
     }
 
     //val highestPath: Option[List[Octant]] = ??? // TODO: combine all of modified paths
     //highestPath foreach replaceGeometryPath
-    (removedPaths ++ insertedPaths) foreach (_ foreach replaceGeometryPath)
+    insertedPaths foreach (_ foreach replaceGeometryPath)
     insertionQueue.clear()
   }
 
@@ -86,13 +80,8 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     if (svoSpatial == null) {throw new IllegalStateException("You deleted the world!!")}
 
     val svoToInsert: SVO = svo.getSVOPath(path)
-    assert(svoToInsert.height + path.length == svo.height)
-
     val oldChild: Spatial = getSpatialAtAbsolute(svoSpatial, path)
-    assert(oldChild.getUserData[Int]("height") == svoToInsert.height)
-
     svoPhysicsState.detachSVOPhysics(oldChild)
-
     val parentSpatial = oldChild.getParent
     parentSpatial.detachChild(oldChild)
 

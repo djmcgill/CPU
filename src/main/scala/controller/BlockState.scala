@@ -1,83 +1,84 @@
 package controller
 
-import com.jme3.export.{JmeExporter, JmeImporter, Savable}
 import com.jme3.math.Vector3f
-import controller.svoState.SVOState
-import logic.voxels.{Full, Block}
+import controller.svoState.SVOSpatialState
+import logic.voxels.{Full, SVO, Block}
 
 // Constructor
-object BlockState extends SVOState with Savable {
-  var cheatMode: Boolean = true
+class BlockStateState extends AbstractAppStateWithApp {
+  lazy val spatialState: SVOSpatialState = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
+  lazy val svo: SVO = app.getRootNode.getUserData[SVO]("svo")
+  var cheatMode: Boolean = false
 
-  def read(im: JmeImporter): Unit = ???
-  def write(ex: JmeExporter): Unit = ???
 
-  def requestPlacement(block: Block, location: Vector3f): BlockState = {
+  // Maybe return a boolean if it was a valid placement or not?
+  def requestPlacement(block: Block, location: Vector3f): Unit = {
     val newState = PlacementPending(block, location)
-    if (cheatMode) {
-      BlockState.placementJobReady(newState)
+    val maybeCurrentState: Option[BlockState] = svo.getNodeAt(location, 0) match {
+      case Some(Full(maybeBlockState)) => maybeBlockState
+      case _ => None
+    }
+    val pointlessOrder = maybeCurrentState match {
+      case Some(blockState : RemovalPending)   if blockState.data == block => true
+      case Some(blockState : RemovalScheduled) if blockState.data == block => true
+      case _ => false
+    }
+    if (cheatMode || pointlessOrder) {
+      placementJobReady(newState)
     } else {
-      spatialState.requestSVOInsertion(newState, location)
-      ??? // add job to queue
+      println(s"TODO: add job at $location to queue") // TODO
+      spatialState.requestSVOInsertion(Some(newState), location)
     }
   }
-  def assignWorker(state: BlockState, workerID: Int): BlockState = state match {
-      case PlacementPending(data, location) => PlacementScheduled(data, location, workerID)
-      case RemovalPending(data, location) => RemovalScheduled(data, location, workerID)
-  }
-  def placementJobFailed(state: BlockState): Unit = {
-    state match {
-      case PlacementScheduled(_, location, worker) =>
-        ??? // remove job from worker
-        spatialState.requestSVODeletion(location)
-
-      case PlacementPending(_, location) =>
-        spatialState.requestSVODeletion(location)
-    }
-  }
-  def removalJobFailed(state: BlockState): BlockState = {
-    state match {
-      case RemovalScheduled(_, _, worker) =>
-        ??? // remove job from worker
-        Placed(state.data)
-      case RemovalPending(_, _) =>
-        Placed(state.data)
-    }
-  }
-  def placementJobReady(state: BlockState): BlockState = {
+  def placementJobReady(state: BlockState): Unit = {
     val location = state match {
       case PlacementScheduled(_, loc, worker) =>
-        ??? // remove job from worker
+        println(s"to remove job at $loc from worker $worker")
         loc
       case PlacementPending(_, loc) => loc
-    }
+      case _ => throw new IllegalArgumentException(s"Unallowed state $state")    }
+
     val collision: Boolean = spatialState.svoPhysicsState.svoSpatialCollidesWithEntity(0, location)
     if (collision) {
-      state
+      ??? // TODO: We tried to insert but can't. It's still a valid job however, so we shouldn't just throw it away.
     } else {
-      spatialState.requestSVOInsertion(state, location)
-      Placed(state.data)
+      spatialState.requestSVOInsertion(Some(Placed(state.data)), location)
     }
   }
-  def removalJobSucceeded(state: BlockState): Unit = {
+
+  def requestRemoval(location: Vector3f): Unit = {
+    val maybeCurrentState = svo.getNodeAt(location, 0) match {
+      case Some(Full(result)) => result
+      case _ => None
+    }
+    val maybeNewState = maybeCurrentState map (currentState => PlacementPending(currentState.data, location))
+
+    val pointlessOrder = maybeCurrentState match {
+      case Some(_: PlacementPending) => true // TODO: remove job from queue
+      case Some(_: PlacementScheduled) => true // TODO: remove job from worker
+      case _ => false
+    }
+
+    if (cheatMode || pointlessOrder) {
+      spatialState.requestSVOInsertion(None, location)
+    } else {
+      println("TODO: register removal request with job queue") // TODO
+      spatialState.requestSVOInsertion(maybeNewState, location)
+    }
+  }
+
+  def removalReady(state: BlockState): Unit = {
     val location = state match {
-      case RemovalPending(_, loc) => loc
-      case RemovalScheduled(_, loc, workerID) =>
-        ??? // remove job from worker
-        loc
+      case RemovalPending(_, loc) => loc // remove from job queue
+      case RemovalScheduled(_, loc, _) => loc // remove from worker
+      case _ => throw new IllegalArgumentException(s"Unallowed state $state")
     }
-    spatialState.requestSVODeletion(location)
+    spatialState.requestSVOInsertion(None, location)
   }
-  def requestRemoval(state: BlockState, location: Vector3f): Option[BlockState] = {
-    val pendingState = RemovalPending(state.data, location)
-    if (cheatMode) {
-      BlockState.removalJobSucceeded(pendingState)
-      None
-    } else {
-      ??? // register with job queue
-      Some(pendingState)
-    }
-  }
+
+  def assignWorker(state: BlockState, workerID: Int): BlockState = ???
+  def placementJobFailed(state: BlockState): Unit = ???
+  def removalJobFailed(state: BlockState): BlockState = ???
 }
 
 // State transitions

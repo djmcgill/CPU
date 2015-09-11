@@ -27,7 +27,9 @@ object Main extends SimpleApplication {
       new SVOSpatialState,
       new PeonJobQueue,
       new Peon,
-      new SkyboxState
+      new SkyboxState,
+      new BlockStateState
+
     )
     bulletAppState.getPhysicsSpace.setAccuracy(0.001f)
     assetManager.registerLocator("resources", classOf[FileLocator])

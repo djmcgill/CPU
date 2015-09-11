@@ -143,7 +143,7 @@ case class SVO (var node: SVONode, var height: Int) extends Savable {
 
   def insertBlockStateAt(maybeBlockState: Option[BlockState], globalPosition: Vector3f, targetHeight: Int) = {
     val maybePath = Octant.getPathToGlobal(globalPosition, targetHeight, this.height)
-    val newNode: SVONode = ???
+    val newNode: SVONode = Full(maybeBlockState)
     maybePath flatMap (insertNodePath(newNode, _))
   }
 

@@ -16,7 +16,8 @@ object SVOSelectVoxel {
   val SelectVoxelName = "SELECT VOXEL"
 }
 
-class SVOSelectVoxel extends AbstractActionListenerState with SVOState {
+class SVOSelectVoxel extends AbstractActionListenerState {
+  lazy val SVOState = new SVOState(app)
   val names = List(SVOSelectVoxel.SelectVoxelName)
   var selectedVoxel: Option[Vector3f] = None
 
@@ -26,7 +27,7 @@ class SVOSelectVoxel extends AbstractActionListenerState with SVOState {
     val click2d = app.getInputManager.getCursorPosition
     def worldCoordsAtZ(z: Float) = app.getCamera.getWorldCoordinates(click2d, z)
     val rayDirection = (worldCoordsAtZ(1) subtractLocal worldCoordsAtZ(0)).normalizeLocal
-    val result = RayCaster.cast(rayOrigin, rayDirection, svo)
+    val result = RayCaster.cast(rayOrigin, rayDirection, SVOState.svo)
     if (result.isEmpty) {selectedVoxel = None}
     result foreach {case (absoluteHitPosition, path) =>
       // convert from world coordinates to the (0,0,0),(1,1,1) cube of the svo

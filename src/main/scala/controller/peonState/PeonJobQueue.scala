@@ -11,7 +11,8 @@ import scala.collection.mutable
 import scala.concurrent._
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class PeonJobQueue() extends AbstractActionListenerState with SVOState {
+class PeonJobQueue() extends AbstractActionListenerState {
+  lazy val SVOState = new SVOState(app)
   private val jobQueue: mutable.Queue[Control] = new mutable.Queue()
 
   def requestBlockPlacement(globalPosition: Vector3f) = {

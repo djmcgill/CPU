@@ -26,12 +26,17 @@ class SVOPhysicsState extends AbstractAppStateWithApp {
     Option(app.getRootNode.getChild(SvoRootName)) foreach attachSVOPhysics
   }
 
+  // FIXME: this isn't working
   def svoSpatialCollidesWithEntity(height: Int, worldTranslation: Vector3f): Boolean = {
+    println("WARNING: Tried to test for a collision in the world. This is not yet implemented")
+    return false
+
     val extent = math.pow(2, height).toFloat
     val extents = new Vector3f(extent, extent, extent)
     val transform = new Transform(worldTranslation)
+    val transform2 = new Transform(worldTranslation mult 1.1f)
     val shape: CollisionShape = new BoxCollisionShape(extents)
-    val sweepResults = bulletAppState.getPhysicsSpace.sweepTest(shape, transform, transform)
+    val sweepResults = bulletAppState.getPhysicsSpace.sweepTest(shape, transform, transform2)
     !sweepResults.isEmpty
   }
 

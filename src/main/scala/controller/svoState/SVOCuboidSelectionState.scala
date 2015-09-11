@@ -6,7 +6,7 @@ import com.jme3.math.{ColorRGBA, Vector3f}
 import com.jme3.renderer.queue.RenderQueue.Bucket
 import com.jme3.scene.Geometry
 import com.jme3.scene.shape.Box
-import controller.AbstractActionListenerState
+import controller.{BlockStateState, BlockState, AbstractActionListenerState}
 import controller.peonState.PeonJobQueue
 import logic.voxels._
 
@@ -15,13 +15,15 @@ object SVOCuboidSelectionState {
   val ChooseMetalName = "CHOOSE METAL"
   val ChooseAirName = "CHOOSE AIR"
   val NoChoiceName = "CHOOSE NOTHING"
+  // CHOOSE LIFE
 
   val StartSelectionName = "SELECT CUBOID"
   val ChoiceNames = List(ChooseDirtName, ChooseMetalName, ChooseAirName, NoChoiceName)
 }
 
 
-class SVOCuboidSelectionState extends AbstractActionListenerState with SVOState {
+class SVOCuboidSelectionState extends AbstractActionListenerState {
+  private lazy val SVOState = new SVOState(app)
   private var initialPosition: Option[Vector3f] = None
   private var selectedCorners: Option[(Vector3f, Vector3f)] = None
   private var maybeBlockToPlace: Option[Option[Block]] = None
@@ -52,15 +54,20 @@ class SVOCuboidSelectionState extends AbstractActionListenerState with SVOState 
 
         // Insert at the center of each of the selected size-0 cubes.
         selectedCorners foreach { case (lower, upper) =>
-          val queueManager = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
+          val queueManager = SVOState.spatialState
           val jobQueue = app.getStateManager.getState[PeonJobQueue](classOf[PeonJobQueue])
           val List(lowerX, lowerY, lowerZ) = List(lower.x, lower.y, lower.z) map { f: Float => math.round(math.floor(f).toFloat) }
           val List(upperX, upperY, upperZ) = List(upper.x, upper.y, upper.z) map { f: Float => math.round(math.ceil(f).toFloat) }
+          val blockStateState = app.getStateManager.getState(classOf[BlockStateState])
 
           maybeBlockToPlace foreach { maybeBlockToInsert =>
             for (x <- lowerX until upperX; y <- lowerY until upperY; z <- lowerZ until upperZ) {
               val position = new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f)
-              ???
+              maybeBlockToInsert match {
+                case Some(blockToInsert) => blockStateState.requestPlacement(blockToInsert, position)
+                case None => blockStateState.requestRemoval(position)
+
+              }
             }
           }
         }
