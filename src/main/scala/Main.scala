@@ -16,6 +16,7 @@ object Main extends SimpleApplication {
 
   override def simpleInitApp() {
     rootNode.setUserData("maxHeight", MaxHeight)
+    rootNode.setUserData("cheatMode", true)
     val bulletAppState = new BulletAppState
     bulletAppState.setThreadingType(BulletAppState.ThreadingType.PARALLEL)
 
@@ -25,17 +26,10 @@ object Main extends SimpleApplication {
       new LightingState,
       new OverviewCameraState,
       new SVOSpatialState,
-      new PeonJobQueue,
       new Peon,
       new SkyboxState,
-      new BlockStateState
-
-    )
+      new BlockStateState)
     bulletAppState.getPhysicsSpace.setAccuracy(0.001f)
     assetManager.registerLocator("resources", classOf[FileLocator])
-  }
-
-  override def simpleUpdate(tpf: Float): Unit = {
-    super.simpleUpdate(tpf)
   }
 }

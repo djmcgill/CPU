@@ -33,13 +33,10 @@ class Peon extends AbstractAppStateWithApp {
     val svoWidth = math.pow(2, maxHeight).toFloat
     peonControl.warp(new Vector3f(svoWidth/2, svoWidth/2 + 2, svoWidth/2))
 
-    val bulletAppState = app.getStateManager.getState[BulletAppState](classOf[BulletAppState])
+    val bulletAppState = app.getStateManager.getState(classOf[BulletAppState])
     bulletAppState.getPhysicsSpace.add(peonControl)
     bulletAppState.getPhysicsSpace.addAll(peonNode)
 
     app.getRootNode.attachChild(peonNode)
-
-    val jobQueue = app.getStateManager.getState[PeonJobQueue](classOf[PeonJobQueue])
-    peonNode.addControl(new JobSeekerControl(jobQueue))
   }
 }

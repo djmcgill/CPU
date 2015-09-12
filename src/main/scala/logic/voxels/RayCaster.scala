@@ -23,9 +23,6 @@ object RayCaster {
     castGo(rayOrigin, sanitisedDirection.normalize(), svo, List())
       // convert rayOrigin FROM svo coordinates and make sure that the path is the right way around
       .map({case (pos, path) => (pos mult scale, path.reverse)})
-
-
-
   }
 
   private def castGo(
@@ -82,7 +79,7 @@ object RayCaster {
 
       // The node has been subdivided, check each of the subtrees.
       // This is a bit of a brute force way, evaluating all possibilities.
-      // Another way to do this would be to follow the line, and see which of x, y, or z equal 0.5 first.
+      // TODO: Another way to do this would be to follow the line, and see which of x, y, or z equal 0.5 first.
       case Subdivided(subSVOs) =>
         val firstOctant = Octant.whichOctant(hitPosition)
 

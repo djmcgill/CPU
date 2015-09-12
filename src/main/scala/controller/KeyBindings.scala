@@ -14,17 +14,17 @@ class KeyBindings extends AbstractAppStateWithApp {
     (OverviewCameraState.TargetRightName   , new KeyTrigger(KeyInput.KEY_RIGHT)),
     (OverviewCameraState.TargetForwardName , new KeyTrigger(KeyInput.KEY_UP   )),
     (OverviewCameraState.TargetBackwardName, new KeyTrigger(KeyInput.KEY_DOWN )),
-    (OverviewCameraState.TargetUpName, new KeyTrigger(KeyInput.KEY_PGUP )),
-    (OverviewCameraState.TargetDownName, new KeyTrigger(KeyInput.KEY_PGDN )),
+    (OverviewCameraState.TargetUpName      , new KeyTrigger(KeyInput.KEY_PGUP )),
+    (OverviewCameraState.TargetDownName    , new KeyTrigger(KeyInput.KEY_PGDN )),
 
-    (OverviewCameraState.ZoomInName, new KeyTrigger(KeyInput.KEY_EQUALS)),
+    (OverviewCameraState.ZoomInName , new KeyTrigger(KeyInput.KEY_EQUALS)),
     (OverviewCameraState.ZoomOutName, new KeyTrigger(KeyInput.KEY_MINUS)),
 
     (SVOCuboidSelectionState.StartSelectionName, new MouseButtonTrigger(MouseInput.BUTTON_LEFT)),
-    (SVOCuboidSelectionState.ChooseDirtName , new KeyTrigger(KeyInput.KEY_4)),
-    (SVOCuboidSelectionState.ChooseMetalName, new KeyTrigger(KeyInput.KEY_3)),
-    (SVOCuboidSelectionState.ChooseAirName  , new KeyTrigger(KeyInput.KEY_2)),
-    (SVOCuboidSelectionState.NoChoiceName   , new KeyTrigger(KeyInput.KEY_1)))
+    (SVOCuboidSelectionState.ChooseDirtName    , new KeyTrigger(KeyInput.KEY_4)),
+    (SVOCuboidSelectionState.ChooseMetalName   , new KeyTrigger(KeyInput.KEY_3)),
+    (SVOCuboidSelectionState.ChooseAirName     , new KeyTrigger(KeyInput.KEY_2)),
+    (SVOCuboidSelectionState.NoChoiceName      , new KeyTrigger(KeyInput.KEY_1)))
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)

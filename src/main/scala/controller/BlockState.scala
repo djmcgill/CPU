@@ -6,10 +6,8 @@ import logic.voxels.{Full, SVO, Block}
 
 // Constructor
 class BlockStateState extends AbstractAppStateWithApp {
-  lazy val spatialState: SVOSpatialState = app.getStateManager.getState[SVOSpatialState](classOf[SVOSpatialState])
+  lazy val spatialState: SVOSpatialState = app.getStateManager.getState(classOf[SVOSpatialState])
   lazy val svo: SVO = app.getRootNode.getUserData[SVO]("svo")
-  var cheatMode: Boolean = false
-
 
   // Maybe return a boolean if it was a valid placement or not?
   def requestPlacement(block: Block, location: Vector3f): Unit = {
@@ -23,6 +21,7 @@ class BlockStateState extends AbstractAppStateWithApp {
       case Some(blockState : RemovalScheduled) if blockState.data == block => true
       case _ => false
     }
+    val cheatMode = app.getRootNode.getUserData[Boolean]("cheatMode")
     if (cheatMode || pointlessOrder) {
       placementJobReady(newState)
     } else {
@@ -59,6 +58,7 @@ class BlockStateState extends AbstractAppStateWithApp {
       case _ => false
     }
 
+    val cheatMode = app.getRootNode.getUserData[Boolean]("cheatMode")
     if (cheatMode || pointlessOrder) {
       spatialState.requestSVOInsertion(None, location)
     } else {

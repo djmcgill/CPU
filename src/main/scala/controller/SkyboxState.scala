@@ -19,8 +19,6 @@ class SkyboxState extends AbstractAppStateWithApp{
     app.getRootNode.attachChild(skySpatial)
   }
 
-  override def cleanup(): Unit = {
+  override def cleanup(): Unit =
     app.getRootNode.detachChild(skySpatial)
-    super.cleanup()
-  }
 }

@@ -32,7 +32,8 @@ class SVOSpatialState extends AbstractAppStateWithApp {
 
   /** You can't make changes directly to the SVO, you have to register your intention here. */
   private val insertionQueue = new mutable.Queue[(Option[BlockState], Vector3f)]()
-  def requestSVOInsertion(maybeBlockState: Option[BlockState], location: Vector3f) = insertionQueue.enqueue((maybeBlockState, location))
+  def requestSVOInsertion(maybeBlockState: Option[BlockState], location: Vector3f) =
+    insertionQueue.enqueue((maybeBlockState, location))
 
   override def setEnabled(enabled: Boolean): Unit = {
     super.setEnabled(enabled)
@@ -41,10 +42,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
-
-    val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
     app.getRootNode.setUserData("svo", svo)
-
     stateManager.attachAll(states)
 
     // Create a spatial for the SVO and call it "svoSpatial".
@@ -56,22 +54,18 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     }
   }
 
-  // TODO: replace block in the SVO with BlockState
   override def update(tpf: Float): Unit = {
-    super.update(tpf)
-
     val insertedPaths = insertionQueue map {case (maybeBlockState, location) =>
         svo.insertBlockStateAt(maybeBlockState, location, 0)
     }
 
-    //val highestPath: Option[List[Octant]] = ??? // TODO: combine all of modified paths
-    //highestPath foreach replaceGeometryPath
+    // TODO: combine all of modified paths, or at least reduce the number of times the same path is called a bunch
     insertedPaths foreach (_ foreach replaceGeometryPath)
     insertionQueue.clear()
   }
 
   override def cleanup(): Unit = {
-    states foreach {state => app.getStateManager.detach(state)}
+    states foreach app.getStateManager.detach
     super.cleanup()
   }
 
@@ -80,6 +74,8 @@ class SVOSpatialState extends AbstractAppStateWithApp {
     if (svoSpatial == null) {throw new IllegalStateException("You deleted the world!!")}
 
     val svoToInsert: SVO = svo.getSVOPath(path)
+
+    // Detach the old spatial
     val oldChild: Spatial = getSpatialAtAbsolute(svoSpatial, path)
     svoPhysicsState.detachSVOPhysics(oldChild)
     val parentSpatial = oldChild.getParent
@@ -103,7 +99,7 @@ class SVOSpatialState extends AbstractAppStateWithApp {
 
     // Create a new node which contains the spatials of the sub-SVOs
     case Subdivided(subSVOs) =>
-      val subSpatials = subSVOs map {subSVO => createSpatialFromSVO(subSVO)}
+      val subSpatials = subSVOs map createSpatialFromSVO
       val newNode = new Node()
       newNode.setUserData("height", svo.height)
       newNode.scale(0.5f)

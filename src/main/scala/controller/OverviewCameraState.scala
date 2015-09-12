@@ -8,18 +8,19 @@ import com.jme3.math.{FastMath, Vector3f}
 import com.jme3.scene.Node
 
 object OverviewCameraState {
-  val TargetLeftName = "CAMERA TARGET LEFT"
-  val TargetRightName = "CAMERA TARGET RIGHT"
-  val TargetForwardName = "CAMERA TARGET FORWARD"
+  val TargetLeftName     = "CAMERA TARGET LEFT"
+  val TargetRightName    = "CAMERA TARGET RIGHT"
+  val TargetForwardName  = "CAMERA TARGET FORWARD"
   val TargetBackwardName = "CAMERA TARGET BACKWARD"
-  val TargetUpName = "CAMERA TARGET UP"
-  val TargetDownName = "CAMERA TARGET DOWN"
-  val ZoomInName = ChaseCamera.ChaseCamZoomIn
-  val ZoomOutName = ChaseCamera.ChaseCamZoomOut
+  val TargetUpName       = "CAMERA TARGET UP"
+  val TargetDownName     = "CAMERA TARGET DOWN"
+  val ZoomInName         = ChaseCamera.ChaseCamZoomIn
+  val ZoomOutName        = ChaseCamera.ChaseCamZoomOut
 }
 
-class OverviewCameraState extends AbstractAppStateWithApp {
-  var cameraTarget: Node = new Node("Overview Camera Target")
+class OverviewCameraState extends AbstractAnalogListenerState {
+  import OverviewCameraState._
+  val cameraTarget: Node = new Node("Overview Camera Target")
   var chaseCam: ChaseCamera = _
   val zoomDistance = 10
 
@@ -27,27 +28,21 @@ class OverviewCameraState extends AbstractAppStateWithApp {
   val moveY = Vector3f.UNIT_Y mult 10
   val moveZ = Vector3f.UNIT_Z mult 10
 
-  // TODO: these triggers too
+  val cameraTranslations = List(
+    (TargetLeftName    , moveX mult -1),
+    (TargetRightName   , moveX),
+    (TargetForwardName , moveZ mult -1),
+    (TargetBackwardName, moveZ),
+    (TargetUpName      , moveY),
+    (TargetDownName    , moveY mult -1))
 
-
-  val cameraTranslations = Seq(
-    ("CAMERA TARGET LEFT"    , moveX mult -1),
-    ("CAMERA TARGET RIGHT"   , moveX),
-    ("CAMERA TARGET FORWARD" , moveZ mult -1),
-    ("CAMERA TARGET BACKWARD", moveZ),
-    ("CAMERA TARGET UP"      , moveY),
-    ("CAMERA TARGET DOWN"    , moveY mult -1))
-
-  val keys = cameraTranslations map (_._1)
+  override val analogNames = cameraTranslations map (_._1)
 
   // When a key is pressed, move the camera according to the offset specified in cameraTranslations
-  val analogListener = new AnalogListener() {
-    override def onAnalog(name: String, value: Float, tpf: Float) = {
+  override def analog(name: String, value: Float, tpf: Float) =
       cameraTranslations find (_._1 == name) foreach { case (_, offset) =>
         cameraTarget.move(offset mult tpf)
-      }
     }
-  }
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
@@ -70,15 +65,11 @@ class OverviewCameraState extends AbstractAppStateWithApp {
 
 
     chaseCam.setToggleRotationTrigger(new MouseButtonTrigger(MouseInput.BUTTON_RIGHT))
-
-    app.getInputManager.addListener(analogListener, keys: _*)
   }
 
   override def cleanup(): Unit = {
     super.cleanup()
     app.getFlyByCamera.setEnabled(true)
-    app.getInputManager.removeListener(analogListener)
-
     app.getRootNode.detachChild(cameraTarget)
   }
 }
