@@ -21,6 +21,8 @@ class BlockGeometries(assetManager: AssetManager) {
       case (_: Metal) => metalBox(height)
       case (_: Dirt) => dirtBox(height)
     }
+
+    // TODO: refactor this to use BlockState.isSolid and isOpaque instead.
     blockState match {
       case Placed(block) => geom
       case PlacementPending(block, _) =>

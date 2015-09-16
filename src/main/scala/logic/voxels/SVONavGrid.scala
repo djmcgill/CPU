@@ -24,11 +24,11 @@ class SVONavGrid(svo: SVO) {
       return false
     }
     svo.node match {
-      case Full(Some(blockState)) => ??? // TODO: check if blockState has physics or not
+      case Full(Some(blockState)) => blockState.isSolid
       case Full(None) => false
       case Subdivided(_) =>
-        val childOctant = ??? : Octant
-        val newPosition = ??? : Vector3f
+        val childOctant = Octant.whichOctant(position)
+        val newPosition = childOctant.toChildSpace(position)
         subSvoNavGrids.get(childOctant.ix).canWalkThere(newPosition)
       case _ => false
     }
