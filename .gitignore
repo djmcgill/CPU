@@ -1,6 +1,9 @@
 /src/test/scala/SVOControllerSpec.scala
 # Created by https://www.gitignore.io/api/intellij,scala,sbt,windows,java
 
+## Mac specific ones
+*.dylib
+
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio
 

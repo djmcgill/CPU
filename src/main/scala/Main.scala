@@ -27,7 +27,7 @@ object Main extends SimpleApplication {
       new OverviewCameraState,
       new SVOSpatialState,
       new Peon,
-      new SkyboxState,
+      //new SkyboxState, FIXME: apparently the skybox textures are not in git
       new BlockStateState)
     bulletAppState.getPhysicsSpace.setAccuracy(0.001f)
     assetManager.registerLocator("resources", classOf[FileLocator])
