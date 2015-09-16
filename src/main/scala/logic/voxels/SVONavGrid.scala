@@ -57,7 +57,7 @@ class SVONavGrid(svo: SVO) {
       cardinal <- List(
         North, East, South, West,
         NorthEast, SouthEast, SouthWest, NorthWest);
-      height <- List(Horizontal, Up, Down);
+      height <- List(Horizontal, Up, Down)
     ) yield position add cardinal add height
   }
 
