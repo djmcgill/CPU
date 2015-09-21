@@ -9,7 +9,7 @@ class RayCasterSpec extends FlatSpec with Matchers {
     val direction = new Vector3f(0, 0, -1)
     val predeterminedHit = new Vector3f(0.1f, 0.1f, 1)
     val predeterminedPath = List()
-    val Some((calculatedHit, calculatedPath)) = RayCaster.cast(origin, direction, SVO.voxel)
+    val Some((calculatedHit, calculatedPath)) = RayCaster.cast(origin, direction, SVO.voxel())
     almostEqual(calculatedHit, predeterminedHit) shouldBe true
     calculatedPath shouldBe predeterminedPath
   }
@@ -19,7 +19,7 @@ class RayCasterSpec extends FlatSpec with Matchers {
     val direction = new Vector3f(0, 1, -1)
     val predeterminedHit = new Vector3f(0.5f, 0.5f, 1)
     val predeterminedPath = List()
-    val Some((calculatedHit, calculatedPath)) = RayCaster.cast(origin, direction, SVO.voxel)
+    val Some((calculatedHit, calculatedPath)) = RayCaster.cast(origin, direction, SVO.voxel())
     almostEqual(calculatedHit, predeterminedHit) shouldBe true
     calculatedPath shouldBe predeterminedPath
   }

@@ -19,10 +19,17 @@ class SVONavGrid(svo: SVO) {
     case _ => None
   }
 
-  // Given a point, is that a valid block to stand on (i.e. does it have physics?)
+  // Given a point, is it /allowed/ to stand there, i.e. not covered by another block.
   def canWalkThere(position: Vector3f): Boolean = {
+    val blockWidth = math.pow(2, -svo.height).toFloat
+    val blockAbovePosition = new Vector3f(position.x, position.y + blockWidth, position.z)
+    canWalkOnThere(position) && !canWalkOnThere(blockAbovePosition)
+  }
+
+
+  // Given a point, is that a valid block to stand on (i.e. does it have physics?)
+  private def canWalkOnThere(position: Vector3f): Boolean = {
     if (!SVO.inBounds(position)) {
-      println(s"WARNING: canWalkThere checked $position which was out of bounds")
       return false
     }
     svo.node match {
@@ -31,7 +38,7 @@ class SVONavGrid(svo: SVO) {
       case Subdivided(_) =>
         val childOctant = Octant.whichOctant(position)
         val newPosition = childOctant.toChildSpace(position)
-        subSvoNavGrids.get(childOctant.ix).canWalkThere(newPosition)
+        subSvoNavGrids.get(childOctant.ix).canWalkOnThere(newPosition)
       case _ => false
     }
   }
@@ -39,6 +46,7 @@ class SVONavGrid(svo: SVO) {
   // TODO: to implement Jump Point Search https://harablog.wordpress.com/2011/09/07/jump-point-search/
   // This also needs to take a previous parent (or current direction of travel).
   private def possibleStepsFrom(position: Vector3f): List[Vector3f] = {
+    val scale      = math.pow(2, -svo.height).toFloat
     val North      = Vector3f.UNIT_Z mult -1
     val East       = Vector3f.UNIT_X
     val South      = Vector3f.UNIT_Z
@@ -58,10 +66,13 @@ class SVONavGrid(svo: SVO) {
         North, East, South, West,
         NorthEast, SouthEast, SouthWest, NorthWest);
       height <- List(Horizontal, Up, Down)
-    ) yield position add cardinal add height
+    ) yield position add ((cardinal add height) mult scale)
   }
 
   // The position should be inside the block that the peon is standing on.
-  def validNeighbours(position: Vector3f): List[Vector3f] =
-    possibleStepsFrom(position) filter canWalkThere
+  def validNeighbours(position: Vector3f): List[Vector3f] = {
+    val answer = possibleStepsFrom(position) filter canWalkThere
+    answer
+  }
+
 }

@@ -16,7 +16,7 @@ class SVOSpec extends FlatSpec with Matchers {
   }
 
   it should "delete correctly from a voxel" in {
-    val svo = SVO.voxel
+    val svo = SVO.voxel()
     svo.insertElementAt(None, new Vector3f(0.3f, 0.3f, 0.3f), 0)
     svo shouldBe new SVO(Full(None), 0)
   }

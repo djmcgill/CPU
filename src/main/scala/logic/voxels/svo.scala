@@ -44,43 +44,38 @@ case class Subdivided (var octants: Array[SVO]) extends SVONode {
 
 object SVO {
   def minimalSubdivided = {
-    def empty: SVO = new SVO(new Full(None), 0)
-    def full: SVO = new SVO(new Full(Some(Placed(new Dirt()))), 0)
-    val arr: Array[SVO] = Array(full, empty, empty, empty, empty, empty, empty, full)
+    val arr: Array[SVO] = Array(voxel(), empty(), empty(), empty(), empty(), empty(), empty(), voxel())
     new SVO(Subdivided(arr), 1)
   }
   def minimalInserted = {
-    def empty: SVO = new SVO(new Full(None), 0)
-    val arr: Array[SVO] = Array(empty, empty, empty, empty, empty, empty, empty, empty)
+    val arr: Array[SVO] = Array(empty(), empty(), empty(), empty(), empty(), empty(), empty(), empty())
     val world: SVO = new SVO(new Subdivided(arr), 1)
     world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.1f, 0.1f), 0)
     world.insertElementAt(Some(new Dirt()), new Vector3f(1.9f, 1.9f, 1.9f), 0)
     world
   }
   def size3 = {
-    val world = new SVO(new Full(None), 3)
+    val world = empty(3)
     world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.1f, 0.1f), 0)
     world
   }
   def size2 = {
-    val world = new SVO(new Full(None), 2)
+    val world = empty(2)
     world.insertElementAt(Some(new Dirt()), new Vector3f(0.1f, 0.1f, 0.1f), 0)
     world
   }
   def initialWorld(maxSize: Int) = {
-    def initialFull = new SVO(Full(Some(Placed(new Dirt()))), maxSize - 1)
-    def initialEmpty = new SVO(Full(None), maxSize - 1)
-    val arr = Array.fill[SVO](8)(initialEmpty)
+    val arr = Array.fill[SVO](8)(empty(maxSize-1))
     for (x <- Array(true, false); z <- Array(true, false)) {
       val y = false
       val o = new Octant(x, y, z)
-      arr(o.ix) = initialFull
+      arr(o.ix) = voxel(maxSize-1)
     }
     val world = new SVO(Subdivided(arr), maxSize)
     world
   }
-  def voxel = new SVO(Full(Some(Placed(new Dirt()))), 0)
-  def empty = new SVO(Full(None), 0)
+  def voxel(height: Int = 0) = new SVO(Full(Some(Placed(new Dirt()))), height)
+  def empty(height: Int = 0) = new SVO(Full(None), height)
   def inBounds(v: Vector3f): Boolean = {
     def inBoundsAxis(f: Float) = 0.0 <= f && f <= 1.0
     inBoundsAxis(v.x) && inBoundsAxis(v.y) && inBoundsAxis(v.z)
