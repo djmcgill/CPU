@@ -12,18 +12,19 @@ Setting will be post human/robot war, none of that generic fantasy rubbish thank
 You are a paralysed robot (just a head?) that can have a large throne built around it in order to control more minions.
 
 ## TODO before alpha:
- - animation for the peon models
  - multiple peons and a pooled job queue
+ - better peon model
+ - make metal texture darker
  - sort out lighting properly, with ambient occlusion or whatever
- - GUIs
-   - pausing (save, load, options)
-   - insert mode with different editing options
-   - main menu (new, continue, load, options)
+ - automatically save and load world (and gamestate)
  - integrate pathfinding (including jumping)
  - sort out controls (assume mouse)
  - sort out cut-away of blocks that are above the cameraTarget
+ - (all the other smaller TODOs in the code)
 
 ## Later TODOS:
+ - jump point search to improve A*
+ - animation for the peon models
  - fluid simulation
    - see http://www.dwarfcorp.com/site/2013/06/19/how-water-works-in-dwarfcorp/
    - if too far away, could abstract to flow into and out of each octant?
