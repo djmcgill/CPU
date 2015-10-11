@@ -4,20 +4,24 @@ import com.jme3.math.{FastMath, Vector3f}
 
 import scala.collection.mutable
 
-// Warning: this expects the positions to be in SVO-space (i.e. between (0,0,0) and (1,1,1)) AND to path from the centre
+// Warning: this paths from the centre
 // of the block stood on to the centre of the desired block.
-/* TODO: add a method which is how it is most commonly used - convert from worldspace to SVO space,
-    default values for maxIterations and closeEnough */
 object AStar {
   val DefaultMaxIterations = 10000
 
-  def pathToInWorld(startWorld: Vector3f, goalWorld: Vector3f, svoHeight: Int, navGrid: SVONavGrid): Option[List[Vector3f]] = {
-    val startSVO = ??? : Vector3f
-    val goalSVO = ??? : Vector3f
-    val closeEnoughSVO = ??? : Float // scale FastMath.sqrt(2) to svo space
-    apply(startSVO, goalSVO, DefaultMaxIterations, closeEnoughSVO, navGrid)
-  }
+  def pathToInWorld(
+      startWorld: Vector3f,
+      goalWorld: Vector3f,
+      svoHeight: Int,
+      navGrid: SVONavGrid): Option[List[Vector3f]] = {
+    val scale = math.pow(2, -svoHeight).toFloat
+    val startSVO = startWorld mult scale
+    val goalSVO = goalWorld mult scale
+    val closeEnoughSVO = FastMath.sqrt(1.8f) * scale
+    val maybePath = apply(startSVO, goalSVO, DefaultMaxIterations, closeEnoughSVO, navGrid)
+    maybePath map (_ map (_ mult math.pow(2, svoHeight).toFloat)) // Convert the path to world-coords
 
+  }
 
   def apply(
     start: Vector3f,

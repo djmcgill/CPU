@@ -12,14 +12,14 @@ Setting will be post human/robot war, none of that generic fantasy rubbish thank
 You are a paralysed robot (just a head?) that can have a large throne built around it in order to control more minions.
 
 ## TODO before alpha:
- - multiple peons and a pooled job queue
- - better peon model
- - make metal texture darker
- - sort out lighting properly, with ambient occlusion or whatever
- - automatically save and load world (and gamestate)
- - integrate pathfinding (including jumping)
+ - multiple peons and a pooled job queue (shouldn't be too hard)
+ - better peon model (urgh graphics)
+ - make metal texture darker (urgh graphics)
+ - sort out lighting properly, with ambient occlusion or whatever (urgh graphics)
+ - automatically save and load world and gamestate (probably going to be annoying)
+ - integrate pathfinding including jumping (shouldn't be too bad, already got a lot of the code around)
  - sort out controls (assume mouse)
- - sort out cut-away of blocks that are above the cameraTarget
+ - sort out cut-away of blocks that are above the cameraTarget (uuuuurgh)
  - (all the other smaller TODOs in the code)
 
 ## Later TODOS:

@@ -60,7 +60,6 @@ class AStarSpec extends FlatSpec with Matchers {
     AStar(from, to, 1000, 0.1f, new SVONavGrid(SVO.initialWorld(1))) shouldBe Some(expectedPath)
   }
 
-
   it should "take the optimal path when many are available for size 2" in {
     val from = new Vector3f(0.125f, 0.375f, 0.125f)
     val to = new Vector3f(0.125f, 0.375f, 0.875f)
@@ -74,5 +73,14 @@ class AStarSpec extends FlatSpec with Matchers {
     val from = new Vector3f(0.125f, 0.375f, 0.125f)
     val to = new Vector3f(0.125f, 0.125f, 0.875f)
     AStar(from, to, 1000, 0.01f, new SVONavGrid(SVO.initialWorld(2))) shouldBe 'empty
+  }
+
+  "AStar.pathToInWorld" should "also work in the same situations that AStar.apply does" in {
+    val from = new Vector3f(0.5f, 1.5f, 0.5f)
+    val to = new Vector3f(0.5f, 0.5f, 3.5f)
+    val expectedPath =
+      List(1.5f, 2.5f, 3.5f) map (new Vector3f(0.5f, 1.5f, _))
+    val svo = SVO.initialWorld(2)
+    AStar.pathToInWorld(from, to, svo.height, new SVONavGrid(svo)) shouldBe Some(expectedPath)
   }
 }
