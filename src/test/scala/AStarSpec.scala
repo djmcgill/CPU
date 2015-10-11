@@ -81,6 +81,6 @@ class AStarSpec extends FlatSpec with Matchers {
     val expectedPath =
       List(1.5f, 2.5f, 3.5f) map (new Vector3f(0.5f, 1.5f, _))
     val svo = SVO.initialWorld(2)
-    AStar.pathToInWorld(from, to, svo.height, new SVONavGrid(svo)) shouldBe Some(expectedPath)
+    AStar.pathToInWorld(from, to, new SVONavGrid(svo)) shouldBe Some(expectedPath)
   }
 }

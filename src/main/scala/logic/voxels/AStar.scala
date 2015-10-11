@@ -12,8 +12,8 @@ object AStar {
   def pathToInWorld(
       startWorld: Vector3f,
       goalWorld: Vector3f,
-      svoHeight: Int,
       navGrid: SVONavGrid): Option[List[Vector3f]] = {
+    val svoHeight = navGrid.svo.height
     val scale = math.pow(2, -svoHeight).toFloat
     val startSVO = startWorld mult scale
     val goalSVO = goalWorld mult scale

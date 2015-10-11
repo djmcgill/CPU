@@ -13,7 +13,7 @@ import com.jme3.math.Vector3f
  */
 // TODO: also include a way to change this when the svo changes
 
-class SVONavGrid(svo: SVO) {
+class SVONavGrid(val svo: SVO) {
   val subSvoNavGrids: Option[Array[SVONavGrid]] = svo.node match {
     case Subdivided(subSVOs) => Some(subSVOs map (new SVONavGrid(_)))
     case _ => None
