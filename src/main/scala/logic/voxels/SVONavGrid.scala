@@ -1,5 +1,6 @@
 package logic.voxels
 
+import com.jme3.export.{JmeExporter, JmeImporter, Savable}
 import com.jme3.math.Vector3f
 
 /**
@@ -13,7 +14,12 @@ import com.jme3.math.Vector3f
  */
 // TODO: also include a way to change this when the svo changes
 
-class SVONavGrid(val svo: SVO) {
+class SVONavGrid(val svo: SVO) extends Savable {
+
+  override def write(jmeExporter: JmeExporter): Unit = ???
+  override def read(jmeImporter: JmeImporter): Unit = ???
+  //def this() = ???
+
   val subSvoNavGrids: Option[Array[SVONavGrid]] = svo.node match {
     case Subdivided(subSVOs) => Some(subSVOs map (new SVONavGrid(_)))
     case _ => None

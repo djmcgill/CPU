@@ -43,7 +43,12 @@ class SVOSpatialState extends AbstractAppStateWithApp {
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
     app.getRootNode.setUserData("svo", svo)
+
+    val svoNavGrid = new SVONavGrid(svo)
+    app.getRootNode.setUserData("navGrid", svoNavGrid)
+
     stateManager.attachAll(states)
+
 
     // Create a spatial for the SVO and call it "svoSpatial".
     createSpatialFromSVO(svo) foreach {svoSpatial =>

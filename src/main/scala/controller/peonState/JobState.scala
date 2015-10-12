@@ -17,10 +17,8 @@ class JobStateState extends AbstractAppStateWithApp {
 // TODO: add a way to interrupt jobs
 abstract sealed class JobState
 
-// Go stand at a random location in the specified flat square.
-case class Idle(
-    idleLocationCenter: Vector3f = ???,
-    idleLocationExtent: Float = ???) extends JobState
+// Go stand at a random location in the specified flat circle.
+case class Idle() extends JobState
 
 // Follow this path.
 // TODO: add a way to specify an action once we get there.

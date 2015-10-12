@@ -7,6 +7,7 @@ import com.jme3.bullet.control.BetterCharacterControl
 import com.jme3.math.Vector3f
 import com.jme3.scene.Node
 import controller.AbstractAppStateWithApp
+import logic.voxels.SVONavGrid
 
 
 class Peon extends AbstractAppStateWithApp {
@@ -36,6 +37,13 @@ class Peon extends AbstractAppStateWithApp {
     val bulletAppState = app.getStateManager.getState(classOf[BulletAppState])
     bulletAppState.getPhysicsSpace.add(peonControl)
     bulletAppState.getPhysicsSpace.addAll(peonNode)
+
+    val svoNavGrid = app.getRootNode.getUserData[SVONavGrid]("navGrid")
+    val jobStateState = app.getStateManager.getState[JobStateState](classOf[JobStateState])
+    val jobSeeker = new PeonJobSeeker(0, jobStateState, svoNavGrid)
+    peonNode.addControl(jobSeeker)
+
+
 
     app.getRootNode.attachChild(peonNode)
   }
