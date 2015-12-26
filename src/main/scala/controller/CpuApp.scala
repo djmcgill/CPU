@@ -1,14 +1,17 @@
 package controller
 
 import com.jme3.app.SimpleApplication
+import com.jme3.app.state.AppState
 import com.jme3.asset.plugins.FileLocator
 import com.jme3.bullet.BulletAppState
 import com.jme3.math.Vector3f
 import controller.blockState.BlockManager
-import controller.peonState.Peon
+import controller.peonState.{PeonManager, Peon}
 import controller.svoState.SvoManager
 import controller.visualState.{OverviewCameraState, SkyboxState, LightingState}
 import logic.voxels.SVO
+
+import scala.collection.JavaConversions._
 
 class CpuApp extends SimpleApplication {
   def maxHeight: Int = rootNode.getUserData("maxHeight")
@@ -27,10 +30,6 @@ class CpuApp extends SimpleApplication {
     val bulletAppState = new BulletAppState()
     bulletAppState.setThreadingType(BulletAppState.ThreadingType.PARALLEL)
 
-    val svoWidth = math.pow(2, maxHeight).toFloat
-    val peon1 = new Peon(0, new Vector3f(svoWidth/2, svoWidth/2 + 2, svoWidth/2))
-    val peon2 = new Peon(1, new Vector3f(svoWidth/2 + 2, svoWidth/2 + 2, svoWidth/2))
-
     stateManager.attachAll(
       bulletAppState,
       new KeyBindings,
@@ -39,8 +38,7 @@ class CpuApp extends SimpleApplication {
       new SvoManager,
       new SkyboxState,
       new BlockManager,
-      peon1,
-      peon2
+      new PeonManager(math.pow(2, maxHeight).toFloat)
     )
 
     assetManager.registerLocator("resources", classOf[FileLocator])
