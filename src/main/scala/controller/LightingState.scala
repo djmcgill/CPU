@@ -5,18 +5,17 @@ import com.jme3.app.state.AppStateManager
 import com.jme3.light.{AmbientLight, DirectionalLight}
 import com.jme3.math.{ColorRGBA, Vector3f}
 
-class LightingState extends AbstractAppStateWithApp {
+class LightingState extends GameState {
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
-    val rootNode = app.getRootNode
 
     val sun = new DirectionalLight()
     sun.setDirection(new Vector3f(0,-1,-1).normalizeLocal())
     sun.setColor(ColorRGBA.White mult 1.5f)
-    rootNode.addLight(sun)
+    app.getRootNode.addLight(sun)
 
-    val ambient: AmbientLight = new AmbientLight()
+    val ambient = new AmbientLight()
     ambient.setColor(ColorRGBA.White)
-    rootNode.addLight(ambient)
+    app.getRootNode.addLight(ambient)
   }
 }

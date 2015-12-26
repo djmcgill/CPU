@@ -5,14 +5,14 @@ import com.jme3.bullet.control.BetterCharacterControl
 import com.jme3.math.{FastMath, Vector3f}
 import com.jme3.renderer.{ViewPort, RenderManager}
 import com.jme3.scene.control.AbstractControl
-import logic.voxels.{AStar, SVONavGrid}
+import logic.voxels.{AStar, SvoNavGrid}
 
 import scala.util.Random
 
-class PeonJobSeeker(peonId: Long, jobStateState: JobStateState, svoNavGrid: SVONavGrid) extends AbstractControl {
+class PeonJobSeeker(peonId: Long, jobStateState: JobManager, svoNavGrid: SvoNavGrid) extends AbstractControl {
   var currentJob: JobState = Idle()
   var currentPath = List[Vector3f]()
-  lazy val control = spatial.getControl[BetterCharacterControl](classOf[BetterCharacterControl])
+  lazy val control = spatial.getControl(classOf[BetterCharacterControl])
 
   override def controlRender(renderManager: RenderManager, viewPort: ViewPort): Unit = {}
 

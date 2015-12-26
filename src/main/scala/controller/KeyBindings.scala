@@ -4,11 +4,11 @@ import com.jme3.app.Application
 import com.jme3.app.state.AppStateManager
 import com.jme3.input.{MouseInput, KeyInput}
 import com.jme3.input.controls.{MouseButtonTrigger, KeyTrigger, Trigger}
-import controller.svoState.{SVOSelectVoxel, SVOCuboidSelectionState}
+import controller.svoState.{SvoSelectVoxel, SvoCuboidSelectionState}
 
-class KeyBindings extends AbstractAppStateWithApp {
+class KeyBindings extends GameState {
   private val bindings: Map[String, Trigger] = Map(
-    (SVOSelectVoxel.SelectVoxelName, new KeyTrigger(KeyInput.KEY_Q)),
+    (SvoSelectVoxel.SelectVoxelName, new KeyTrigger(KeyInput.KEY_Q)),
 
     (OverviewCameraState.TargetLeftName    , new KeyTrigger(KeyInput.KEY_LEFT)),
     (OverviewCameraState.TargetRightName   , new KeyTrigger(KeyInput.KEY_RIGHT)),
@@ -20,11 +20,12 @@ class KeyBindings extends AbstractAppStateWithApp {
     (OverviewCameraState.ZoomInName , new KeyTrigger(KeyInput.KEY_EQUALS)),
     (OverviewCameraState.ZoomOutName, new KeyTrigger(KeyInput.KEY_MINUS)),
 
-    (SVOCuboidSelectionState.StartSelectionName, new MouseButtonTrigger(MouseInput.BUTTON_LEFT)),
-    (SVOCuboidSelectionState.ChooseDirtName    , new KeyTrigger(KeyInput.KEY_4)),
-    (SVOCuboidSelectionState.ChooseMetalName   , new KeyTrigger(KeyInput.KEY_3)),
-    (SVOCuboidSelectionState.ChooseAirName     , new KeyTrigger(KeyInput.KEY_2)),
-    (SVOCuboidSelectionState.NoChoiceName      , new KeyTrigger(KeyInput.KEY_1)))
+    (SvoCuboidSelectionState.StartSelectionName, new MouseButtonTrigger(MouseInput.BUTTON_LEFT)),
+    (SvoCuboidSelectionState.ChooseDirtName    , new KeyTrigger(KeyInput.KEY_4)),
+    (SvoCuboidSelectionState.ChooseMetalName   , new KeyTrigger(KeyInput.KEY_3)),
+    (SvoCuboidSelectionState.ChooseAirName     , new KeyTrigger(KeyInput.KEY_2)),
+    (SvoCuboidSelectionState.NoChoiceName      , new KeyTrigger(KeyInput.KEY_1))
+  )
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
@@ -32,7 +33,7 @@ class KeyBindings extends AbstractAppStateWithApp {
   }
 
   override def cleanup(): Unit = {
-    bindings foreach {case (name, _) => app.getInputManager.deleteMapping(name)}
+    bindings.keys foreach app.getInputManager.deleteMapping
     super.cleanup()
   }
 }

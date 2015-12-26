@@ -7,7 +7,7 @@ import com.jme3.input.controls.AnalogListener
 /**
  * Scala wrapper class for actions to be performed in response to the specified named events.
  */
-abstract class AbstractAnalogListenerState extends AbstractAppStateWithApp {
+abstract class AbstractAnalogListenerState extends GameState {
   /** The actionNames that this handler is interested in. WARNING: Still need to register in KeyBindings. */
   val analogNames: List[String]
 

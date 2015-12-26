@@ -7,7 +7,7 @@ import com.jme3.input.controls.{ActionListener, Trigger}
 /**
  * Scala wrapper class for actions to be performed in response to the specified named events.
  */
-abstract class AbstractActionListenerState extends AbstractAppStateWithApp {
+abstract class AbstractActionListenerState extends GameState {
   /** The actionNames that this handler is interested in. WARNING: Still need to register in KeyBindings. */
   val actionNames: List[String]
 

@@ -17,17 +17,18 @@ import scala.collection.JavaConversions._
  * Renders a svo and attaches the physics.
  * Updates the SVO but DOES NOT touch the jobs or anything.
  */
-class SVOSpatialState extends AbstractAppStateWithApp {
+class SvoManager extends GameState {
   private val SvoRootName = "svoSpatial"
-  private lazy val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
-  private lazy val svo = SVO.initialWorld(maxHeight)
-  lazy val svoPhysicsState = new SVOPhysicsState
+  def svo: SVO = app.getRootNode.getUserData("svo")
+  def svo_= (newSvo: SVO): Unit = app.getRootNode.setUserData("svo", newSvo)
+
+  lazy val svoPhysicsState = new SvoPhysicsState
   private lazy val blockGeometries = new BlockGeometries(app.getAssetManager)
-  private lazy val states: Seq[AppState] = Seq(
+  private lazy val states: Seq[SvoState] = Seq(
     // These states can all assume that the SVO and it's spatial exists and is static throughout their lifetime.
-    new SVOCuboidSelectionState,
+    new SvoCuboidSelectionState,
     svoPhysicsState,
-    new SVOSelectVoxel
+    new SvoSelectVoxel
   )
 
   /** You can't make changes directly to the SVO, you have to register your intention here. */
@@ -42,19 +43,18 @@ class SVOSpatialState extends AbstractAppStateWithApp {
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
-    app.getRootNode.setUserData("svo", svo)
+    svo = SVO.initialWorld(app.maxHeight)
 
-    val svoNavGrid = new SVONavGrid(svo)
+    val svoNavGrid = new SvoNavGrid(svo)
     app.getRootNode.setUserData("navGrid", svoNavGrid)
 
     stateManager.attachAll(states)
-
 
     // Create a spatial for the SVO and call it "svoSpatial".
     createSpatialFromSVO(svo) foreach {svoSpatial =>
       svoSpatial.setName(SvoRootName)
       app.getRootNode.attachChild(svoSpatial)
-      val scale = math.pow(2, maxHeight).toFloat
+      val scale = math.pow(2, app.maxHeight).toFloat
       svoSpatial.scale(scale)
     }
   }

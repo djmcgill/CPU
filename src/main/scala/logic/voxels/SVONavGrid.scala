@@ -9,19 +9,19 @@ import com.jme3.math.Vector3f
  *        ____        O____
  *  ____O|    -> ____|
  *
- * Also I want to attach each SVONavGrid to a spatial SVO node, so they get
+ * Also I want to attach each SvoNavGrid to a spatial SVO node, so they get
  * loaded in and out when the nodes themselves do.
  */
 // TODO: also include a way to change this when the svo changes
 
-class SVONavGrid(val svo: SVO) extends Savable {
+class SvoNavGrid(val svo: SVO) extends Savable {
 
   override def write(jmeExporter: JmeExporter): Unit = ???
   override def read(jmeImporter: JmeImporter): Unit = ???
   //def this() = ???
 
-  val subSvoNavGrids: Option[Array[SVONavGrid]] = svo.node match {
-    case Subdivided(subSVOs) => Some(subSVOs map (new SVONavGrid(_)))
+  val subSvoNavGrids: Option[Array[SvoNavGrid]] = svo.node match {
+    case Subdivided(subSVOs) => Some(subSVOs map (new SvoNavGrid(_)))
     case _ => None
   }
 

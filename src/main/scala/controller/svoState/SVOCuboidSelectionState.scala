@@ -1,49 +1,41 @@
 package controller.svoState
 
-import com.jme3.app.Application
-import com.jme3.app.state.AppStateManager
 import com.jme3.material.Material
 import com.jme3.material.RenderState.BlendMode
 import com.jme3.math.{ColorRGBA, Vector3f}
 import com.jme3.renderer.queue.RenderQueue.Bucket
 import com.jme3.scene.Geometry
 import com.jme3.scene.shape.Box
-import controller.{BlockStateState, BlockState, AbstractActionListenerState}
+import controller.{BlockController, AbstractActionListenerState}
 import logic.voxels._
 
-object SVOCuboidSelectionState {
-  val ChooseDirtName = "CHOOSE DIRT"
+object SvoCuboidSelectionState {
+  val ChooseDirtName  = "CHOOSE DIRT"
   val ChooseMetalName = "CHOOSE METAL"
-  val ChooseAirName = "CHOOSE AIR"
-  val NoChoiceName = "CHOOSE NOTHING"
-  // CHOOSE YOUR FUTURE
-  // CHOOSE LIFE
-
-  val StartSelectionName = "SELECT CUBOID"
+  val ChooseAirName   = "CHOOSE AIR"
+  val NoChoiceName    = "CHOOSE NOTHING"
   val ChoiceNames = List(ChooseDirtName, ChooseMetalName, ChooseAirName, NoChoiceName)
+
+  val StartSelectionName = "START CUBOID SELECTION"
 }
 
-class SVOCuboidSelectionState extends AbstractActionListenerState {
+class SvoCuboidSelectionState extends AbstractActionListenerState with SvoState {
+  import SvoCuboidSelectionState._
 
-
-  override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
-    super.initialize(stateManager, superApp)
-    app.getRootNode.attachChild(SelectionBoxGeometry)
-  }
-
-  override def setEnabled(enabled: Boolean): Unit = {
-    super.setEnabled(enabled)
-    if (enabled) {
-      app.getRootNode.attachChild(SelectionBoxGeometry)
-    } else {
-      app.getRootNode.detachChild(SelectionBoxGeometry)
-    }
-  }
-
-  // TODO: have a cube that's displayed
   private var initialPosition: Option[Vector3f]             = None
   private var selectedCorners: Option[(Vector3f, Vector3f)] = None
   private var maybeBlockToPlace: Option[Option[Block]]      = None
+
+  private def startSelection(block: Option[Block]): Unit = {
+    maybeBlockToPlace = Some(block)
+    app.getRootNode.attachChild(SelectionBoxGeometry)
+    app.getInputManager.setCursorVisible(false)
+  }
+  private def stopSelection(): Unit = {
+    maybeBlockToPlace = None
+    app.getRootNode.detachChild(SelectionBoxGeometry)
+    app.getInputManager.setCursorVisible(true)
+  }
 
   private lazy val SelectionBoxGeometry = {
     val geometry = new Geometry("Cuboid selection", new Box(1, 1, 1))
@@ -56,57 +48,47 @@ class SVOCuboidSelectionState extends AbstractActionListenerState {
     geometry
   }
 
-  override val actionNames = SVOCuboidSelectionState.StartSelectionName :: SVOCuboidSelectionState.ChoiceNames
+  override val actionNames = StartSelectionName :: ChoiceNames
 
-  // TODO: is it the chase cam that messes with the mouse cursor on left-click?
-  override def action(name: String, isPressed: Boolean, tpf: Float): Unit = {
-    if (name == SVOCuboidSelectionState.StartSelectionName) {
-      if (isPressed) {
-        // Start recording the selected cuboid
-        initialPosition = Some(pointUnderMouse())
-        app.getInputManager.setCursorVisible(false)
-      } else {
-        // Stop editing the cuboid, we're done.
-        // TODO: add a key to cancel the cuboid insertion
-        initialPosition = None
-        app.getInputManager.setCursorVisible(true)
+  override def action(name: String, isPressed: Boolean, tpf: Float): Unit = name match {
+    case StartSelectionName if isPressed && maybeBlockToPlace.nonEmpty =>
+      // Start recording the selected cuboid
+      initialPosition = Some(pointUnderMouse())
+      app.getInputManager.setCursorVisible(false)
 
-        // Insert at the center of each of the selected size-0 cubes.
-        selectedCorners foreach { case (lower, upper) =>
-          val Array(lowerX, lowerY, lowerZ) = lower.toArray(null) map (f => math.round(math.floor(f).toFloat))
-          val Array(upperX, upperY, upperZ) = upper.toArray(null) map (f => math.round(math.ceil(f).toFloat))
-          val blockStateState = app.getStateManager.getState(classOf[BlockStateState])
-
-          for ((lower, upper) <- selectedCorners;
-               maybeBlockToInsert <- maybeBlockToPlace;
-               x <- lowerX until upperX;
-               y <- lowerY until upperY;
-               z <- lowerZ until upperZ) {
-            val position = new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f)
-            maybeBlockToInsert match {
-              case Some(blockToInsert) => blockStateState.requestPlacement(blockToInsert, position)
-              case None => blockStateState.requestRemoval(position)
-            }
+    case StartSelectionName if !isPressed && maybeBlockToPlace.nonEmpty =>
+      val maybeSolidBlock = maybeBlockToPlace.get
+      // Insert at the center of each of the selected size-0 cubes.
+      selectedCorners foreach { case (lower, upper) =>
+        val Array(lowerX, lowerY, lowerZ) = lower.toArray(null) map (f => math.round(math.floor(f).toFloat))
+        val Array(upperX, upperY, upperZ) = upper.toArray(null) map (f => math.round(math.ceil(f).toFloat))
+        val BlockController = app.getStateManager.getState(classOf[BlockController])
+        for (x <- lowerX until upperX;
+             y <- lowerY until upperY;
+             z <- lowerZ until upperZ) {
+          val position = new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f)
+          maybeSolidBlock match {
+            case Some(solidBlock) => BlockController.requestPlacement(solidBlock, position)
+            case None => BlockController.requestRemoval(position)
           }
         }
       }
-    } else if(isPressed) {
-      print("new data chosen is: ")
-      maybeBlockToPlace = () match {
-        case _ if name == SVOCuboidSelectionState.ChooseDirtName => println("dirt"); Some(Some(new Dirt()))
-        case _ if name == SVOCuboidSelectionState.ChooseMetalName => println("metal"); Some(Some(new Metal()))
-        case _ if name == SVOCuboidSelectionState.ChooseAirName => println("air"); Some(None)
-        case _ if name == SVOCuboidSelectionState.NoChoiceName => println("none"); None
-      }
-    }
+      initialPosition = None
+
+    case ChooseDirtName  if isPressed => startSelection(Some(new Dirt()))
+    case ChooseMetalName if isPressed => startSelection(Some(new Metal()))
+    case ChooseAirName   if isPressed => startSelection(None)
+    case NoChoiceName    if isPressed => stopSelection()
+    case _ =>
   }
 
   // Recalculate the rectangle and update the geometry if needed
   override def update(tpf: Float): Unit = {
     super.update(tpf)
-    val oldCorners = selectedCorners
-    updateCorners(pointUnderMouse())
+    if (maybeBlockToPlace.isEmpty) {return}
 
+    val oldCorners = selectedCorners
+    selectedCorners = updateCorners(pointUnderMouse())
     selectedCorners foreach {case (lowerLeftCorner, upperRightCorner) => if (oldCorners != selectedCorners) {
         val smallVector = new Vector3f(0.1f, 0.1f, 0.1f)
         val newMesh = new Box(Vector3f.ZERO subtract smallVector, upperRightCorner subtract lowerLeftCorner add smallVector)
@@ -116,10 +98,8 @@ class SVOCuboidSelectionState extends AbstractActionListenerState {
     }
   }
 
-  private def updateCorners(currentMousePosition: Vector3f): Unit = {
+  private def updateCorners(currentMousePosition: Vector3f): Option[(Vector3f, Vector3f)] = {
     val corner1 = initialPosition.getOrElse(currentMousePosition)
-    //initialPosition = Some(corner1)
-
     val corner2 = currentMousePosition
     def floorMin(a: Float, b: Float): Float = math.floor(math.min(a, b)).toFloat
     val lowerLeftCorner = new Vector3f(
@@ -136,8 +116,7 @@ class SVOCuboidSelectionState extends AbstractActionListenerState {
       ceilMax(corner1.x, corner2.x, lowerLeftCorner.x),
       ceilMax(corner1.y, corner2.y, lowerLeftCorner.y),
       ceilMax(corner1.z, corner2.z, lowerLeftCorner.z))
-
-    selectedCorners = Some((lowerLeftCorner, upperRightCorner))
+    Some((lowerLeftCorner, upperRightCorner))
   }
 
   private def pointUnderMouse(): Vector3f = {

@@ -9,7 +9,7 @@ class SVONavGridSpec extends FlatSpec with Matchers {
   private val diag: Float => Vector3f = Vector3f.UNIT_XYZ.mult
 
   it should "correctly calculate the neighbour in minimalInserted" in {
-    val navSpec = new SVONavGrid(SVO.minimalInserted)
+    val navSpec = new SvoNavGrid(SVO.minimalInserted)
     navSpec.validNeighbours(diag(0.25f)) shouldBe List(diag(0.75f))
   }
 
@@ -20,7 +20,7 @@ class SVONavGridSpec extends FlatSpec with Matchers {
                      List(Octant(7), Octant(7)),
                      List(Octant(7), Octant(0)))
     paths foreach {svo.insertNodePath(Full(Some(Placed(new Dirt()))), _)}
-    new SVONavGrid(svo)
+    new SvoNavGrid(svo)
   }
 
   it should "correctly should calculate the neighbour for a size 2 world" in {

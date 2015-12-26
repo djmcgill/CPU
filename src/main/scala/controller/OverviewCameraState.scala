@@ -19,30 +19,26 @@ object OverviewCameraState {
 }
 
 class OverviewCameraState extends AbstractAnalogListenerState {
-  import OverviewCameraState._
-  val cameraTarget: Node = new Node("Overview Camera Target")
-  var chaseCam: ChaseCamera = _
-  val zoomDistance = 10
+  private val PanMultiplier = 10
 
-  val moveX = Vector3f.UNIT_X mult 10
-  val moveY = Vector3f.UNIT_Y mult 10
-  val moveZ = Vector3f.UNIT_Z mult 10
+  private val cameraTarget: Node = new Node("Overview Camera Target")
+  private var chaseCam: ChaseCamera = _
 
-  val cameraTranslations = List(
-    (TargetLeftName    , moveX mult -1),
-    (TargetRightName   , moveX),
-    (TargetForwardName , moveZ mult -1),
-    (TargetBackwardName, moveZ),
-    (TargetUpName      , moveY),
-    (TargetDownName    , moveY mult -1))
+  private val cameraTranslations = {
+    import OverviewCameraState._
+    Map((TargetLeftName    , Vector3f.UNIT_X mult -PanMultiplier),
+        (TargetRightName   , Vector3f.UNIT_X mult  PanMultiplier),
+        (TargetForwardName , Vector3f.UNIT_Z mult -PanMultiplier),
+        (TargetBackwardName, Vector3f.UNIT_Z mult  PanMultiplier),
+        (TargetUpName      , Vector3f.UNIT_Y mult  PanMultiplier),
+        (TargetDownName    , Vector3f.UNIT_Y mult -PanMultiplier))
+  }
 
-  override val analogNames = cameraTranslations map (_._1)
+  override val analogNames = cameraTranslations.keys.toList
 
   // When a key is pressed, move the camera according to the offset specified in cameraTranslations
   override def analog(name: String, value: Float, tpf: Float) =
-      cameraTranslations find (_._1 == name) foreach { case (_, offset) =>
-        cameraTarget.move(offset mult tpf)
-    }
+      cameraTranslations.get(name) foreach (offset => cameraTarget.move(offset mult tpf))
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
@@ -54,16 +50,12 @@ class OverviewCameraState extends AbstractAnalogListenerState {
     chaseCam.setZoomSensitivity(50)
 
     chaseCam.setDefaultHorizontalRotation(FastMath.HALF_PI)
-
-    val maxHeight = app.getRootNode.getUserData[Int]("maxHeight")
-    val scale = math.pow(2, maxHeight).toFloat
     chaseCam.setMaxDistance(1000)
     chaseCam.setDefaultDistance(15)
 
     app.getRootNode.attachChild(cameraTarget)
+    val scale = math.pow(2, app.maxHeight).toFloat
     cameraTarget.setLocalTranslation(scale/2, scale/2 + 5, scale/2)
-
-
     chaseCam.setToggleRotationTrigger(new MouseButtonTrigger(MouseInput.BUTTON_RIGHT))
   }
 

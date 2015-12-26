@@ -8,12 +8,12 @@ import logic.voxels._
  * This class will record the position of the voxel that the mouse is currently over.
  */
 
-object SVOSelectVoxel {
+object SvoSelectVoxel {
   val SelectVoxelName = "SELECT VOXEL"
 }
 
-class SVOSelectVoxel extends AbstractActionListenerState {
-  val actionNames = List(SVOSelectVoxel.SelectVoxelName)
+class SvoSelectVoxel extends AbstractActionListenerState with SvoState {
+  val actionNames = List(SvoSelectVoxel.SelectVoxelName)
   var selectedVoxel: Option[Vector3f] = None
 
   override def action(name: String, isPressed: Boolean, tpf: Float): Unit = {

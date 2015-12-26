@@ -10,13 +10,13 @@ import com.jme3.bullet.util.CollisionShapeFactory
 import com.jme3.math.{Transform, Vector3f}
 import com.jme3.scene._
 import com.jme3.scene.shape.Box
-import controller.AbstractAppStateWithApp
+import controller.GameState
 import logic.voxels.{Octant, Subdivided, Full, SVO}
 
 import scala.collection.JavaConversions._
 import scala.concurrent.Promise
 
-class SVOPhysicsState extends AbstractAppStateWithApp {
+class SvoPhysicsState extends SvoState {
   private val SvoRootName = "svoSpatial"
   private lazy val bulletAppState: BulletAppState =
     app.getStateManager.getState[BulletAppState](classOf[BulletAppState])

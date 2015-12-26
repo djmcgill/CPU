@@ -43,4 +43,5 @@ You are a paralysed robot (just a head?) that can have a large throne built arou
    - arrays better for very varied expanses
  - vehicles
  - give set cull hint to the SVO
+ - raycasting visualisation?
  
