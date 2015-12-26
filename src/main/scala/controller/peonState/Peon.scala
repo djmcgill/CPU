@@ -9,8 +9,7 @@ import com.jme3.scene.Node
 import controller.GameState
 import logic.voxels.SvoNavGrid
 
-
-class Peon(id: Int) extends GameState {
+class Peon(id: Int, startingPosition: Vector3f) extends GameState {
   val peonScale = 0.5f
   var facingAngle = 0f
 
@@ -18,8 +17,8 @@ class Peon(id: Int) extends GameState {
     super.initialize(stateManager, superApp)
     // model is 4 units tall
     val peonSpatial = app.getAssetManager.loadModel("Models/StickFigure/Stick_Figure_by_Swp.OBJ")
-    val peonNode = new Node("peon")
-    app.getRootNode.setUserData("peon", peonNode)
+    val peonNode = new Node(s"peon-$id")
+    app.getRootNode.setUserData("peon-$id", peonNode)
     peonNode.attachChild(peonSpatial)
     peonSpatial.scale(peonScale)
     peonSpatial.move(0, 2*peonScale, 0)
@@ -28,8 +27,7 @@ class Peon(id: Int) extends GameState {
     peonNode.addControl(peonControl)
     peonControl.setJumpForce(new Vector3f(0,0.2f,0))
     peonControl.setGravity(new Vector3f(0,0.8f,0))
-    val svoWidth = math.pow(2, app.maxHeight).toFloat
-    peonControl.warp(new Vector3f(svoWidth/2, svoWidth/2 + 2, svoWidth/2))
+    peonControl.warp(startingPosition)
 
     val bulletAppState = app.getStateManager.getState(classOf[BulletAppState])
     bulletAppState.getPhysicsSpace.add(peonControl)
@@ -39,7 +37,6 @@ class Peon(id: Int) extends GameState {
     val jobStateState = app.getStateManager.getState[JobManager](classOf[JobManager])
     val jobSeeker = new PeonJobSeeker(0, jobStateState, svoNavGrid)
     peonNode.addControl(jobSeeker)
-
     app.getRootNode.attachChild(peonNode)
   }
 }
