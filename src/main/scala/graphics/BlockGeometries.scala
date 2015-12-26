@@ -9,7 +9,7 @@ import com.jme3.scene.Geometry
 import com.jme3.scene.shape.Box
 import com.jme3.texture.Texture
 import com.jme3.util.TangentBinormalGenerator
-import controller._
+import controller.blockState._
 import logic.voxels._
 
 /** The geometries for the various blocks. */

@@ -1,10 +1,11 @@
-package controller
+package controller.blockState
 
 import com.jme3.math.Vector3f
+import controller._
 import controller.svoState.SvoManager
-import logic.voxels.{Full, Block, SVO}
+import logic.voxels.{Block, Full, SVO}
 
-class BlockController extends GameState {
+class BlockManager extends GameState {
   lazy val spatialState: SvoManager = app.getStateManager.getState(classOf[SvoManager])
   lazy val svo: SVO = app.getRootNode.getUserData[SVO]("svo")
 

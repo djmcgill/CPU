@@ -5,6 +5,7 @@ import com.jme3.app.state.AppStateManager
 import com.jme3.input.{MouseInput, KeyInput}
 import com.jme3.input.controls.{MouseButtonTrigger, KeyTrigger, Trigger}
 import controller.svoState.{SvoSelectVoxel, SvoCuboidSelectionState}
+import controller.visualState.OverviewCameraState
 
 class KeyBindings extends GameState {
   private val bindings: Map[String, Trigger] = Map(

@@ -6,7 +6,8 @@ import com.jme3.math.{ColorRGBA, Vector3f}
 import com.jme3.renderer.queue.RenderQueue.Bucket
 import com.jme3.scene.Geometry
 import com.jme3.scene.shape.Box
-import controller.{BlockController, AbstractActionListenerState}
+import controller.AbstractActionListenerState
+import controller.blockState.BlockManager
 import logic.voxels._
 
 object SvoCuboidSelectionState {
@@ -62,7 +63,7 @@ class SvoCuboidSelectionState extends AbstractActionListenerState with SvoState 
       selectedCorners foreach { case (lower, upper) =>
         val Array(lowerX, lowerY, lowerZ) = lower.toArray(null) map (f => math.round(math.floor(f).toFloat))
         val Array(upperX, upperY, upperZ) = upper.toArray(null) map (f => math.round(math.ceil(f).toFloat))
-        val BlockController = app.getStateManager.getState(classOf[BlockController])
+        val BlockController = app.getStateManager.getState(classOf[BlockManager])
         for (x <- lowerX until upperX;
              y <- lowerY until upperY;
              z <- lowerZ until upperZ) {

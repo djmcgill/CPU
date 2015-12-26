@@ -1,4 +1,4 @@
-package controller
+package controller.visualState
 
 import com.jme3.app._
 import com.jme3.app.state._
@@ -6,6 +6,7 @@ import com.jme3.input._
 import com.jme3.input.controls._
 import com.jme3.math.{FastMath, Vector3f}
 import com.jme3.scene.Node
+import controller.AbstractAnalogListenerState
 
 object OverviewCameraState {
   val TargetLeftName     = "CAMERA TARGET LEFT"

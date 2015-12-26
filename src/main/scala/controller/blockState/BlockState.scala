@@ -1,8 +1,7 @@
-package controller
+package controller.blockState
 
 import com.jme3.math.Vector3f
-import controller.svoState.SvoManager
-import logic.voxels.{Full, SVO, Block}
+import logic.voxels.Block
 
 // State transitions
 sealed abstract class BlockState {

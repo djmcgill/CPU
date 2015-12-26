@@ -1,5 +1,5 @@
 import com.jme3.math.Vector3f
-import controller.Placed
+import controller.blockState.Placed
 import logic.voxels._
 import org.scalatest.{Matchers, FlatSpec}
 

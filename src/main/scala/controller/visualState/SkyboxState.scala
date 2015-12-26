@@ -1,9 +1,10 @@
-package controller
+package controller.visualState
 
 import com.jme3.app.Application
 import com.jme3.app.state.AppStateManager
 import com.jme3.texture.Texture
 import com.jme3.util.SkyFactory
+import controller.GameState
 
 class SkyboxState extends GameState {
   private def loadTexture(name: String): Texture = app.getAssetManager.loadTexture(name)

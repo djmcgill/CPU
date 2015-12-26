@@ -5,6 +5,7 @@ import com.jme3.app.state.{AppState, AbstractAppState, AppStateManager}
 import com.jme3.math._
 import com.jme3.scene._
 import controller._
+import controller.blockState.BlockState
 import graphics.BlockGeometries
 import logic.voxels._
 

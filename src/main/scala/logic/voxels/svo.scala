@@ -2,7 +2,7 @@ package logic.voxels
 
 import com.jme3.export._
 import com.jme3.math.Vector3f
-import controller.{Placed, BlockState}
+import controller.blockState.{Placed, BlockState}
 
 
 /**

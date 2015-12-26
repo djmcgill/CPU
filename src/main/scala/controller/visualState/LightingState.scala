@@ -1,9 +1,10 @@
-package controller
+package controller.visualState
 
 import com.jme3.app.Application
 import com.jme3.app.state.AppStateManager
 import com.jme3.light.{AmbientLight, DirectionalLight}
 import com.jme3.math.{ColorRGBA, Vector3f}
+import controller.GameState
 
 class LightingState extends GameState {
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
