@@ -10,7 +10,7 @@ import com.jme3.bullet.util.CollisionShapeFactory
 import com.jme3.math.{Transform, Vector3f}
 import com.jme3.scene._
 import com.jme3.scene.shape.Box
-import controller.GameState
+import controller.{SvoState, GameState}
 import logic.voxels.{Octant, Subdivided, Full, SVO}
 
 import scala.collection.JavaConversions._

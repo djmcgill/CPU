@@ -1,7 +1,7 @@
 package controller.svoState
 
 import com.jme3.math.Vector3f
-import controller.AbstractActionListenerState
+import controller.{SvoState, AbstractActionListenerState}
 import logic.voxels._
 
 /**
@@ -23,12 +23,12 @@ class SvoSelectVoxel extends AbstractActionListenerState with SvoState {
     def worldCoordsAtZ(z: Float) = app.getCamera.getWorldCoordinates(click2d, z)
     val rayDirection = (worldCoordsAtZ(1) subtractLocal worldCoordsAtZ(0)).normalizeLocal
 
-    RayCaster.cast(rayOrigin, rayDirection, app.svo) match {
+    RayCaster.cast(rayOrigin, rayDirection, svo) match {
       case None => selectedVoxel = None
       case Some((absoluteHitPosition, path)) =>
 
         // convert from world coordinates to the (0,0,0),(1,1,1) cube of the svo
-        val relativeHitPosition = Octant.globalToLocal(app.maxHeight, absoluteHitPosition, path)
+        val relativeHitPosition = Octant.globalToLocal(maxHeight, absoluteHitPosition, path)
 
         // We have a point on the face of a cube, and we want to nudge it over
         // the boundary so that the insert position is inside of the cube.

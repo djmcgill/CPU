@@ -6,14 +6,14 @@ import controller.peonState.JobManager
 import controller.svoState.SvoManager
 import logic.voxels.{Block, Full, SVO}
 
-class BlockManager extends GameState {
+class BlockManager extends SvoState {
   lazy val spatialState: SvoManager = app.getStateManager.getState(classOf[SvoManager])
   lazy val jobManager: JobManager = app.getStateManager.getState(classOf[JobManager])
 
   // Maybe return a boolean if it was a valid placement or not?
   def requestPlacement(block: Block, location: Vector3f): Unit = {
     val newState = PlacementPending(block, location)
-    val maybeCurrentState: Option[BlockState] = app.svo.getNodeAt(location, 0) match {
+    val maybeCurrentState: Option[BlockState] = svo.getNodeAt(location, 0) match {
       case Some(Full(maybeBlockState)) => maybeBlockState
       case _ => None
     }
@@ -47,7 +47,7 @@ class BlockManager extends GameState {
   }
 
   def requestRemoval(location: Vector3f): Unit = {
-    val maybeCurrentState = app.svo.getNodeAt(location, 0) match {
+    val maybeCurrentState = svo.getNodeAt(location, 0) match {
       case Some(Full(result)) => result
       case _ => None
     }

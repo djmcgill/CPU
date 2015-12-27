@@ -18,7 +18,7 @@ import scala.collection.JavaConversions._
  * Renders a svo and attaches the physics.
  * Updates the SVO but DOES NOT touch the jobs or anything.
  */
-class SvoManager extends GameState {
+class SvoManager(maxHeightParam: Int) extends SvoState {
   private val SvoRootName = "svoSpatial"
 
   lazy val svoPhysicsState = new SvoPhysicsState
@@ -42,22 +42,23 @@ class SvoManager extends GameState {
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
-    app.svo = SVO.initialWorld(app.maxHeight)
-    app.svoNavGrid = new SvoNavGrid(app.svo)
+    maxHeight = maxHeightParam
+    svo = SVO.initialWorld(maxHeight)
+    svoNavGrid = new SvoNavGrid(svo)
     stateManager.attachAll(states)
 
     // Create a spatial for the SVO and call it "svoSpatial".
-    createSpatialFromSVO(app.svo) foreach {svoSpatial =>
+    createSpatialFromSVO(svo) foreach {svoSpatial =>
       svoSpatial.setName(SvoRootName)
       app.getRootNode.attachChild(svoSpatial)
-      val scale = math.pow(2, app.maxHeight).toFloat
+      val scale = math.pow(2, maxHeight).toFloat
       svoSpatial.scale(scale)
     }
   }
 
   override def update(tpf: Float): Unit = {
     val insertedPaths = insertionQueue map {case (maybeBlockState, location) =>
-        app.svo.insertBlockStateAt(maybeBlockState, location, 0)
+        svo.insertBlockStateAt(maybeBlockState, location, 0)
     }
 
     // TODO: combine all of modified paths, or at least reduce the number of times the same path is called a bunch
@@ -74,7 +75,7 @@ class SvoManager extends GameState {
     val svoSpatial = app.getRootNode.getChild(SvoRootName)
     if (svoSpatial == null) {throw new IllegalStateException("You deleted the world!!")}
 
-    val svoToInsert: SVO = app.svo.getSVOPath(path)
+    val svoToInsert: SVO = svo.getSVOPath(path)
 
     // Detach the old spatial
     val oldChild: Spatial = getSpatialAtAbsolute(svoSpatial, path)

@@ -19,7 +19,7 @@ object OverviewCameraState {
   val ZoomOutName        = ChaseCamera.ChaseCamZoomOut
 }
 
-class OverviewCameraState extends AbstractAnalogListenerState {
+class OverviewCameraState(maxHeight: Int) extends AbstractAnalogListenerState {
   private val PanMultiplier = 10
 
   private val cameraTarget: Node = new Node("Overview Camera Target")
@@ -55,7 +55,7 @@ class OverviewCameraState extends AbstractAnalogListenerState {
     chaseCam.setDefaultDistance(15)
 
     app.getRootNode.attachChild(cameraTarget)
-    val scale = math.pow(2, app.maxHeight).toFloat
+    val scale = math.pow(2, maxHeight).toFloat
     cameraTarget.setLocalTranslation(scale/2, scale/2 + 5, scale/2)
     chaseCam.setToggleRotationTrigger(new MouseButtonTrigger(MouseInput.BUTTON_RIGHT))
   }

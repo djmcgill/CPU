@@ -6,7 +6,7 @@ import com.jme3.math.{ColorRGBA, Vector3f}
 import com.jme3.renderer.queue.RenderQueue.Bucket
 import com.jme3.scene.Geometry
 import com.jme3.scene.shape.Box
-import controller.AbstractActionListenerState
+import controller.{SvoState, AbstractActionListenerState}
 import controller.blockState.BlockManager
 import logic.voxels._
 

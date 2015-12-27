@@ -6,10 +6,9 @@ import com.jme3.bullet.BulletAppState
 import com.jme3.bullet.control.BetterCharacterControl
 import com.jme3.math.Vector3f
 import com.jme3.scene.Node
-import controller.GameState
-import logic.voxels.SvoNavGrid
+import controller.SvoState
 
-class Peon(id: Int, startingPosition: Vector3f) extends GameState {
+class Peon(id: Int, startingPosition: Vector3f) extends SvoState {
   val peonScale = 0.5f
   var facingAngle = 0f
 
@@ -34,7 +33,7 @@ class Peon(id: Int, startingPosition: Vector3f) extends GameState {
     bulletAppState.getPhysicsSpace.addAll(peonNode)
 
     val jobStateState = app.getStateManager.getState[JobManager](classOf[JobManager])
-    val jobSeeker = new PeonJobSeeker(0, jobStateState, app.svoNavGrid)
+    val jobSeeker = new PeonJobSeeker(0, jobStateState, svoNavGrid)
     peonNode.addControl(jobSeeker)
     app.getRootNode.attachChild(peonNode)
   }
