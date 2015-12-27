@@ -10,6 +10,8 @@ class JobManager extends GameState {
 
   // TODO: have a positional element to this, so that the peon will get the nearest(ish) job
   private val jobQueue = mutable.Queue[JobState]()
-  def peonRequestJob(peonId: Long): JobState =
+  def peonRequestJob(peonId: Long): JobState = {
+    println(s"peon $peonId is requesting a job")
     if (jobQueue.isEmpty) Idle() else jobQueue.dequeue()
+  }
 }

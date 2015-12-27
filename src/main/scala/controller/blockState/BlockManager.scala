@@ -2,11 +2,13 @@ package controller.blockState
 
 import com.jme3.math.Vector3f
 import controller._
+import controller.peonState.JobManager
 import controller.svoState.SvoManager
 import logic.voxels.{Block, Full, SVO}
 
 class BlockManager extends GameState {
   lazy val spatialState: SvoManager = app.getStateManager.getState(classOf[SvoManager])
+  lazy val jobManager: JobManager = app.getStateManager.getState(classOf[JobManager])
 
   // Maybe return a boolean if it was a valid placement or not?
   def requestPlacement(block: Block, location: Vector3f): Unit = {
@@ -20,14 +22,14 @@ class BlockManager extends GameState {
       case Some(blockState : RemovalScheduled) if blockState.data == block => true
       case _ => false
     }
-    val cheatMode = app.getRootNode.getUserData[Boolean]("cheatMode")
-    if (cheatMode || pointlessOrder) {
+    if (app.cheatMode || pointlessOrder) {
       placementJobReady(newState)
     } else {
-      println(s"TODO: add job at $location to queue") // TODO
       spatialState.requestSVOInsertion(Some(newState), location)
+      jobManager.requestInteractWithBlock(location)
     }
   }
+
   def placementJobReady(state: BlockState): Unit = {
     val location = state match {
       case PlacementScheduled(_, loc, worker) =>

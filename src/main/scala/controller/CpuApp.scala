@@ -6,7 +6,7 @@ import com.jme3.asset.plugins.FileLocator
 import com.jme3.bullet.BulletAppState
 import com.jme3.math.Vector3f
 import controller.blockState.BlockManager
-import controller.peonState.{PeonManager, Peon}
+import controller.peonState.{JobManager, PeonManager, Peon}
 import controller.svoState.SvoManager
 import controller.visualState.{OverviewCameraState, SkyboxState, LightingState}
 import logic.voxels.{SvoNavGrid, SVO}
@@ -41,6 +41,7 @@ class CpuApp extends SimpleApplication {
       new SvoManager,
       new SkyboxState,
       new BlockManager,
+      new JobManager,
       new PeonManager(math.pow(2, maxHeight).toFloat)
     )
 

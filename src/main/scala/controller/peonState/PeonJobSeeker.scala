@@ -9,7 +9,8 @@ import logic.voxels.{AStar, SvoNavGrid}
 
 import scala.util.Random
 
-class PeonJobSeeker(peonId: Long, jobStateState: JobManager, svoNavGrid: SvoNavGrid) extends AbstractControl {
+class PeonJobSeeker(peonId: Long, jobManager: JobManager, svoNavGrid: SvoNavGrid) extends AbstractControl {
+  val WalkSpeedMult = 3.0f
   var currentJob: JobState = Idle()
   var currentPath = List[Vector3f]()
   lazy val control = spatial.getControl(classOf[BetterCharacterControl])
@@ -20,22 +21,12 @@ class PeonJobSeeker(peonId: Long, jobStateState: JobManager, svoNavGrid: SvoNavG
     // Update job state
     if (currentPath.isEmpty) {
       currentJob match {
-        case Idle() =>
-          val idleCenter = new Vector3f(0.75f, 0.5f, 0.75f) mult math.pow(2, svoNavGrid.svo.height).toFloat
-          val idleRadius = 10
-          if (spatial.getWorldTranslation.distance(idleCenter) <= idleRadius) {
-            currentJob = jobStateState.peonRequestJob(peonId)
-          } else {
-            // Move towards a random point in the idle area. When there, do nothing.
-            val angle = Random.nextFloat() * FastMath.TWO_PI
-            val distance = Random.nextFloat() * idleRadius
-            val point = idleCenter add new Vector3f(distance * math.cos(angle).toFloat, 0, distance * math.sin(angle).toFloat)
-
-            val currentPosition = spatial.getWorldTranslation
-            val maybePath = AStar.pathToInWorld(currentPosition, point, svoNavGrid)
-            currentPath = maybePath.getOrElse(Nil)
-          }
-        case _ => ???
+        case Idle() => gotoIdleLocation()
+        case InteractWithBlock(position) =>
+          println(s"trying to interact with $position")
+          val currentPosition = spatial.getWorldTranslation
+          val maybePath = AStar.pathToInWorld(currentPosition, position, svoNavGrid)
+          currentPath = maybePath.getOrElse(Nil)
       }
     }
 
@@ -54,17 +45,35 @@ class PeonJobSeeker(peonId: Long, jobStateState: JobManager, svoNavGrid: SvoNavG
           Some(nextTarget)
         }
     }
-    maybeCurrentTarget foreach {currentTarget =>
-      val facingTarget = currentTarget
-      facingTarget.y = spatial.getWorldTranslation.y
-      spatial.lookAt(facingTarget, Vector3f.UNIT_Y)
+    maybeCurrentTarget foreach actuallyWalkTowardsTarget(spatial.getWorldTranslation)
+  }
 
-      val walkDirection = currentTarget subtract spatial.getWorldTranslation
-      walkDirection.y = 0
-      walkDirection.normalizeLocal()
-      control.jump()
-      control.setWalkDirection(walkDirection)
-      // TODO: how to walk faster?
+  def gotoIdleLocation(): Unit = {
+    val idleCenter = new Vector3f(0.6f, 0.5f, 0.6f) mult math.pow(2, svoNavGrid.svo.height).toFloat
+    val idleRadius = 10
+    if (spatial.getWorldTranslation.distance(idleCenter) <= idleRadius) {
+      currentJob = jobManager.peonRequestJob(peonId)
+    } else {
+      // Move towards a random point in the idle area. When there, do nothing.
+      val angle = Random.nextFloat() * FastMath.TWO_PI
+      val distance = Random.nextFloat() * idleRadius
+      val point = idleCenter add new Vector3f(distance * math.cos(angle).toFloat, 0, distance * math.sin(angle).toFloat)
+
+      val currentPosition = spatial.getWorldTranslation
+      val maybePath = AStar.pathToInWorld(currentPosition, point, svoNavGrid)
+      currentPath = maybePath.getOrElse(Nil)
     }
+  }
+
+  def actuallyWalkTowardsTarget(currentLocation: Vector3f)(currentTarget: Vector3f): Unit = {
+    val facingTarget = currentTarget
+    facingTarget.y = currentLocation.y
+    spatial.lookAt (facingTarget, Vector3f.UNIT_Y)
+
+    val walkDirection = currentTarget subtract currentLocation
+    walkDirection.y = 0
+    walkDirection.normalizeLocal ()
+    control.jump()
+    control.setWalkDirection(walkDirection mult WalkSpeedMult)
   }
 }
