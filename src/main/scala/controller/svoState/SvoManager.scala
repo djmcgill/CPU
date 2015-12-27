@@ -20,8 +20,6 @@ import scala.collection.JavaConversions._
  */
 class SvoManager extends GameState {
   private val SvoRootName = "svoSpatial"
-  def svo: SVO = app.getRootNode.getUserData("svo")
-  def svo_= (newSvo: SVO): Unit = app.getRootNode.setUserData("svo", newSvo)
 
   lazy val svoPhysicsState = new SvoPhysicsState
   private lazy val blockGeometries = new BlockGeometries(app.getAssetManager)
@@ -44,15 +42,12 @@ class SvoManager extends GameState {
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)
-    svo = SVO.initialWorld(app.maxHeight)
-
-    val svoNavGrid = new SvoNavGrid(svo)
-    app.getRootNode.setUserData("navGrid", svoNavGrid)
-
+    app.svo = SVO.initialWorld(app.maxHeight)
+    app.svoNavGrid = new SvoNavGrid(app.svo)
     stateManager.attachAll(states)
 
     // Create a spatial for the SVO and call it "svoSpatial".
-    createSpatialFromSVO(svo) foreach {svoSpatial =>
+    createSpatialFromSVO(app.svo) foreach {svoSpatial =>
       svoSpatial.setName(SvoRootName)
       app.getRootNode.attachChild(svoSpatial)
       val scale = math.pow(2, app.maxHeight).toFloat
@@ -62,7 +57,7 @@ class SvoManager extends GameState {
 
   override def update(tpf: Float): Unit = {
     val insertedPaths = insertionQueue map {case (maybeBlockState, location) =>
-        svo.insertBlockStateAt(maybeBlockState, location, 0)
+        app.svo.insertBlockStateAt(maybeBlockState, location, 0)
     }
 
     // TODO: combine all of modified paths, or at least reduce the number of times the same path is called a bunch
@@ -79,7 +74,7 @@ class SvoManager extends GameState {
     val svoSpatial = app.getRootNode.getChild(SvoRootName)
     if (svoSpatial == null) {throw new IllegalStateException("You deleted the world!!")}
 
-    val svoToInsert: SVO = svo.getSVOPath(path)
+    val svoToInsert: SVO = app.svo.getSVOPath(path)
 
     // Detach the old spatial
     val oldChild: Spatial = getSpatialAtAbsolute(svoSpatial, path)

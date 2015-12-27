@@ -33,9 +33,8 @@ class Peon(id: Int, startingPosition: Vector3f) extends GameState {
     bulletAppState.getPhysicsSpace.add(peonControl)
     bulletAppState.getPhysicsSpace.addAll(peonNode)
 
-    val svoNavGrid = app.getRootNode.getUserData[SvoNavGrid]("navGrid")
     val jobStateState = app.getStateManager.getState[JobManager](classOf[JobManager])
-    val jobSeeker = new PeonJobSeeker(0, jobStateState, svoNavGrid)
+    val jobSeeker = new PeonJobSeeker(0, jobStateState, app.svoNavGrid)
     peonNode.addControl(jobSeeker)
     app.getRootNode.attachChild(peonNode)
   }

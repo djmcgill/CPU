@@ -9,7 +9,7 @@ import controller.blockState.BlockManager
 import controller.peonState.{PeonManager, Peon}
 import controller.svoState.SvoManager
 import controller.visualState.{OverviewCameraState, SkyboxState, LightingState}
-import logic.voxels.SVO
+import logic.voxels.{SvoNavGrid, SVO}
 
 import scala.collection.JavaConversions._
 
@@ -23,9 +23,12 @@ class CpuApp extends SimpleApplication {
   def svo: SVO = rootNode.getUserData("svo")
   def svo_= (newSVO: SVO) = rootNode.setUserData("svo", newSVO)
 
+  def svoNavGrid: SvoNavGrid = rootNode.getUserData("navGrid")
+  def svoNavGrid_= (newSvoNavGrid: SvoNavGrid): Unit = rootNode.setUserData("navGrid", newSvoNavGrid)
+
   override def simpleInitApp() {
     maxHeight = 8
-    cheatMode = true
+    cheatMode = false
 
     val bulletAppState = new BulletAppState()
     bulletAppState.setThreadingType(BulletAppState.ThreadingType.PARALLEL)
