@@ -8,7 +8,7 @@ import com.jme3.math.Vector3f
 import com.jme3.scene.Node
 import controller.SvoState
 
-class Peon(id: Int, startingPosition: Vector3f) extends SvoState {
+class Peon(id: Int, startingPosition: Vector3f, bulletAppState: BulletAppState, jobManager: JobManager) extends SvoState {
   val peonScale = 0.5f
   var facingAngle = 0f
 
@@ -29,11 +29,9 @@ class Peon(id: Int, startingPosition: Vector3f) extends SvoState {
     peonControl.warp(startingPosition)
 
     val bulletAppState = app.getStateManager.getState(classOf[BulletAppState])
-    bulletAppState.getPhysicsSpace.add(peonControl)
     bulletAppState.getPhysicsSpace.addAll(peonNode)
 
-    val jobStateState = app.getStateManager.getState[JobManager](classOf[JobManager])
-    val jobSeeker = new PeonJobSeeker(0, jobStateState, svoNavGrid)
+    val jobSeeker = new PeonJobSeeker(0, jobManager, svoNavGrid)
     peonNode.addControl(jobSeeker)
     app.getRootNode.attachChild(peonNode)
   }

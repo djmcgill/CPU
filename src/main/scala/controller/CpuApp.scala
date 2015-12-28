@@ -23,6 +23,7 @@ class CpuApp extends SimpleApplication {
 
     val bulletAppState = new BulletAppState()
     bulletAppState.setThreadingType(BulletAppState.ThreadingType.PARALLEL)
+    val jobManager = new JobManager()
 
     stateManager.attachAll(
       bulletAppState,
@@ -32,8 +33,8 @@ class CpuApp extends SimpleApplication {
       new SvoManager(MaxHeight),
       new SkyboxState,
       new BlockManager,
-      new JobManager,
-      new PeonManager(math.pow(2, MaxHeight).toFloat)
+      jobManager,
+      new PeonManager(math.pow(2, MaxHeight).toFloat, bulletAppState, jobManager)
     )
 
     assetManager.registerLocator("resources", classOf[FileLocator])

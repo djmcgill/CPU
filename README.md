@@ -18,7 +18,7 @@ You are a paralysed robot (just a head?) that can have a large throne built arou
  - make metal texture darker (urgh graphics)
  - sort out lighting properly, with ambient occlusion or whatever (urgh graphics)
  - automatically save and load world and gamestate (probably going to be annoying)
- - integrate pathfinding including jumping (shouldn't be too bad, already got a lot of the code around)
+ - integrate pathfinding including jumping (mostly done, but buggy)
  - sort out controls (assume mouse)
  - sort out cut-away of blocks that are above the cameraTarget (uuuuurgh)
  - (all the other smaller TODOs in the code)
