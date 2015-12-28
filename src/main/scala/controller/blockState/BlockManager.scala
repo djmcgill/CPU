@@ -6,9 +6,7 @@ import controller.peonState.JobManager
 import controller.svoState.SvoManager
 import logic.voxels.{Block, Full, SVO}
 
-class BlockManager extends SvoState {
-  lazy val spatialState: SvoManager = app.getStateManager.getState(classOf[SvoManager])
-  lazy val jobManager: JobManager = app.getStateManager.getState(classOf[JobManager])
+class BlockManager(svoManager: SvoManager, jobManager: JobManager) extends SvoState {
 
   // Maybe return a boolean if it was a valid placement or not?
   def requestPlacement(block: Block, location: Vector3f): Unit = {
@@ -25,7 +23,7 @@ class BlockManager extends SvoState {
     if (app.cheatMode || pointlessOrder) {
       placementJobReady(newState)
     } else {
-      spatialState.requestSVOInsertion(Some(newState), location)
+      svoManager.requestSVOInsertion(Some(newState), location)
       jobManager.requestInteractWithBlock(location)
     }
   }
@@ -38,11 +36,11 @@ class BlockManager extends SvoState {
       case PlacementPending(_, loc) => loc
       case _ => throw new IllegalArgumentException(s"Unallowed state $state")    }
 
-    val collision: Boolean = spatialState.svoPhysicsState.svoSpatialCollidesWithEntity(0, location)
+    val collision: Boolean = svoManager.svoPhysicsState.svoSpatialCollidesWithEntity(0, location)
     if (collision) {
       ??? // TODO: We tried to insert but can't. It's still a valid job however, so we shouldn't just throw it away.
     } else {
-      spatialState.requestSVOInsertion(Some(Placed(state.data)), location)
+      svoManager.requestSVOInsertion(Some(Placed(state.data)), location)
     }
   }
 
@@ -61,10 +59,10 @@ class BlockManager extends SvoState {
 
     val cheatMode = app.getRootNode.getUserData[Boolean]("cheatMode")
     if (cheatMode || pointlessOrder) {
-      spatialState.requestSVOInsertion(None, location)
+      svoManager.requestSVOInsertion(None, location)
     } else {
       println("TODO: register removal request with job queue") // TODO
-      spatialState.requestSVOInsertion(maybeNewState, location)
+      svoManager.requestSVOInsertion(maybeNewState, location)
     }
   }
 
@@ -74,7 +72,7 @@ class BlockManager extends SvoState {
       case RemovalScheduled(_, loc, _) => loc // remove from worker
       case _ => throw new IllegalArgumentException(s"Unallowed state $state")
     }
-    spatialState.requestSVOInsertion(None, location)
+    svoManager.requestSVOInsertion(None, location)
   }
 
   def assignWorker(state: BlockState, workerID: Int): BlockState = ???

@@ -20,7 +20,7 @@ object SvoCuboidSelectionState {
   val StartSelectionName = "START CUBOID SELECTION"
 }
 
-class SvoCuboidSelectionState extends AbstractActionListenerState with SvoState {
+class SvoCuboidSelectionState(blockManager: BlockManager) extends AbstractActionListenerState with SvoState {
   import SvoCuboidSelectionState._
 
   private var initialPosition: Option[Vector3f]             = None
@@ -63,14 +63,13 @@ class SvoCuboidSelectionState extends AbstractActionListenerState with SvoState 
       selectedCorners foreach { case (lower, upper) =>
         val Array(lowerX, lowerY, lowerZ) = lower.toArray(null) map (f => math.round(math.floor(f).toFloat))
         val Array(upperX, upperY, upperZ) = upper.toArray(null) map (f => math.round(math.ceil(f).toFloat))
-        val BlockController = app.getStateManager.getState(classOf[BlockManager])
         for (x <- lowerX until upperX;
              y <- lowerY until upperY;
              z <- lowerZ until upperZ) {
           val position = new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f)
           maybeSolidBlock match {
-            case Some(solidBlock) => BlockController.requestPlacement(solidBlock, position)
-            case None => BlockController.requestRemoval(position)
+            case Some(solidBlock) => blockManager.requestPlacement(solidBlock, position)
+            case None => blockManager.requestRemoval(position)
           }
         }
       }

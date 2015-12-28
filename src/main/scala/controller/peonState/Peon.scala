@@ -27,8 +27,6 @@ class Peon(id: Int, startingPosition: Vector3f, bulletAppState: BulletAppState, 
     peonControl.setJumpForce(new Vector3f(0,0.2f,0))
     peonControl.setGravity(new Vector3f(0,0.8f,0))
     peonControl.warp(startingPosition)
-
-    val bulletAppState = app.getStateManager.getState(classOf[BulletAppState])
     bulletAppState.getPhysicsSpace.addAll(peonNode)
 
     val jobSeeker = new PeonJobSeeker(0, jobManager, svoNavGrid)

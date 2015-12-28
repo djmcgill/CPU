@@ -16,10 +16,8 @@ import logic.voxels.{Octant, Subdivided, Full, SVO}
 import scala.collection.JavaConversions._
 import scala.concurrent.Promise
 
-class SvoPhysicsState extends SvoState {
+class SvoPhysicsState(bulletAppState: BulletAppState) extends SvoState {
   private val SvoRootName = "svoSpatial"
-  private lazy val bulletAppState: BulletAppState =
-    app.getStateManager.getState[BulletAppState](classOf[BulletAppState])
 
   override def initialize(stateManager: AppStateManager, superApp: Application): Unit = {
     super.initialize(stateManager, superApp)

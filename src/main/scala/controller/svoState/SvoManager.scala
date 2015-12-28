@@ -2,10 +2,12 @@ package controller.svoState
 
 import com.jme3.app.Application
 import com.jme3.app.state.{AppState, AbstractAppState, AppStateManager}
+import com.jme3.bullet.BulletAppState
 import com.jme3.math._
 import com.jme3.scene._
 import controller._
-import controller.blockState.BlockState
+import controller.blockState.{BlockManager, BlockState}
+import controller.peonState.JobManager
 import graphics.BlockGeometries
 import logic.voxels._
 
@@ -18,16 +20,20 @@ import scala.collection.JavaConversions._
  * Renders a svo and attaches the physics.
  * Updates the SVO but DOES NOT touch the jobs or anything.
  */
-class SvoManager(maxHeightParam: Int) extends SvoState {
+class SvoManager(maxHeightParam: Int, jobManager: JobManager, bulletAppState: BulletAppState) extends SvoState {
   private val SvoRootName = "svoSpatial"
 
-  lazy val svoPhysicsState = new SvoPhysicsState
+  lazy val svoPhysicsState = new SvoPhysicsState(bulletAppState)
   private lazy val blockGeometries = new BlockGeometries(app.getAssetManager)
+
+  val blockManager = new BlockManager(this, jobManager)
+
   private lazy val states: Seq[SvoState] = Seq(
     // These states can all assume that the SVO and it's spatial exists and is static throughout their lifetime.
-    new SvoCuboidSelectionState,
+    new SvoCuboidSelectionState(blockManager),
     svoPhysicsState,
-    new SvoSelectVoxel
+    new SvoSelectVoxel,
+    blockManager
   )
 
   /** You can't make changes directly to the SVO, you have to register your intention here. */

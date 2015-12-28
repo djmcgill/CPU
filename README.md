@@ -12,7 +12,6 @@ Setting will be post human/robot war, none of that generic fantasy rubbish thank
 You are a paralysed robot (just a head?) that can have a large throne built around it in order to control more minions.
 
 ## TODO before alpha:
- - get rid of all "app.getStateManager.getState"
  - pooled job queue (shouldn't be too hard)
  - better peon model (urgh graphics)
  - make metal texture darker (urgh graphics)
