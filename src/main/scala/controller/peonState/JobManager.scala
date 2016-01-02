@@ -6,12 +6,15 @@ import controller.GameState
 import scala.collection.mutable
 
 class JobManager extends GameState {
-  def requestInteractWithBlock(position: Vector3f): Unit = jobQueue.enqueue(InteractWithBlock(position))
+  private val jobQueue = mutable.Queue[UnassignedJob]()
 
-  // TODO: have a positional element to this, so that the peon will get the nearest(ish) job
-  private val jobQueue = mutable.Queue[JobState]()
-  def peonRequestJob(peonId: Long): JobState = {
-    println(s"peon $peonId is requesting a job")
-    if (jobQueue.isEmpty) Idle() else jobQueue.dequeue()
+  def requestInteractWithBlock(position: Vector3f): Unit =
+    jobQueue.enqueue(UnassignedJob(peon => InteractWithBlock(peon, position)))
+
+  def assignJob(peon: Peon): Unit = {
+    println(s"peon ${peon.id} is requesting a job")
+    val unassignedJob = jobQueue.dequeueFirst(peon.acceptableJob) getOrElse UnassignedJob(peon => Idle(peon))
+    val assignedJob = unassignedJob.assignJob(peon)
+    peon.assignJob(assignedJob)
   }
 }
