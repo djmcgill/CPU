@@ -16,7 +16,7 @@ abstract sealed class AssignedJob {
 }
 
 // Go stand at a random location in the specified flat circle.
-case class Idle(override var peon: Peon) extends AssignedJob {
+case class Idle(override var peon: Peon = null) extends AssignedJob {
   var angle = 0.0f
   override def update(dt: Float): Boolean = {
     if (angle > 5f) true else {
@@ -29,7 +29,7 @@ case class Idle(override var peon: Peon) extends AssignedJob {
 
 // Follow this path.
 // TODO: add a way to specify an action once we get there.
-case class InteractWithBlock(override var peon: Peon, position: Vector3f) extends AssignedJob {
+case class InteractWithBlock(position: Vector3f, override var peon: Peon = null) extends AssignedJob {
   val WalkSpeedMult = 3.0f
 
   override def update(dt: Float): Boolean = {

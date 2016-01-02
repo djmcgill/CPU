@@ -9,11 +9,11 @@ class JobManager extends GameState {
   private val jobQueue = mutable.Queue[UnassignedJob]()
 
   def requestInteractWithBlock(position: Vector3f): Unit =
-    jobQueue.enqueue(new UnassignedJob(InteractWithBlock(null, position)))
+    jobQueue.enqueue(new UnassignedJob(InteractWithBlock(position)))
 
   def assignJob(peon: Peon): Unit = {
     println(s"peon ${peon.id} is requesting a job")
-    val unassignedJob = jobQueue.dequeueFirst(peon.acceptableJob) getOrElse new UnassignedJob(Idle(null))
+    val unassignedJob = jobQueue.dequeueFirst(peon.acceptableJob) getOrElse new UnassignedJob(Idle())
     unassignedJob.assignTo(peon)
   }
 }
