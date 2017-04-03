@@ -12,6 +12,7 @@ Setting will be post human/robot war, none of that generic fantasy rubbish thank
 You are a paralysed robot (just a head?) that can have a large throne built around it in order to control more minions.
 
 ## TODO before alpha:
+ - overhaul blockmanager because the current design is pretty shit
  - better peon model (urgh graphics)
  - make metal texture darker (urgh graphics)
  - sort out lighting properly, with ambient occlusion or whatever (urgh graphics)

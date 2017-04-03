@@ -17,22 +17,18 @@ class BlockManager(svoManager: SvoManager, jobManager: JobManager) extends SvoSt
     }
     val pointlessOrder = maybeCurrentState match {
       case Some(blockState : RemovalPending)   if blockState.data == block => true
-      case Some(blockState : RemovalScheduled) if blockState.data == block => true
       case _ => false
     }
     if (app.cheatMode || pointlessOrder) {
       placementJobReady(newState)
     } else {
       svoManager.requestSVOInsertion(Some(newState), location)
-      jobManager.requestInteractWithBlock(location)
+      jobManager.requestPlaceBlock(newState)
     }
   }
 
   def placementJobReady(state: BlockState): Unit = {
     val location = state match {
-      case PlacementScheduled(_, loc, worker) =>
-        println(s"to remove job at $loc from worker $worker")
-        loc
       case PlacementPending(_, loc) => loc
       case _ => throw new IllegalArgumentException(s"Unallowed state $state")    }
 
@@ -53,7 +49,6 @@ class BlockManager(svoManager: SvoManager, jobManager: JobManager) extends SvoSt
 
     val pointlessOrder = maybeCurrentState match {
       case Some(_: PlacementPending) => true // TODO: remove job from queue
-      case Some(_: PlacementScheduled) => true // TODO: remove job from worker
       case _ => false
     }
 

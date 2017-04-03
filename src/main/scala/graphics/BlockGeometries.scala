@@ -29,12 +29,7 @@ class BlockGeometries(assetManager: AssetManager) {
         val newGeom = phantom(geom)
         newGeom.setUserData("phantom", true)
         newGeom
-      case PlacementScheduled(block, _, _) =>
-        val newGeom = phantom(geom)
-        newGeom.setUserData("phantom", true)
-        newGeom
       case RemovalPending(block, _) => phantom(geom)
-      case RemovalScheduled(block, _, _) => phantom(geom)
     }
   }
 
